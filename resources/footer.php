@@ -108,7 +108,7 @@
 										is_array($tmp_path) && @sizeof($tmp_path) != 0 &&
 										(
 											($tmp_url['scheme'] != '' && $tmp_url['scheme'].'://'.$tmp_url['host'].$tmp_url['path'] == $tmp_path['dirname'].'/'.$tmp_path['filename'].'.'.$tmp_path['extension']) //is url
-											|| $tmp_url['path'] == $tmp_path['dirname'].'/'.$tmp_path['filename'].'.'.$tmp_path['extension'] //is path
+											|| $tmp_url['path'] == ($tmp_path['dirname']=='/'?'':$tmp_path['dirname']).'/'.$tmp_path['filename'].'.'.$tmp_path['extension'] //is path
 										)) {
 										$settings['theme'][$subcategory] = $setting['text'];
 									}
@@ -119,6 +119,9 @@
 							default:
 								if (isset($setting['text']) && $setting['text'] != '') {
 									$settings['theme'][$subcategory] = str_replace('&lowbar;','_',escape($setting['text']));
+								}
+								if (isset($setting['unescapedtext']) && $setting['unescapedtext'] != '') {
+									$settings['theme'][$subcategory] = str_replace('&lowbar;','_',($setting['unescapedtext']));
 								}
 								else if (isset($setting['numeric']) && is_numeric($setting['numeric'])) {
 									$settings['theme'][$subcategory] = $setting['numeric'];

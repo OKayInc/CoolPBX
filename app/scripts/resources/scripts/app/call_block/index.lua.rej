@@ -1,0 +1,7 @@
+--- app/scripts/resources/scripts/app/call_block/index.lua
++++ app/scripts/resources/scripts/app/call_block/index.lua
+@@ -244,4 +244,4 @@
+ 					freeswitch.consoleLog("notice", "[call_block] " .. call_block_cache_key .. " source: cache\n");
+ 				end
+ 		end
+-	end+	end
