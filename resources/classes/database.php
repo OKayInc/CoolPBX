@@ -188,6 +188,7 @@ include "root.php";
 						print "error: " . $error->getMessage() . "<br/>";
 						die();
 					}
+					$this->db->setAttribute( PDO::ATTR_EMULATE_PREPARES, false );
 				}
 
 				if ($this->driver == "pgsql") {
@@ -1139,7 +1140,7 @@ include "root.php";
 						if (is_array($parameters)) {
 							$message["parameters"] = $parameters;
 						}
-						$this->message = $message;
+						$this->message = $message; print_r($message);
 						return false;
 					}
 			} //select

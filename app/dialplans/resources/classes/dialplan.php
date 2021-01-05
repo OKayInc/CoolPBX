@@ -209,6 +209,7 @@
 
 						//get the array of xml files
 							$xml_list = glob($_SERVER["DOCUMENT_ROOT"] . PROJECT_PATH . "/*/*/resources/switch/conf/dialplan/*.xml");
+							/* **/
 
 						//process the dialplan xml files
 							foreach ($xml_list as $xml_file) {
@@ -605,8 +606,8 @@
 							$sql .= "p.dialplan_continue, p.dialplan_order, p.dialplan_enabled, p.dialplan_description, ";
 							$sql .= "s.dialplan_detail_uuid, s.dialplan_detail_tag, s.dialplan_detail_type, s.dialplan_detail_data, ";
 							$sql .= "s.dialplan_detail_break, s.dialplan_detail_inline, s.dialplan_detail_group, s.dialplan_detail_order ";
-							$sql .= "from v_dialplans as p, v_dialplan_details as s ";
-							$sql .= "where p.dialplan_uuid = s.dialplan_uuid ";
+							$sql .= "from v_dialplans as p inner join v_dialplan_details as s using(dialplan_uuid) ";
+							$sql .= "where 1=1 ";
 							if ($this->is_empty == "dialplan_xml") {
 								$sql .= "and p.dialplan_xml is null ";
 							}
@@ -622,7 +623,7 @@
 							}
 							if (is_uuid($this->uuid)) {
 								$sql .= "and p.dialplan_uuid = :dialplan_uuid ";
-								$sql .= "and s.dialplan_uuid = :dialplan_uuid ";
+//								$sql .= "and s.dialplan_uuid = :dialplan_uuid ";
 								$parameters['dialplan_uuid'] = $this->uuid;
 							}
 							$sql .= "order by ";

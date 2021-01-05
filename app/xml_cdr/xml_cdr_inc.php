@@ -516,9 +516,9 @@
 			$parameters['limit'] = $_SESSION['cdr']['limit']['numeric'];
 		}
 		else {
-			$sql .= " limit :limit offset :offset \n";
-			$parameters['limit'] = $rows_per_page;
-			$parameters['offset'] = $offset;
+			$sql .= " limit :limit offset :offset";
+			$parameters['limit'] = intval($rows_per_page);
+			$parameters['offset'] = intval($offset);
 		}
 	}
 	$sql = str_replace("  ", " ", $sql);
