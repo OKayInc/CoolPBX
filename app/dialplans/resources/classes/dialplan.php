@@ -623,7 +623,7 @@
 							}
 							if (is_uuid($this->uuid)) {
 								$sql .= "and p.dialplan_uuid = :dialplan_uuid ";
-//								$sql .= "and s.dialplan_uuid = :dialplan_uuid ";
+								$sql .= "and s.dialplan_uuid = :dialplan_uuid ";
 								$parameters['dialplan_uuid'] = $this->uuid;
 							}
 							$sql .= "order by ";
