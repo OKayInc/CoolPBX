@@ -76,7 +76,16 @@
 	if (count($_POST) > 0) {
 
 		//get the values from the HTTP POST and save them as PHP variables
-			$extension = str_replace(' ','-',$_POST["extension"]);
+			if ($action == 'add' || permission_exists("extension_extension")) {
+				$extension = str_replace(' ','-',$_POST["extension"]);
+			}
+			else { //lookup extension based on submitted uuid
+				$sql = "select extension from v_extensions where extension_uuid = :extension_uuid";
+				$parameters['extension_uuid'] = $extension_uuid;
+				$database = new database;
+				$extension = $database->select($sql, $parameters, 'column');
+				unset($sql, $parameters);
+			}
 			$number_alias = $_POST["number_alias"];
 			$password = $_POST["password"];
 
@@ -947,10 +956,15 @@
 	echo "    ".$text['label-extension']."\n";
 	echo "</td>\n";
 	echo "<td width='70%' class='vtable' align='left'>\n";
-	echo "    <input class='formfld' type='text' name='extension' autocomplete='new-password' maxlength='255' value=\"".escape($extension)."\" required='required'>\n";
-	echo "    <input type='text' style='display: none;' disabled='disabled'>\n"; //help defeat browser auto-fill
-	echo "<br />\n";
-	echo $text['description-extension']."\n";
+	if ($action == "add" || permission_exists("extension_extension")) {
+		echo "    <input class='formfld' type='text' name='extension' autocomplete='new-password' maxlength='255' value=\"".escape($extension)."\" required='required'>\n";
+		echo "    <input type='text' style='display: none;' disabled='disabled'>\n"; //help defeat browser auto-fill
+		echo "<br />\n";
+		echo $text['description-extension']."\n";
+	}
+	else {
+		echo escape($extension);
+	}
 	echo "</td>\n";
 	echo "</tr>\n";
 

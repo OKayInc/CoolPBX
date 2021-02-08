@@ -188,8 +188,12 @@
 		echo button::create(['type'=>'button','label'=>$text['button-export'],'icon'=>$_SESSION['theme']['button_icon_export'],'onclick'=>"toggle_select('export_format'); this.blur();"]);
 		echo 		"<select class='formfld' style='display: none; width: auto;' name='export_format' id='export_format' onchange=\"display_message('".$text['message-preparing_download']."'); toggle_select('export_format'); document.getElementById('frm_export').submit();\">";
 		echo "			<option value='' disabled='disabled' selected='selected'>".$text['label-format']."</option>";
-		echo "			<option value='csv'>CSV</option>";
-		echo "			<option value='pdf'>PDF</option>";
+		if (permission_exists('xml_cdr_export_csv')) {
+			echo "			<option value='csv'>CSV</option>";
+		}
+		if (permission_exists('xml_cdr_export_pdf')) {
+			echo "			<option value='pdf'>PDF</option>";
+		}
 		echo "		</select>";
 	}
 	if (!$archive_request && permission_exists('xml_cdr_delete')) {
@@ -820,10 +824,14 @@
 
 					$content .= "</tr>\n";
 
-				//show the leg b only to those with the permission
 					if (!permission_exists('xml_cdr_lose_race') && $row['hangup_cause'] == 'LOSE_RACE') {
 						$content = '';
 					}
+				//show agent originated legs only to those with the permission
+					if (!permission_exists('xml_cdr_cc_agent_leg') && $row['cc_side'] == "agent") {
+						$content = '';
+					}
+				//show the leg b only to those with the permission
 					if ($row['leg'] == 'a') {
 						echo $content;
 					}
