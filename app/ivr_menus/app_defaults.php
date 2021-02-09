@@ -68,7 +68,7 @@ if ($domains_processed == 1) {
 
 	//use the ivr_menu_language to update the language dialect and voice
 	$sql = "update v_ivr_menus set ";
-	if ($db_type == 'pgsql){
+	if ($db_type == 'pgsql'){
 	$sql .= "ivr_menu_language = split_part(ivr_menu_language, '/', 1), ";
 	$sql .= "ivr_menu_dialect = split_part(ivr_menu_language, '/', 2),  ";
 	$sql .= "ivr_menu_voice = split_part(ivr_menu_language, '/', 3) ";

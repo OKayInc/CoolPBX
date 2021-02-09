@@ -737,13 +737,13 @@ if (!class_exists('menu')) {
 				$sql .= "where i.menu_item_uuid = l.menu_item_uuid ";
 				$sql .= "and l.menu_language = :menu_language ";
 				$sql .= "and l.menu_uuid = :menu_uuid ";
-				$sql .= "and i.menu_uuid = :menu_uuid ";
+				$sql .= "and i.menu_uuid = :menu_uuid2 ";
 				$sql .= "and i.menu_item_parent_uuid is null ";
 				$sql .= "and i.menu_item_uuid in ";
 				$sql .= "( ";
 				$sql .= "select menu_item_uuid ";
 				$sql .= "from v_menu_item_groups ";
-				$sql .= "where menu_uuid = :menu_uuid ";
+				$sql .= "where menu_uuid = :menu_uuid3 ";
 				$x = 0;
 				foreach($_SESSION['groups'] as $row) {
 					$sql_where_or[] = "group_name = :group_name_".$x;
@@ -760,6 +760,8 @@ if (!class_exists('menu')) {
 				$sql .= "order by i.menu_item_order asc ";
 				$parameters['menu_language'] = $_SESSION['domain']['language']['code'];
 				$parameters['menu_uuid'] = $this->menu_uuid;
+				$parameters['menu_uuid2'] = $this->menu_uuid;
+				$parameters['menu_uuid3'] = $this->menu_uuid;
 				$database = new database;
 				$result = $database->select($sql, $parameters, 'all');
 				unset($sql, $parameters);
@@ -807,13 +809,13 @@ if (!class_exists('menu')) {
 				$sql .= "where i.menu_item_uuid = l.menu_item_uuid ";
 				$sql .= "and l.menu_language = :menu_language ";
 				$sql .= "and l.menu_uuid = :menu_uuid ";
-				$sql .= "and i.menu_uuid = :menu_uuid ";
+				$sql .= "and i.menu_uuid = :menu_uuid2 ";
 				$sql .= "and i.menu_item_parent_uuid = :menu_item_parent_uuid ";
 				$sql .= "and i.menu_item_uuid in ";
 				$sql .= "( ";
 				$sql .= "select menu_item_uuid ";
 				$sql .= "from v_menu_item_groups ";
-				$sql .= "where menu_uuid = :menu_uuid ";
+				$sql .= "where menu_uuid = :menu_uuid3 ";
 				$x = 0;
 				foreach($_SESSION['groups'] as $row) {
 					$sql_where_or[] = "group_name = :group_name_".$x;
@@ -829,6 +831,8 @@ if (!class_exists('menu')) {
 				$sql .= "order by l.menu_item_title, i.menu_item_order asc ";
 				$parameters['menu_language'] = $_SESSION['domain']['language']['code'];
 				$parameters['menu_uuid'] = $this->menu_uuid;
+				$parameters['menu_uuid2'] = $this->menu_uuid;
+				$parameters['menu_uuid3'] = $this->menu_uuid;
 				$parameters['menu_item_parent_uuid'] = $menu_item_uuid;
 				$database = new database;
 				$sub_result = $database->select($sql, $parameters, 'all');
