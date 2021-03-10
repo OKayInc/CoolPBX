@@ -28,7 +28,7 @@ Software Requirements
 - CoolPBX will run on Debian 9 & 10, Ubuntu 18.04 LTS, FreeBSD 10 & 11, CentOS 7 & 8, and more.
 
 ### ISSUES
-If you find a bug sign up for an account on [services.okay.network](https://services.okay.network) to report the issue.
+If you find a bug and you require commercial support sign up for an account on [services.okay.network](https://services.okay.network) to report the issue. If you do not require a commercial support but you want to report the bug, just report it here. We are getting back the issue tab.
 
 ---
 
