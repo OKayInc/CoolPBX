@@ -1,7 +1,7 @@
 What is [CoolPBX](https://okay.network/)?
 --------------------------------------
 
-[CoolPBX](https://okay.network/) is a for from the original FusionPBX project. It can be used as a single or domain based multi-tenant PBX, carrier grade switch, call center server, fax server, VoIP server, voicemail server, conference server, voice application server, multi-tenant appliance framework and more. [FreeSWITCH™](https://freeswitch.com) is a highly scalable, multi-threaded, multi-platform communication platform. 
+[CoolPBX](https://okay.network/) is a fork from the original FusionPBX project. It can be used as a single or domain based multi-tenant PBX, carrier grade switch, call center server, fax server, VoIP server, voicemail server, conference server, voice application server, multi-tenant appliance framework and more. [FreeSWITCH™](https://freeswitch.com) is a highly scalable, multi-threaded, multi-platform communication platform. 
 
 It provides the functionality your business needs and brings carrier grade switching, and corporate-level phone system features to small, medium, and large businesses. 
 
