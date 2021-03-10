@@ -50,6 +50,7 @@ What will come:
 - SMS integration
 - REST API
 - Revamped XML Handler
+- Cluster-ready out of the box
 
 Free Support
 --------------------------------------
