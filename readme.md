@@ -5,7 +5,7 @@ What is [CoolPBX](https://okay.network/)?
 
 It provides the functionality your business needs and brings carrier grade switching, and corporate-level phone system features to small, medium, and large businesses. 
 
-In addition to providing all of the usual PBX functionality, CollPBX allows you to configure:
+In addition to providing all of the usual PBX functionality, CoolPBX allows you to configure:
 
 - Multi-Tenant
 - Unlimited Extensions
