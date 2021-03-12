@@ -51,6 +51,7 @@ What will come:
 - REST API
 - Revamped XML Handler
 - Cluster-ready out of the box
+- Reseller ready out of the box
 
 Free Support
 --------------------------------------
