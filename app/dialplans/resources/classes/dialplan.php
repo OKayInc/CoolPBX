@@ -209,7 +209,6 @@
 
 						//get the array of xml files
 							$xml_list = glob($_SERVER["DOCUMENT_ROOT"] . PROJECT_PATH . "/*/*/resources/switch/conf/dialplan/*.xml");
-							/* **/
 
 						//process the dialplan xml files
 							foreach ($xml_list as $xml_file) {
