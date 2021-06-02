@@ -176,9 +176,7 @@ if (!class_exists('xml_cdr')) {
 			$this->fields[] = "sip_hangup_disposition";
 			if (is_array($_SESSION['cdr']['field'])) {
 				foreach ($_SESSION['cdr']['field'] as $field) {
-					if (!in_array($field, $this->fields)){
-						$this->fields[] = $field;
-					}
+					$this->fields[] = $field;
 				}
 			}
 		}
@@ -215,7 +213,7 @@ if (!class_exists('xml_cdr')) {
 					$database->domain_uuid = $domain_uuid;
 					$database->save($array, false);
 					//$message = $database->message;
-					//echo print_r($message,true);
+					//print_r($message);
 
 					//remove the temporary permission
 					$p->delete("xml_cdr_add", "temp");
@@ -462,19 +460,15 @@ if (!class_exists('xml_cdr')) {
 							foreach ($_SESSION['cdr']['field'] as $field) {
 								$fields = explode(",", $field);
 								$field_name = end($fields);
-								if (!in_array($field_name, $this->fields))
-									$this->fields[] = $field_name;
+								$this->fields[] = $field_name;
 								if (count($fields) == 1) {
-									if (is_null($this->array[$key][$field_name]))
-										$this->array[$key][$field_name] = urldecode($xml->variables->$fields[0]);
+									$this->array[$key][$field_name] = urldecode($xml->variables->$fields[0]);
 								}
 								if (count($fields) == 2) {
-									if (is_null($this->array[$key][$field_name]))
-										$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]);
+									$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]);
 								}
 								if (count($fields) == 3) {
-									if (is_null($this->array[$key][$field_name]))
-										$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]->$fields[2]);
+									$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]->$fields[2]);
 								}
 							}
 						}
@@ -889,7 +883,7 @@ if (!class_exists('xml_cdr')) {
 				//if http enabled is set to false then deny access
 					if (!defined('STDIN')) {
 						if ($_SESSION["cdr"]["http_enabled"]["boolean"] == "false") {
-							echo "access denied ".__LINE__."<br />\n";
+							echo "access denied<br />\n";
 							return;
 						}
 					}
@@ -903,7 +897,7 @@ if (!class_exists('xml_cdr')) {
 								$_SESSION["xml_cdr"]["password"] = $auth_array[1];
 							}
 							else {
-								echo "access denied ".__LINE__."<br />\n";
+								echo "access denied<br />\n";
 								return;
 							}
 						}
