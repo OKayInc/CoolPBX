@@ -37,7 +37,6 @@ if (!class_exists('xml_cdr')) {
 		 */
 		public $db;
 		public $array;
-		public $debug;
 		public $fields;
 
 		/**
@@ -95,13 +94,33 @@ if (!class_exists('xml_cdr')) {
 		 * cdr process logging
 		 */
 		public function log($message) {
-			//save to file system (alternative to a syslog server)
-				$fp = fopen($_SESSION['server']['temp']['dir'].'/xml_cdr.log', 'a+');
-				if (!$fp) {
-					return;
+			
+			//save the log if enabled is true
+			if ($_SESSION['log']['enabled']['boolean'] == 'true') {
+
+				//save the log to the php error log
+				if ($_SESSION['log']['type']['text'] == 'error_log') {
+	    			error_log($message);
 				}
-				fwrite($fp, $message);
-				fclose($fp);
+
+				//save the log to the syslog server
+				if ($_SESSION['log']['type']['text'] == 'syslog') {
+					openlog("XML CDR", LOG_PID | LOG_PERROR, LOG_LOCAL0);
+	    			syslog(LOG_WARNING, $message);
+					closelog();
+				}
+
+				//save the log to the file system
+				if ($_SESSION['log']['type']['text'] == 'file') {
+					$fp = fopen($_SESSION['server']['temp']['dir'].'/xml_cdr.log', 'a+');
+					if (!$fp) {
+						return;
+					}
+					fwrite($fp, $message);
+					fclose($fp);
+				}
+
+			}
 		}
 
 		/**
@@ -151,6 +170,7 @@ if (!class_exists('xml_cdr')) {
 			$this->fields[] = "last_app";
 			$this->fields[] = "last_arg";
 			$this->fields[] = "voicemail_message";
+			$this->fields[] = "call_center_queue_uuid";
 			$this->fields[] = "cc_side";
 			$this->fields[] = "cc_member_uuid";
 			$this->fields[] = "cc_queue_joined_epoch";
@@ -176,7 +196,8 @@ if (!class_exists('xml_cdr')) {
 			$this->fields[] = "sip_hangup_disposition";
 			if (is_array($_SESSION['cdr']['field'])) {
 				foreach ($_SESSION['cdr']['field'] as $field) {
-					$this->fields[] = $field;
+					$field_name = end($field);
+					$this->fields[] = $field_name;
 				}
 			}
 		}
@@ -212,8 +233,9 @@ if (!class_exists('xml_cdr')) {
 					$database->app_uuid = '4a085c51-7635-ff03-f67b-86e834422848';
 					$database->domain_uuid = $domain_uuid;
 					$database->save($array, false);
-					//$message = $database->message;
-					//print_r($message);
+
+					//debug results	
+					$this->log(print_r($database->message, true));
 
 					//remove the temporary permission
 					$p->delete("xml_cdr_add", "temp");
@@ -253,7 +275,7 @@ if (!class_exists('xml_cdr')) {
 				}
 				catch(Exception $e) {
 					echo $e->getMessage();
-					//$this->log("\nfail loadxml: " . $e->getMessage() . "\n");
+					$this->log("\nXML parsing error: " . $e->getMessage() . "\n");
 				}
 
 			//check for duplicate call uuid's
@@ -344,13 +366,15 @@ if (!class_exists('xml_cdr')) {
 						$this->array[$key]['pin_number'] = urldecode($xml->variables->pin_number);
 
 					//time
-						$this->array[$key]['start_epoch'] = urldecode($xml->variables->start_epoch);
-						$start_stamp = urldecode($xml->variables->start_stamp);
-						$this->array[$key]['start_stamp'] = $start_stamp;
-						$this->array[$key]['answer_stamp'] = urldecode($xml->variables->answer_stamp);
-						$this->array[$key]['answer_epoch'] = urldecode($xml->variables->answer_epoch);
-						$this->array[$key]['end_epoch'] = urldecode($xml->variables->end_epoch);
-						$this->array[$key]['end_stamp'] = urldecode($xml->variables->end_stamp);
+						$start_epoch = urldecode($xml->variables->start_epoch);
+						$this->array[$key]['start_epoch'] = $start_epoch;
+						$this->array[$key]['start_stamp'] = date('c', $start_epoch);
+						$answer_epoch = urldecode($xml->variables->answer_epoch);
+						$this->array[$key]['answer_epoch'] = $answer_epoch;
+						$this->array[$key]['answer_stamp'] = date('c', $answer_epoch);
+						$end_epoch = urldecode($xml->variables->end_epoch);
+						$this->array[$key]['end_epoch'] = $end_epoch;
+						$this->array[$key]['end_stamp'] = date('c', $end_epoch);
 						$this->array[$key]['duration'] = urldecode($xml->variables->duration);
 						$this->array[$key]['mduration'] = urldecode($xml->variables->mduration);
 						$this->array[$key]['billsec'] = urldecode($xml->variables->billsec);
@@ -372,14 +396,6 @@ if (!class_exists('xml_cdr')) {
 						$this->array[$key]['cc_side'] = urldecode($xml->variables->cc_side);
 						$this->array[$key]['cc_member_uuid'] = urldecode($xml->variables->cc_member_uuid);
 						$this->array[$key]['cc_queue_joined_epoch'] = urldecode($xml->variables->cc_queue_joined_epoch);
-						//remove the @domain from the queue name
-						$cc_queue = urldecode($xml->variables->cc_queue);
-						if (strpos($cc_queue, "@")) {
-							$this->array[$key]['cc_queue'] = substr($cc_queue, 0, strpos($cc_queue, "@"));
-						}
-						else {
-							$this->array[$key]['cc_queue'] = $cc_queue;
-						}
 						$this->array[$key]['cc_member_session_uuid'] = urldecode($xml->variables->cc_member_session_uuid);
 						$this->array[$key]['cc_agent_uuid'] = urldecode($xml->variables->cc_agent_uuid);
 						$this->array[$key]['cc_agent'] = urldecode($xml->variables->cc_agent);
@@ -394,6 +410,8 @@ if (!class_exists('xml_cdr')) {
 						if (urldecode($xml->variables->cc_side) == 'agent') {
 							$this->array[$key]['direction'] = 'inbound';
 						}
+						$this->array[$key]['cc_queue'] = urldecode($xml->variables->cc_queue);
+						$this->array[$key]['call_center_queue_uuid'] = urldecode($xml->variables->call_center_queue_uuid);
 
 					//app info
 						$this->array[$key]['last_app'] = urldecode($xml->variables->last_app);
@@ -428,6 +446,7 @@ if (!class_exists('xml_cdr')) {
 						$this->array[$key]['pdd_ms'] = urldecode($xml->variables->progress_mediamsec) + urldecode($xml->variables->progressmsec);
 
 					//get break down the date to year, month and day
+						$start_stamp = urldecode($xml->variables->start_stamp);
 						$start_time = strtotime($start_stamp);
 						$start_year = date("Y", $start_time);
 						$start_month = date("M", $start_time);
@@ -462,19 +481,25 @@ if (!class_exists('xml_cdr')) {
 								$field_name = end($fields);
 								$this->fields[] = $field_name;
 								if (count($fields) == 1) {
-									$this->array[$key][$field_name] = urldecode($xml->variables->$fields[0]);
+									$this->array[$key][$field_name] = urldecode($xml->variables->{$fields[0]});
 								}
 								if (count($fields) == 2) {
-									$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]);
+									$this->array[$key][$field_name] = urldecode($xml->{$fields[0]}->{$fields[1]});
 								}
 								if (count($fields) == 3) {
-									$this->array[$key][$field_name] = urldecode($xml->$fields[0]->$fields[1]->$fields[2]);
+									$this->array[$key][$field_name] = urldecode($xml->{$fields[0]}->{$fields[1]}->{$fields[2]});
+								}
+								if (count($fields) == 4) {
+									$this->array[$key][$field_name] = urldecode($xml->{$fields[0]}->{$fields[1]}->{$fields[2]}->{$fields[3]});
+								}
+								if (count($fields) == 5) {
+									$this->array[$key][$field_name] = urldecode($xml->{$fields[0]}->{$fields[1]}->{$fields[2]}->{$fields[3]}->{$fields[4]});
 								}
 							}
 						}
 
 					//send the domain name to the cdr log
-						//$this->log("\ndomain_name is `$domain_name`; domain_uuid is '$domain_uuid'\n");
+						//$this->log("\ndomain_name is `$domain_name`;\ndomain_uuid is '$domain_uuid'\n");
 
 					//get the domain_uuid with the domain_name
 						if (strlen($domain_uuid) == 0) {
@@ -633,7 +658,7 @@ if (!class_exists('xml_cdr')) {
 									$array['call_recordings'][$x]['call_recording_name'] = $record_name;
 									$array['call_recordings'][$x]['call_recording_path'] = $record_path;
 									$array['call_recordings'][$x]['call_recording_length'] = $record_length;
-									$array['call_recordings'][$x]['call_recording_date'] = urldecode($xml->variables->start_stamp);
+									$array['call_recordings'][$x]['call_recording_date'] = date('c', $start_epoch);
 									$array['call_recordings'][$x]['call_direction'] = urldecode($xml->variables->call_direction);
 									//$array['call_recordings'][$x]['call_recording_description']= $row['zzz'];
 									//$array['call_recordings'][$x]['call_recording_base64']= $row['zzz'];
@@ -708,10 +733,9 @@ if (!class_exists('xml_cdr')) {
 						}
 
 					//insert the values
-						if ($this->debug) {
-							//$time5_insert = microtime(true);
-							//echo $sql."<br />\n";
-						}
+						//if ($this->debug) {
+						//	$time5_insert = microtime(true);
+						//}
 						try {
 							$error = "false";
 							//$this->db->exec($sql);
@@ -732,9 +756,10 @@ if (!class_exists('xml_cdr')) {
 								fwrite($fh, json_encode($xml));
 							}
 							fclose($fh);
-							if ($this->debug) {
-								echo $e->getMessage();
-							}
+
+							//debug info
+							$this->log($e->getMessage());
+
 							$error = "true";
 						}
 
@@ -759,11 +784,10 @@ if (!class_exists('xml_cdr')) {
 						}
 						unset($error);
 
-						//if ($this->debug) {
-							//GLOBAL $insert_time,$insert_count;
-							//$insert_time+=microtime(true)-$time5_insert; //add this current query.
-							//$insert_count++;
-						//}
+						//debug
+						//GLOBAL $insert_time,$insert_count;
+						//$insert_time+=microtime(true)-$time5_insert; //add this current query.
+						//$insert_count++;
 
 				} //if ($duplicate_uuid == false)
 		} //function xml_array
@@ -845,10 +869,9 @@ if (!class_exists('xml_cdr')) {
 		 */
 		public function post() {
 			if (isset($_POST["cdr"])) {
+
 				//debug method
-					if ($this->debug){
-						print_r($_POST["cdr"]);
-					}
+					//$this->log($_POST["cdr"]);
 
 				//authentication for xml cdr http post
 					if (!defined('STDIN')) {
@@ -920,11 +943,12 @@ if (!class_exists('xml_cdr')) {
 					}
 
 				//log the xml cdr
-					//xml_cdr_log("process cdr via post\n");
+					$this->log("HTTP POST\n");
 
 				//parse the xml and insert the data into the database
 					$this->xml_array(0, $leg, $xml_string);
 					$this->save();
+
 			}
 		}
 		//$this->post();
@@ -934,34 +958,42 @@ if (!class_exists('xml_cdr')) {
 		 */
 		public function user_summary() {
 
+			//set the time zone
+				if (isset($_SESSION['domain']['time_zone']['name'])) {
+					$time_zone = $_SESSION['domain']['time_zone']['name'];
+				}
+				else {
+					$time_zone = date_default_timezone_get();
+				}
+
 			//build the date range
 				if (strlen($this->start_stamp_begin) > 0 || strlen($this->start_stamp_end) > 0) {
 					unset($this->quick_select);
 					if (strlen($this->start_stamp_begin) > 0 && strlen($this->start_stamp_end) > 0) {
-						$sql_date_range = " and start_stamp between :start_stamp_begin and :start_stamp_end \n";
-						$parameters['start_stamp_begin'] = $this->start_stamp_begin.':00.000';
-						$parameters['start_stamp_end'] = $this->start_stamp_end.':59.999';
+						$sql_date_range = " and start_stamp between :start_stamp_begin::timestamptz and :start_stamp_end::timestamptz \n";
+						$parameters['start_stamp_begin'] = $this->start_stamp_begin.':00.000 '.$time_zone;
+						$parameters['start_stamp_end'] = $this->start_stamp_end.':59.999 '.$time_zone;
 					}
 					else {
 						if (strlen($this->start_stamp_begin) > 0) { 
-							$sql_date_range = "and start_stamp >= :start_stamp_begin \n"; 
-							$parameters['start_stamp_begin'] = $this->start_stamp_begin.':00.000';
+							$sql_date_range = "and start_stamp >= :start_stamp_begin::timestamptz \n"; 
+							$parameters['start_stamp_begin'] = $this->start_stamp_begin.':00.000 '.$time_zone;
 						}
 						if (strlen($this->start_stamp_end) > 0) { 
-							$sql_date_range .= "and start_stamp <= :start_stamp_end \n"; 
-							$parameters['start_stamp_end'] = $this->start_stamp_end.':59.999';
+							$sql_date_range .= "and start_stamp <= :start_stamp_end::timestamptz \n"; 
+							$parameters['start_stamp_end'] = $this->start_stamp_end.':59.999 '.$time_zone;
 						}
 					}
 				}
 				else {
 					switch ($this->quick_select) {
-						case 1: $sql_date_range = "and start_stamp >= '".date('Y-m-d H:i:s.000', strtotime("-1 week"))."' \n"; break; //last 7 days
-						case 2: $sql_date_range = "and start_stamp >= '".date('Y-m-d H:i:s.000', strtotime("-1 hour"))."' \n"; break; //last hour
-						case 3: $sql_date_range = "and start_stamp >= '".date('Y-m-d')." "."00:00:00.000' \n"; break; //today
-						case 4: $sql_date_range = "and start_stamp between '".date('Y-m-d',strtotime("-1 day"))." "."00:00:00.000' and '".date('Y-m-d',strtotime("-1 day"))." "."23:59:59.999' \n"; break; //yesterday
-						case 5: $sql_date_range = "and start_stamp >= '".date('Y-m-d',strtotime("this week"))." "."00:00:00.000' \n"; break; //this week
-						case 6: $sql_date_range = "and start_stamp >= '".date('Y-m-')."01 "."00:00:00.000' \n"; break; //this month
-						case 7: $sql_date_range = "and start_stamp >= '".date('Y-')."01-01 "."00:00:00.000' \n"; break; //this year
+						case 1: $sql_date_range = "and start_stamp >= '".date('Y-m-d H:i:s.000', strtotime("-1 week"))." ".$time_zone."'::timestamptz \n"; break; //last 7 days
+						case 2: $sql_date_range = "and start_stamp >= '".date('Y-m-d H:i:s.000', strtotime("-1 hour"))." ".$time_zone."'::timestamptz \n"; break; //last hour
+						case 3: $sql_date_range = "and start_stamp >= '".date('Y-m-d')." "."00:00:00.000 ".$time_zone."'::timestamptz \n"; break; //today
+						case 4: $sql_date_range = "and start_stamp between '".date('Y-m-d',strtotime("-1 day"))." "."00:00:00.000 ".$time_zone."'::timestamptz and '".date('Y-m-d',strtotime("-1 day"))." "."23:59:59.999 ".$time_zone."'::timestamptz \n"; break; //yesterday
+						case 5: $sql_date_range = "and start_stamp >= '".date('Y-m-d',strtotime("this week"))." "."00:00:00.000 ".$time_zone."' \n"; break; //this week
+						case 6: $sql_date_range = "and start_stamp >= '".date('Y-m-')."01 "."00:00:00.000 ".$time_zone."'::timestamptz \n"; break; //this month
+						case 7: $sql_date_range = "and start_stamp >= '".date('Y-')."01-01 "."00:00:00.000 ".$time_zone."'::timestamptz \n"; break; //this year
 					}
 				}
 

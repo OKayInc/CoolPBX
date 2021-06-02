@@ -161,6 +161,7 @@
 		call_direction = session:getVariable("call_direction");
 		accountcode = session:getVariable("accountcode");
 		local_ip_v4 = session:getVariable("local_ip_v4")
+		hold_music = session:getVariable("hold_music");
 	end
 
 --set caller id
@@ -809,8 +810,16 @@
 							--get the extension_uuid
 							cmd = "user_data ".. destination_number .."@"..domain_name.." var extension_uuid";
 							extension_uuid = trim(api:executeString(cmd));
+
+							--set hold music
+							if (hold_music == nil) then
+								hold_music = '';
+							else
+								hold_music = ",hold_music="..hold_music;
+							end
+
 							--send to user
-							local dial_string_to_user = "[sip_invite_domain="..domain_name..",domain_name="..domain_name..",call_direction="..call_direction..","..group_confirm.."leg_timeout="..destination_timeout..","..delay_name.."="..destination_delay..",dialed_extension=" .. row.destination_number .. ",extension_uuid="..extension_uuid .. row.record_session .. "]user/" .. row.destination_number .. "@" .. domain_name;
+							local dial_string_to_user = "[sip_invite_domain="..domain_name..",domain_name="..domain_name..",call_direction="..call_direction..","..group_confirm.."leg_timeout="..destination_timeout..","..delay_name.."="..destination_delay..",dialed_extension=" .. row.destination_number .. ",extension_uuid=".. extension_uuid .. row.record_session .. hold_music .."]user/" .. row.destination_number .. "@" .. domain_name;
 							dial_string = dial_string_to_user;
 						elseif (tonumber(destination_number) == nil) then
 							--sip uri
@@ -980,10 +989,17 @@
 						-- log.noticef("bridge begin: originate_disposition:%s answered:%s ready:%s bridged:%s", session:getVariable("originate_disposition"), session:answered() and "true" or "false", session:ready() and "true" or "false", session:bridged() and "true" or "false")
 						if (ring_group_strategy ~= "rollover") then
 							if (session:getVariable("ring_group_send_presence") == "true") then
-								session:setVariable("presence_id", ring_group_extension.."@"..domain_name );
+								session:setVariable("presence_id", ring_group_extension.."@"..domain_name);
 								send_presence(uuid, ring_group_extension.."@"..domain_name, "early");
 							end
+							
 							session:execute("bridge", app_data);
+							
+							--set the presence to terminated and unset presence_id
+							if (session:getVariable("ring_group_send_presence") == "true") then
+								session:setVariable("presence_id", "");
+								send_presence(uuid, ring_group_extension.."@"..domain_name, "terminated");
+							end
 						end
 						-- log.noticef("bridge done: originate_disposition:%s answered:%s ready:%s bridged:%s", session:getVariable("originate_disposition"), session:answered() and "true" or "false", session:ready() and "true" or "false", session:bridged() and "true" or "false")
 					end
