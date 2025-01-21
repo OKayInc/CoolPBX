@@ -288,7 +288,7 @@ syslog(LOG_WARNING, 'array: '.print_r($array, true));
 				$result["domain_name"] = $this->domain_name;
 				$result["username"] = $_SESSION["username"];
 				$result["user_uuid"] = $this->user_uuid;
-				$result["domain_uuid"] = $_SESSION["domain_uuid"];
+				$result["domain_uuid"] = $this->domain_uuid;
 				$result["contact_uuid"] = $this->contact_uuid;
 				$result["authorized"] = $auth_valid ? true : false;
 openlog('FusionPBX', LOG_NDELAY, LOG_AUTH);
