@@ -243,7 +243,7 @@ syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));
 							exit();
 						}
 					}
-syslog(LOG_WARNING, 'last $result: '.print_r(result, true));
+syslog(LOG_WARNING, 'last $result: '.print_r($result, true));
 				//set the session variables
 					$_SESSION["domain_uuid"] = $result["domain_uuid"];
 					//$_SESSION["domain_name"] = $result["domain_name"];
