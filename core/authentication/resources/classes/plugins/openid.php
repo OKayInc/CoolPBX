@@ -186,7 +186,7 @@ syslog(LOG_WARNING, 'userinfo: '.print_r($userinfo, true));
 				$this->username = $userinfo->preferred_username;
 	
 				// Create the user
-				$sql = "select v_users.*, v_domains.domain_name from v_users inner join v_domains on v_users.domain_uuid = v_domians.domain_uuid ";
+				$sql = "select v_users.*, v_domains.domain_name from v_users inner join v_domains on v_users.domain_uuid = v_domains.domain_uuid ";
 				$sql .= "where username=:username ";
 				if ($_SESSION["users"]["unique"]["text"] == "global") {
 					//unique username - global (example: email address)
