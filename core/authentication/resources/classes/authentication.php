@@ -141,11 +141,15 @@ syslog(LOG_WARNING, '1 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 					$_SESSION['authentication']['plugin'][$name]['user_email'] = $_SESSION['user_email'];
 					$_SESSION['authentication']['plugin'][$name]['authorized'] = 0;
 				}
-				elseif ($_SESSION['authentication']['plugin'][$name]['authorized'] == true){
-					$result = $_SESSION['authentication']['plugin'][$name];
-				}
 			}
 syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
+			foreach ($_SESSION['authentication']['methods'] as $name) {
+				if ((bool)$_SESSION['authentication']['plugin'][$name]['authorized'] == true){
+					$result = $_SESSION['authentication']['plugin'][$name];
+					break;
+				}
+			}
+syslog(LOG_WARNING, '2 $result: '.print_r($result, true));
 		//debug information
 			//view_array($_SESSION['authentication'], false);
 
