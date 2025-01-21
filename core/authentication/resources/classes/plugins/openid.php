@@ -55,7 +55,7 @@ closelog();
 			$secret_id = $_SESSION['openid']['secret_id']['text'];
 
 		//request the username
-			if(!isset($_GET['code'])) {
+			if(!isset($_GET['code']) && empty($_REQUEST["username"]) && empty($_REQUEST["key"])) {
 
 				//set a default template
 				$_SESSION['domain']['template']['name'] = 'default';
