@@ -118,7 +118,7 @@ closelog();
 			}
 
 		//if authorized then verify
-			else {
+			if(isset($_GET['code'])) {
 openlog('FusionPBX', LOG_NDELAY, LOG_AUTH);
 syslog(LOG_WARNING, 'openid() GOT A CODE');
 closelog();
