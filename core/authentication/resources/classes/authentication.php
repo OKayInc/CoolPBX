@@ -204,6 +204,7 @@ syslog(LOG_WARNING, '$authorized is not empty');
 					$sql .= "where domain_uuid = :domain_uuid ";
 					$sql .= "and user_uuid = :user_uuid ";
 					$sql .= "and user_setting_enabled = 'true' ";
+					unset($parameters);
 					$parameters['domain_uuid'] = $result["domain_uuid"];
 					$parameters['user_uuid'] = $result["user_uuid"];
 					$database = new database;
@@ -242,7 +243,7 @@ syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));
 							exit();
 						}
 					}
-
+syslog(LOG_WARNING, 'last $result: '.print_r(result, true));
 				//set the session variables
 					$_SESSION["domain_uuid"] = $result["domain_uuid"];
 					//$_SESSION["domain_name"] = $result["domain_name"];
@@ -270,10 +271,14 @@ syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));
 					$sql .= "where u.domain_uuid = :domain_uuid ";
 					$sql .= "and u.user_uuid = :user_uuid ";
 					$sql .= "and u.group_uuid = g.group_uuid ";
+					unset($parameters);
 					$parameters['domain_uuid'] = $_SESSION["domain_uuid"];
 					$parameters['user_uuid'] = $_SESSION["user_uuid"];
+syslog(LOG_WARNING, 'sql: '.$sql);
+syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));				
 					$database = new database;
 					$result = $database->select($sql, $parameters, 'all');
+syslog(LOG_WARNING, '$result: '.print_r($result, true));
 					$_SESSION["groups"] = $result;
 					$_SESSION["user"]["groups"] = $result;
 					unset($sql, $parameters);
@@ -303,6 +308,8 @@ syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));
 						}
 						$sql .= "and permission_assigned = 'true' ";
 						$parameters['domain_uuid'] = $_SESSION["domain_uuid"];
+syslog(LOG_WARNING, 'sql: '.$sql);
+syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));				
 						$database = new database;
 						$result = $database->select($sql, $parameters, 'all');
 						if (is_array($result) && @sizeof($result) != 0) {
@@ -374,6 +381,9 @@ syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));
 								$sql .= "e.extension asc ";
 								$parameters['domain_uuid'] = $_SESSION['domain_uuid'];
 								$parameters['user_uuid'] = $_SESSION['user_uuid'];
+syslog(LOG_WARNING, 'sql: '.$sql);
+syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));				
+
 								$database = new database;
 								$result = $database->select($sql, $parameters, 'all');
 								if (is_array($result) && @sizeof($result) != 0) {
