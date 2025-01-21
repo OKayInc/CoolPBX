@@ -186,18 +186,16 @@ syslog(LOG_WARNING, 'userinfo: '.print_r($userinfo, true));
 				$this->username = $userinfo->preferred_username;
 	
 				// Create the user
-	
-				$sql = "select * from v_users ";
+				$sql = "select v_users.*, v_domains.domain_name from v_users inner join v_domains on v_users.domain_uuid = v_domians.domain_uuid ";
 				$sql .= "where username=:username ";
-				
 				if ($_SESSION["users"]["unique"]["text"] == "global") {
-						//unique username - global (example: email address)
+					//unique username - global (example: email address)
 				}
 				else {
-						//unique username - per domain
-						$sql .= "and domain_uuid=:domain_uuid ";
-						$parameters['domain_uuid'] = $this->domain_uuid;
-				}
+					//unique username - per domain
+					$sql .= "and domain_uuid=:domain_uuid ";
+					$parameters['domain_uuid'] = $this->domain_uuid;
+				}				
 				$parameters['username'] = $this->username;
 syslog(LOG_WARNING, 'sql: '.$sql);
 syslog(LOG_WARNING, 'parameters: '.print_r($parameters, true));
@@ -225,6 +223,8 @@ syslog(LOG_WARNING, 'row: '.print_r($row, true));
 					}
 					$this->user_uuid = $row["user_uuid"];
 					$this->contact_uuid = $row["contact_uuid"];
+					$this->domain_uuid = $row["domain_uuid"];
+					$this->domain_name = $row["domain_name"];
 				}
 				else {
 					//salt used with the password to create a one way hash
