@@ -150,7 +150,7 @@ syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 			$authorized = false;
 			if (is_array($_SESSION['authentication']['plugin'])) {
 				foreach($_SESSION['authentication']['plugin'] as $row) {
-					if ($row["authorized"]) {
+					if ((bool)$row["authorized"]) {
 						$authorized |= true;
 						$result = $row;
 					}
