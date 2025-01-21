@@ -41,10 +41,10 @@
 
 //define variables
 	if (!isset($_SESSION['template_content'])) { $_SESSION["template_content"] = null; }
-
+syslog(LOG_WARNING, '1 SESSION[authorized]: '.print_r($_SESSION['authorized'], true));
 //if the session is not authorized then verify the identity
 	if (!isset($_SESSION['authorized']) || (isset($_SESSION['authorized']) && !$_SESSION['authorized'])) {
-
+syslog(LOG_WARNING, '2 SESSION[authorized]: '.print_r($_SESSION['authorized'], true));
 		//clear the menu
 			unset($_SESSION["menu"]);
 
@@ -72,7 +72,7 @@
 					header("Location: ".PROJECT_PATH."/?path=".urlencode($target_path));
 					exit;
 			}
-
+syslog(LOG_WARNING, '3 SESSION[authorized]: '.print_r($_SESSION['authorized'], true));
 		//if logged in, redirect to login destination
 			if (!isset($_REQUEST["key"])) {
 				if (isset($_SESSION['redirect_path'])) {
