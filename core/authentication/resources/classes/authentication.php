@@ -84,10 +84,11 @@ syslog(LOG_WARNING, 'authentication::validate()');
 
 		//use the authentication plugins
 syslog(LOG_WARNING, '$_SESSION[authentication][methods]: '.print_r($_SESSION['authentication']['methods'], true));
+			$pre_auth = false;
 			foreach ($_SESSION['authentication']['methods'] as $name) {
 syslog(LOG_WARNING, 'Evaluation method: '.$name);
 				//already processed the plugin move to the next plugin
-				if (!empty($_SESSION['authentication']['plugin'][$name]['authorized'])) {
+				if (!empty($_SESSION['authentication']['plugin'][$name]['authorized']) || $pre_auth) {
 syslog(LOG_WARNING, "_SESSION['authentication']['plugin'][$name]['authorized'] not empty: ".$_SESSION['authentication']['plugin'][$name]['authorized']);					
 					continue;
 				}
@@ -125,6 +126,7 @@ syslog(LOG_WARNING, '$array: '.print_r($array, true));
 					//save the result to the authentication plugin
 					$_SESSION['authentication']['plugin'][$name] = $result;
 syslog(LOG_WARNING, "_SESSION['authentication']['plugin'][$name]: ".print_r($_SESSION['authentication']['plugin'][$name], true));
+					$pre_auth = $array["authorized"];
 				}
 			}
 syslog(LOG_WARNING, '1 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
