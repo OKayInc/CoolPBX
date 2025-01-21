@@ -142,7 +142,7 @@ syslog(LOG_WARNING, '1 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 					$_SESSION['authentication']['plugin'][$name]['authorized'] = 0;
 				}
 				elseif ($_SESSION['authentication']['plugin'][$name]['authorized'] == true){
-					$result = ['authentication']['plugin'][$name];
+					$result = $_SESSION['authentication']['plugin'][$name];
 				}
 			}
 syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
