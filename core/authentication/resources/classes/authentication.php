@@ -126,7 +126,7 @@ syslog(LOG_WARNING, '$array: '.print_r($array, true));
 					//save the result to the authentication plugin
 					$_SESSION['authentication']['plugin'][$name] = $result;
 syslog(LOG_WARNING, "_SESSION['authentication']['plugin'][$name]: ".print_r($_SESSION['authentication']['plugin'][$name], true));
-					$pre_auth = $array["authorized"];
+					$pre_auth |= $array["authorized"];
 				}
 			}
 syslog(LOG_WARNING, '1 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
