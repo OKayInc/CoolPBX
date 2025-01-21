@@ -285,7 +285,7 @@ syslog(LOG_WARNING, 'array: '.print_r($array, true));
 				//build the result array
 				unset($result);
 				$result["plugin"] = "openid";
-				$result["domain_name"] = $_SESSION["domain_name"];
+				$result["domain_name"] = $this->domain_name;
 				$result["username"] = $_SESSION["username"];
 				$result["user_uuid"] = $this->user_uuid;
 				$result["domain_uuid"] = $_SESSION["domain_uuid"];
