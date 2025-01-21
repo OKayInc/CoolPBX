@@ -152,6 +152,7 @@ syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 				foreach($_SESSION['authentication']['plugin'] as $row) {
 					if ($row["authorized"]) {
 						$authorized |= true;
+						$result = $row;
 					}
 					else {
 						$authorized |= false;
@@ -160,7 +161,7 @@ syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 				}
 			}
 
-		//result array
+/*		//result array
 			$result["plugin"] = "database";
 			$result["domain_name"] = $_SESSION['domain_name'];
 			if (!isset($_SESSION['username'])) {
@@ -174,6 +175,7 @@ syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['
 				$result["contact_uuid"] = $_SESSION['contact_uuid'];
 			}
 			$result["authorized"] = $authorized;
+   */
 syslog(LOG_WARNING, '$authorized: '.$authorized);
 		//add user logs
 			user_logs::add($result);
