@@ -28,6 +28,7 @@ class authentication {
 	 * @return array [plugin] => last plugin used to authenticate the user [authorized] => true or false
 	 */
 	public function validate() {
+syslog(LOG_WARNING, 'authentication::validate()');
 		//get the domain_name and domain_uuid
 			if (!isset($this->domain_name) || !isset($this->domain_uuid)) {
 				$this->get_domain();
@@ -84,9 +85,10 @@ class authentication {
 		//use the authentication plugins
 syslog(LOG_WARNING, '$_SESSION[authentication][methods]: '.print_r($_SESSION['authentication']['methods'], true));
 			foreach ($_SESSION['authentication']['methods'] as $name) {
-
+syslog(LOG_WARNING, 'Evaluation method: '.$name);
 				//already processed the plugin move to the next plugin
 				if (!empty($_SESSION['authentication']['plugin'][$name]['authorized'])) {
+syslog(LOG_WARNING, "_SESSION['authentication']['plugin'][$name]['authorized'] not empty: ".$_SESSION['authentication']['plugin'][$name]['authorized']);					
 					continue;
 				}
 
@@ -110,7 +112,7 @@ syslog(LOG_WARNING, '$_SESSION[authentication][methods]: '.print_r($_SESSION['au
 						$object->password = $this->password;
 					}
 					$array = $object->$name();
-
+syslog(LOG_WARNING, '$array: '.print_r($array, true));
 					$id = $array["plugin"];
 					$result['plugin'] = $array["plugin"];
 					$result['domain_name'] = $array["domain_name"];
@@ -122,9 +124,10 @@ syslog(LOG_WARNING, '$_SESSION[authentication][methods]: '.print_r($_SESSION['au
 
 					//save the result to the authentication plugin
 					$_SESSION['authentication']['plugin'][$name] = $result;
+syslog(LOG_WARNING, "_SESSION['authentication']['plugin'][$name]: ".print_r($_SESSION['authentication']['plugin'][$name], true));
 				}
 			}
-syslog(LOG_WARNING, '$_SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
+syslog(LOG_WARNING, '1 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
 		//make sure all plugins are in the array
 			foreach ($_SESSION['authentication']['methods'] as $name) {
 				if (!isset($_SESSION['authentication']['plugin'][$name]['authorized'])) {
@@ -137,7 +140,7 @@ syslog(LOG_WARNING, '$_SESSION[authentication][plugin][]: '.print_r($_SESSION['a
 					$_SESSION['authentication']['plugin'][$name]['authorized'] = 0;
 				}
 			}
-
+syslog(LOG_WARNING, '2 _SESSION[authentication][plugin][]: '.print_r($_SESSION['authentication']['plugin'], true));
 		//debug information
 			//view_array($_SESSION['authentication'], false);
 
@@ -169,7 +172,7 @@ syslog(LOG_WARNING, '$_SESSION[authentication][plugin][]: '.print_r($_SESSION['a
 				$result["contact_uuid"] = $_SESSION['contact_uuid'];
 			}
 			$result["authorized"] = $authorized;
-
+syslog(LOG_WARNING, '$authorized: '.$authorized);
 		//add user logs
 			user_logs::add($result);
 
@@ -185,7 +188,7 @@ syslog(LOG_WARNING, '$_SESSION[authentication][plugin][]: '.print_r($_SESSION['a
 
 		//user is authorized - get user settings, check user cidr
 			if (!empty($authorized)) {
-
+syslog(LOG_WARNING, '$authorized is not empty');
 				//set a session variable to indicate authorized is set to true
 					$_SESSION['authorized'] = true;
 
@@ -201,8 +204,10 @@ syslog(LOG_WARNING, '$_SESSION[authentication][plugin][]: '.print_r($_SESSION['a
 					$parameters['user_uuid'] = $result["user_uuid"];
 					$database = new database;
 					$user_settings = $database->select($sql, $parameters, 'all');
+					
+syslog(LOG_WARNING, 'sql: '.$sql);
+syslog(LOG_WARNING, '$parameters: '.print_r($parameters, true));				
 					unset($sql, $parameters);
-
 				//build the user cidr array
 					if (is_array($user_settings) && @sizeof($user_settings) != 0) {
 						foreach ($user_settings as $row) {
