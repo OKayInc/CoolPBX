@@ -232,7 +232,8 @@ syslog(LOG_WARNING, 'row: '.print_r($row, true));
 						$password = generate_password('32', '4');
 	
 					//prepare the uuids
-						$this->user_uuid = $_SESSION["user_uuid"] = uuid();
+						$_SESSION["user_uuid"] = uuid();
+						$this->user_uuid = $_SESSION["user_uuid"];
 						$this->contact_uuid = $_SESSION["contact_uuid"] = uuid();
 						$this->username = $userinfo->preferred_username;
 						$_SESSION["username"] = $userinfo->preferred_username;
