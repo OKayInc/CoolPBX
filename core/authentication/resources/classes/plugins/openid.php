@@ -76,6 +76,7 @@ closelog();
 				//add multi-lingual support
 				$language = new text;
 				$text = $language->get(null, '/core/authentication');
+				$settings['openid']['button_text'] = !empty($_SESSION['openid']['button_text']['text']) ? $_SESSION['openid']['button_text']['text'] : $text['button-oid'];
 
 				//initialize a template object
 				$view = new template();
@@ -95,7 +96,7 @@ closelog();
 				$view->assign("login_logo_source", $settings['theme']['logo']);
 				$view->assign("button_login", $text['button-login']);
 				$view->assign("favicon", $settings['theme']['favicon']);
-				$view->assign("button_oid", $text['button-oid']);
+				$view->assign("button_oid", $settings['openid']['button_text']);
 				
 				$_SESSION['state'] = bin2hex(random_bytes(5));
 				$_SESSION['code_verifier'] = bin2hex(random_bytes(50));
