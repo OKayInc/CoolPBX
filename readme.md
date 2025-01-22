@@ -1,9 +1,9 @@
 What is [CoolPBX](https://okay.network/)?
 --------------------------------------
 
-[CoolPBX](https://okay.network/) is a fork from the original FusionPBX project. It can be used as a single or domain based multi-tenant PBX, carrier grade switch, call center server, fax server, VoIP server, voicemail server, conference server, voice application server, multi-tenant appliance framework and more. [FreeSWITCH™](https://freeswitch.com) is a highly scalable, multi-threaded, multi-platform communication platform. 
+[CoolPBX](https://okay.network/) is a fork from the original FusionPBX project. It can be used as a single or domain-based multi-tenant PBX, carrier-grade switch, call center server, fax server, VoIP server, voicemail server, conference server, voice application server, multi-tenant appliance framework and more. [FreeSWITCH™](https://freeswitch.com) is a highly scalable, multi-threaded, multi-platform communication platform. 
 
-It provides the functionality your business needs and brings carrier grade switching, and corporate-level phone system features to small, medium, and large businesses. 
+It provides the functionality your business needs and brings carrier-grade switching, and corporate-level phone system features to small, medium, and large businesses. 
 
 In addition to providing all of the usual PBX functionality, CoolPBX allows you to configure:
 
@@ -19,7 +19,7 @@ In addition to providing all of the usual PBX functionality, CoolPBX allows you 
 - Find Me / Follow Me
 - Hot desking
 - High Availability and Redundancy
-- Dialplan Programming that allow nearly endless possibilities
+- Dialplan Programming that allows nearly endless possibilities
 - Many other Features
 
 Software Requirements
@@ -28,25 +28,26 @@ Software Requirements
 - CoolPBX will run on Debian 9 & 10, Ubuntu 18.04 LTS, FreeBSD 10 & 11, CentOS 7 & 8, and more.
 
 ### ISSUES
-If you find a bug and you require commercial support sign up for an account on [services.okay.network](https://services.okay.network) to report the issue. If you do not require a commercial support but you want to report the bug, just report it here. We are getting back the issue tab.
+If you find a bug and you require commercial support sign up for an account on [services.okay.network](https://services.okay.network) to report the issue. If you do not need commercial support but want to report the bug, report it here. We are getting back to the issue tab.
 
 ---
 
 FusionPBX vs CoolPBX
 ====================
 
-CoolPBX has a very different vision of what a PBX should be. CoolPBX will continue to sync against FusionPBX and it will continue to send pull-requests that benefit both projects. At some point, CoolPBX will de-branch as it will continue its own path.
+CoolPBX has a very different vision of what a PBX should be. CoolPBX will continue to sync against FusionPBX and it will continue to send pull requests that benefit both projects. At some point, CoolPBX will de-branch as it will continue its path.
 
 What is the difference?
 -----------------
 
 Currently:
 - MySQL/MariaDB support (yes!, we do not drop the support to these databases),
-- Reseller ready out of the box (aka parent-child domain capability)
+- Reseller ready out of the box (aka parent-child domain capability),
+- OpenID authentication (tested against OKTA).
 
 What will come:
 - LCR and Billing included (once the [campaign](https://www.gofundme.com/f/jcjcmk-make-billing-4-fusionpbx-opensource) to convert it has been done)
-- Enhance CDR Integration (you will be able to create your own plugins that will execute custom actions when the CDR event happens)
+- Enhance CDR Integration (you will be able to create your plugins that will execute custom actions when the CDR event happens)
 - Revamped caching engine
 - SMS integration
 - REST API
