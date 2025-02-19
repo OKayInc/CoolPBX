@@ -148,13 +148,17 @@ if (!class_exists('conference_centers')) {
 				}
 				if (!empty($this->search)) {
 					$sql .= "and (";
-					$sql .= "lower(r.conference_room_name) like :search or ";
-					$sql .= "lower(r.moderator_pin) like :search or ";
-					$sql .= "lower(r.participant_pin) like :search or ";
-					$sql .= "lower(r.account_code) like :search or ";
-					$sql .= "lower(r.description) like :search ";
+					$sql .= "lower(r.conference_room_name) like :search1 or ";
+					$sql .= "lower(r.moderator_pin) like :search2 or ";
+					$sql .= "lower(r.participant_pin) like :search3 or ";
+					$sql .= "lower(r.account_code) like :search4 or ";
+					$sql .= "lower(r.description) like :search5 ";
 					$sql .= ") ";
-					$parameters['search'] = '%'.strtolower($this->search).'%';
+					$parameters['search1'] = '%'.strtolower($this->search).'%';
+					$parameters['search2'] = '%'.strtolower($this->search).'%';
+					$parameters['search3'] = '%'.strtolower($this->search).'%';
+					$parameters['search4'] = '%'.strtolower($this->search).'%';
+					$parameters['search5'] = '%'.strtolower($this->search).'%';
 					$parameters['domain_uuid'] = $this->domain_uuid;
 				}
 				if (isset($this->created_by)) {
@@ -167,10 +171,8 @@ if (!class_exists('conference_centers')) {
 				else {
 					$sql .= "order by $order_by $order ";
 				}
-				$sql .= "limit :rows_per_page offset :offset ";
+				$sql .= "limit ".$this->rows_per_page." offset ".$this->offset;
 				$parameters['domain_uuid'] = $this->domain_uuid;
-				$parameters['rows_per_page'] = $this->rows_per_page;
-				$parameters['offset'] = $this->offset;
 				$database = new database;
 				$conference_rooms = $database->select($sql, $parameters, 'all');
 
