@@ -165,9 +165,15 @@
 
 		--get the agents
 			xml:append([[                    <agents>]]);
-			sql = "select SPLIT_PART(SPLIT_PART(a.agent_contact, '/', 2), '@', 1) as extension,  ";
-			sql = sql .. "(select extension_uuid from v_extensions where domain_uuid = a.domain_uuid ";
-			sql = sql .. "and extension = SPLIT_PART(SPLIT_PART(a.agent_contact, '/', 2), '@', 1) limit 1) as extension_uuid, ";
+			if (database["type"] == "mysql") then
+				sql = "select substring_index(substring_index(agent_contact,'/',-1), '@', 1) as extension,  ";
+				sql = sql .. "(select extension_uuid from v_extensions where domain_uuid = a.domain_uuid ";
+				sql = sql .. "and extension = substring_index(substring_index(agent_contact,'/',-1), '@', 1) limit 1) as extension_uuid, ";
+			else
+				sql = "select SPLIT_PART(SPLIT_PART(a.agent_contact, '/', 2), '@', 1) as extension,  ";
+				sql = sql .. "(select extension_uuid from v_extensions where domain_uuid = a.domain_uuid ";
+				sql = sql .. "and extension = SPLIT_PART(SPLIT_PART(a.agent_contact, '/', 2), '@', 1) limit 1) as extension_uuid, ";
+			end
 			sql = sql .. "a.*, d.domain_name  ";
 			sql = sql .. "from v_call_center_agents as a, v_domains as d ";
 			sql = sql .. "where d.domain_uuid = a.domain_uuid; ";
