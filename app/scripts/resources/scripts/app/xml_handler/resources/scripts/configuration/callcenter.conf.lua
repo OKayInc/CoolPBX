@@ -123,7 +123,7 @@
 					if (queue_time_base_score ~= nil) then
 						xml:append([[                                    <param name="time-base-score" value="]] .. xml.sanitize(queue_time_base_score) .. [["/>]]);
 					end
-					if (queue_max_wait_time_with_no_agent ~= nil) then
+					if (queue_max_wait_time ~= nil) then
 						xml:append([[                                    <param name="max-wait-time" value="]] .. xml.sanitize(queue_max_wait_time) .. [["/>]]);
 					end
 					if (queue_max_wait_time_with_no_agent ~= nil) then
