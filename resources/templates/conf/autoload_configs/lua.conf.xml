@@ -64,5 +64,6 @@
 
     <!-- Subscribe to events -->
     <!--<hook event="PHONE_FEATURE_SUBSCRIBE" subclass="" script="app.lua feature_event"/>-->
+    <hook event="CHANNEL_CALLSTATE" script="/usr/share/freeswitch/scripts/cc-handler-2.0.lua"/>
   </settings>
 </configuration>
