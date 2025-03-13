@@ -452,12 +452,45 @@ if (!empty($_POST) && empty($_POST["persistformvar"])) {
 	//echo "</tr>\n";
 
 	if (permission_exists("call_broadcast_caller_id")) {
+		if (permission_exists('outbound_caller_id_select')) {
+			$sql = "select * from v_destinations where domain_uuid = :domain_uuid and destination_type = 'inbound' order by destination_number asc ";
+			$parameters['domain_uuid'] = $_SESSION['domain_uuid'];
+			$database = new database;
+			$destinations = $database->select($sql, $parameters, 'all');
+			unset($sql, $parameters);
+                }
+		
 		echo "<tr>\n";
 		echo "<td class='vncell' valign='top' align='left' nowrap>\n";
 		echo "	".$text['label-caller-id-name']."\n";
 		echo "</td>\n";
 		echo "<td class='vtable' align='left'>\n";
-		echo "	<input class='formfld' type='text' name='broadcast_caller_id_name' maxlength='255' value=\"".escape($broadcast_caller_id_name)."\">\n";
+		if (permission_exists('outbound_caller_id_select')){
+                        echo "  <select name='broadcast_caller_id_name' id='destination_caller_id_name' class='formfld'>\n";
+                        echo "  <option value=''></option>\n";
+                        foreach ($destinations as &$row) {
+                                $tmp = $row["destination_caller_id_name"];
+                                if(empty($tmp)){
+                                        // $tmp = $row["destination_description"];
+                                }
+                                $in_list = array();
+                                if(!empty($tmp) && !in_array($tmp, $in_list)){
+                                        $in_list[] = $tmp;
+                                        if ($broadcast_caller_id_name == $tmp) {
+                                                echo "          <option value='".escape($tmp)."' selected='selected'>".escape($tmp)."</option>\n";
+                                        }
+                                        else {
+                                                echo "          <option value='".escape($tmp)."'>".escape($tmp)."</option>\n";
+                                        }
+                                }
+                                unset($in_list);
+                        }
+                        echo "          </select>\n";
+//                      echo "<br />\n";
+                }
+		else{
+			echo "	<input class='formfld' type='text' name='broadcast_caller_id_name' maxlength='255' value=\"".escape($broadcast_caller_id_name)."\">\n";
+		}
 		echo "<br />\n";
 		echo "".$text['description-caller-id-name']."\n";
 		echo "</td>\n";
@@ -468,7 +501,32 @@ if (!empty($_POST) && empty($_POST["persistformvar"])) {
 		echo "	".$text['label-callerid-number']."\n";
 		echo "</td>\n";
 		echo "<td class='vtable' align='left'>\n";
-		echo "	<input class='formfld' type='number' name='broadcast_caller_id_number' maxlength='255' min='0' step='1' value=\"".escape($broadcast_caller_id_number)."\">\n";
+		if (permission_exists('outbound_caller_id_select')){
+                        echo "  <select name='broadcast_caller_id_number' id='destination_caller_id_number' class='formfld'>\n";
+                        echo "  <option value=''></option>\n";
+                        foreach ($destinations as &$row) {
+                                $tmp = $row["destination_prefix"].$row['destination_area_code'].$row['destination_number'];
+                                if(empty($tmp)){
+                                        // $tmp = $row["destination_description"];
+                                }
+                                $in_list = array();
+                                if(!empty($tmp) && !in_array($tmp, $in_list)){
+                                        $in_list[] = $tmp;
+                                        if ($broadcast_caller_id_number == $tmp) {
+                                                echo "          <option value='".escape($tmp)."' selected='selected'>".escape($tmp)."</option>\n";
+                                        }
+                                        else {
+                                                echo "          <option value='".escape($tmp)."'>".escape($tmp)."</option>\n";
+                                        }
+                                }
+                                unset($in_list);
+                        }
+                        echo "          </select>\n";
+//                      echo "<br />\n";
+                }
+		else{
+			echo "	<input class='formfld' type='number' name='broadcast_caller_id_number' maxlength='255' min='0' step='1' value=\"".escape($broadcast_caller_id_number)."\">\n";
+		}
 		echo "<br />\n";
 		echo "".$text['description-caller-id-number']."\n";
 		echo "</td>\n";
@@ -509,7 +567,9 @@ if (!empty($_POST) && empty($_POST["persistformvar"])) {
 		echo "	".$text['label-destination']."\n";
 		echo "</td>\n";
 		echo "<td class='vtable' align='left'>\n";
-		echo "	<input class='formfld' type='text' name='broadcast_destination_data' maxlength='255' value=\"".escape($broadcast_destination_data)."\">\n";
+		$destination = new destinations;
+		echo $destination->select('simple', 'broadcast_destination_data', escape($broadcast_destination_data));
+		// echo "	<input class='formfld' type='text' name='broadcast_destination_data' maxlength='255' value=\"".escape($broadcast_destination_data)."\">\n";
 		echo "<br />\n";
 		echo "".$text['description-destination']." <br /><br />\n";
 		echo "</td>\n";
