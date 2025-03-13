@@ -133,19 +133,27 @@
 	}
 	if (!empty($search)) {
 		$sql .= "and (";
-		$sql .= "lower(destination_type) like :search ";
-		$sql .= "or lower(destination_number) like :search ";
-		$sql .= "or lower(destination_context) like :search ";
-		$sql .= "or lower(destination_accountcode) like :search ";
+		$sql .= "lower(destination_type) like :search1 ";
+		$sql .= "or lower(destination_number) like :search2 ";
+		$sql .= "or lower(destination_context) like :search3 ";
+		$sql .= "or lower(destination_accountcode) like :search4 ";
 		if (permission_exists('outbound_caller_id_select')) {
-			$sql .= "or lower(destination_caller_id_name) like :search ";
-			$sql .= "or destination_caller_id_number like :search ";
+			$sql .= "or lower(destination_caller_id_name) like :search5 ";
+			$sql .= "or destination_caller_id_number like :search6 ";
 		}
-		$sql .= "or lower(destination_enabled) like :search ";
-		$sql .= "or lower(destination_description) like :search ";
-		$sql .= "or lower(destination_data) like :search ";
+		$sql .= "or lower(destination_enabled) like :search7 ";
+		$sql .= "or lower(destination_description) like :search8 ";
+		$sql .= "or lower(destination_data) like :search9 ";
 		$sql .= ") ";
-		$parameters['search'] = '%'.$search.'%';
+		$parameters['search1'] = '%'.$search.'%';
+		$parameters['search2'] = '%'.$search.'%';
+		$parameters['search3'] = '%'.$search.'%';
+		$parameters['search4'] = '%'.$search.'%';
+		$parameters['search5'] = '%'.$search.'%';
+		$parameters['search6'] = '%'.$search.'%';
+		$parameters['search7'] = '%'.$search.'%';
+		$parameters['search8'] = '%'.$search.'%';
+		$parameters['search9'] = '%'.$search.'%';
 	}
 	$parameters['destination_type'] = $destination_type;
 	$database = new database;
@@ -178,19 +186,27 @@
 	}
 	if (!empty($search)) {
 		$sql .= "and (";
-		$sql .= "lower(destination_type) like :search ";
-		$sql .= "or lower(destination_number) like :search ";
-		$sql .= "or lower(destination_context) like :search ";
-		$sql .= "or lower(destination_accountcode) like :search ";
+		$sql .= "lower(destination_type) like :search1 ";
+		$sql .= "or lower(destination_number) like :search2 ";
+		$sql .= "or lower(destination_context) like :search3 ";
+		$sql .= "or lower(destination_accountcode) like :search4 ";
 		if (permission_exists('outbound_caller_id_select')) {
-			$sql .= "or lower(destination_caller_id_name) like :search ";
-			$sql .= "or destination_caller_id_number like :search ";
+			$sql .= "or lower(destination_caller_id_name) like :search5 ";
+			$sql .= "or destination_caller_id_number like :search6 ";
 		}
-		$sql .= "or lower(destination_enabled) like :search ";
-		$sql .= "or lower(destination_description) like :search ";
-		$sql .= "or lower(destination_data) like :search ";
+		$sql .= "or lower(destination_enabled) like :search7 ";
+		$sql .= "or lower(destination_description) like :search8 ";
+		$sql .= "or lower(destination_data) like :search9 ";
 		$sql .= ") ";
-		$parameters['search'] = '%'.$search.'%';
+		$parameters['search1'] = '%'.$search.'%';
+		$parameters['search2'] = '%'.$search.'%';
+		$parameters['search3'] = '%'.$search.'%';
+		$parameters['search4'] = '%'.$search.'%';
+		$parameters['search5'] = '%'.$search.'%';
+		$parameters['search6'] = '%'.$search.'%';
+		$parameters['search7'] = '%'.$search.'%';
+		$parameters['search8'] = '%'.$search.'%';
+		$parameters['search9'] = '%'.$search.'%';
 	}
 	$sql .= order_by($order_by, $order, 'destination_number, destination_order ', 'asc');
 	$sql .= limit_offset($rows_per_page, $offset);
