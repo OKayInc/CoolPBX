@@ -1423,6 +1423,7 @@
 			if (count($destinations) > 0) {
 				echo "	<select name='outbound_caller_id_name' id='outbound_caller_id_name' class='formfld'>\n";
 				echo "	<option value=''></option>\n";
+				$in_list = array();
 				foreach ($destinations as &$row) {
 					$tmp = $row["destination_caller_id_name"];
 					if(empty($tmp)){
@@ -1438,6 +1439,7 @@
 						}
 					}
 				}
+				unset($in_list);
 				echo "		</select>\n";
 				echo "<br />\n";
 				echo $text['description-outbound_caller_id_name-select']."\n";
