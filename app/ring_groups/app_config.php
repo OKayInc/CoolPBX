@@ -44,6 +44,7 @@
 		$apps[$x]['destinations'][$y]['field']['context'] = "ring_group_context";
 		$apps[$x]['destinations'][$y]['select_value']['dialplan'] = "transfer:\${destination} XML \${context}";
 		$apps[$x]['destinations'][$y]['select_value']['ivr'] = "menu-exec-app:transfer \${destination} XML \${context}";
+		$apps[$x]['destinations'][$y]['select_value']['simple'] = "\${destination}";
 		$apps[$x]['destinations'][$y]['select_label'] = "\${destination} \${name} \${description}";
 
 	//cache details
