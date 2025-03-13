@@ -44,6 +44,7 @@
 		$apps[$x]['destinations'][$y]['field']['description'] = "dialplan_description";
 		$apps[$x]['destinations'][$y]['select_value']['dialplan'] = "transfer:\${destination} XML \${context}";
 		$apps[$x]['destinations'][$y]['select_value']['ivr'] = "menu-exec-app:transfer \${destination} XML \${context}";
+		$apps[$x]['destinations'][$y]['select_value']['simple'] = "\${destination}";
 		$apps[$x]['destinations'][$y]['select_label'] = "\${destination} \${name} \${description}";
 
 	//permission details
