@@ -152,10 +152,11 @@
 	if (!empty($search)) {
 		$search =  strtolower($_GET["search"]);
 		$sql_search = " (";
-		$sql_search .= "	lower(domain_name) like :search ";
-		$sql_search .= "	or lower(domain_description) like :search ";
+		$sql_search .= "	lower(domain_name) like :search1 ";
+		$sql_search .= "	or lower(domain_description) like :search2 ";
 		$sql_search .= ") ";
-		$parameters['search'] = '%'.$search.'%';
+		$parameters['search1'] = '%'.$search.'%';
+		$parameters['search2'] = '%'.$search.'%';
 	}
 
 //get the count
