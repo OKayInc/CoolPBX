@@ -103,10 +103,11 @@
 	}
 	if (!empty($search)) {
 		$sql .= "and ( \n";
-		$sql .= "	lower(group_name) like :search \n";
-		$sql .= "	or lower(group_description) like :search \n";
+		$sql .= "	lower(group_name) like :search1 \n";
+		$sql .= "	or lower(group_description) like :search2 \n";
 		$sql .= ") \n";
-		$parameters['search'] = '%'.$search.'%';
+		$parameters['search1'] = '%'.$search.'%';
+		$parameters['search2'] = '%'.$search.'%';
 	}
 	$database = new database;
 	$num_rows = $database->select($sql, $parameters ?? '', 'column');
