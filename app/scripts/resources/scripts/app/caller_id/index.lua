@@ -15,28 +15,33 @@
 --	</condition>
 
 
+	local Database = require "resources.functions.database";
+	local dbh = Database.new('system');
+	json = require "resources.functions.lunajson";
 	permanent = argv[2] or 'false';
 
 	 if (session:ready()) then
 --get the variables
 		extension_uuid = session:getVariable("extension_uuid");
+		domain_uuid = session:getVariable("domain_uuid");
 		outbound_caller_id_number = session:getVariable("outbound_caller_id_number");
 		caller_id_sound_current = session:getVariable("caller_id_sound_current");
 		caller_id_sound_prompt = session:getVariable("caller_id_sound_prompt");
 		caller_id_sound_goodbye = session:getVariable("caller_id_sound_goodbye");
+		caller_id_sound_invalid = session:getVariable("caller_id_sound_invalid");
 		sip_from_user = session:getVariable("sip_from_user");
 		sip_from_host = session:getVariable("sip_from_host");
+		api_version = session:getVariable("api_version") or '50';
+		default_countrycode = session:getVariable("default_countrycode") or '1';
 
 --prepare the api object
 		api = freeswitch.API();
-
---define the trim function
-		require "resources.functions.trim";
 
 --set the cache key
 		realm = 'caller_id';
 		key = extension_uuid;
 		argument = 'exists/'..realm..'/'..key;
+		freeswitch.consoleLog("notice", "[caller_id] API " .. api_version .. "\n");
 
 		if (	(api:execute('db', argument) == 'false') and
 			(caller_id_sound_current ~= nil) and
@@ -52,23 +57,41 @@
 			max_tries = 1;
 			digit_timeout = 5000;	-- in ms
 			tmp_caller_id = session:playAndGetDigits(min_digits, max_digits, max_tries, digit_timeout, "#", caller_id_sound_prompt, "", "\\d+");
-			freeswitch.consoleLog("notice", "[caller_id] Temporal caller ID for " .. extension_uuid .. ' is ' .. tmp_caller_id .. "\n");
-			if (permanent == 'false') then
-				api:execute('db','insert/'..realm..'/'..key..'/'..tmp_caller_id);
-			else
-				sql = 'UPDATE v_extensions SET outbound_caller_id_number = :tmp_caller_id WHERE extension_uuid = :extension_uuid';
-				local Database = require "resources.functions.database";
-				local dbh = Database.new('system');
-				local params = {tmp_caller_id = tmp_caller_id, extension_uuid = extension_uuid};
-				if (debug["sql"]) then
-					freeswitch.consoleLog("notice", "[caller_id] SQL: "..sql.."; params:" .. json.encode(params) .. "\n");
+			freeswitch.consoleLog("notice", "[caller_id] Proposed Caller ID for " .. extension_uuid .. ' is ' .. tmp_caller_id .. "\n");
+
+			local params = {tmp_caller_id = tmp_caller_id};
+			sql_v = 'SELECT COUNT(*) AS C FROM v_destinations WHERE (destination_number = :tmp_caller_id) ';
+			if (api_version ~= '44') then
+				sql_v = sql_v .. ' OR (CONCAT(destination_prefix, destination_area_code, destination_number) = :tmp_caller_id) OR (CONCAT(default_country_code, destination_area_code, destination_number) = :tmp_caller_id) ';
+			end
+--			if (debug["sql"]) then
+				freeswitch.consoleLog("notice", "[caller_id] SQL: "..sql_v.."; params:" .. json.encode(params) .. "\n");
+--			end
+			local row = dbh:first_row(sql_v, params);
+			freeswitch.consoleLog("notice", "[caller_id] Result: "..row.C.."\n");
+			if (not row) or (tonumber(row.C) == 0) then
+				-- invalid entry
+				freeswitch.consoleLog("notice", "[caller_id] Invalid entry, the caller ID you give must match your destinations\n");
+				if (caller_id_sound_invalid ~= nil) then
+					session:execute('playback',caller_id_sound_invalid);
 				end
-				dbh:query(sql,params);
-				local cache = require "resources.functions.cache";
-				local key = 'directory:'..sip_from_user..'@'..sip_from_host;
-				freeswitch.consoleLog("notice", "[caller_id] key: ".. key .. "\n");
-				if (cache.support() and key) then
-					cache.del(key);
+
+			else
+				if (permanent == 'false') then
+					api:execute('db','insert/'..realm..'/'..key..'/'..tmp_caller_id);
+				else
+					sql = 'UPDATE v_extensions SET outbound_caller_id_number = :tmp_caller_id WHERE extension_uuid = :extension_uuid';
+					local params = {tmp_caller_id = tmp_caller_id, extension_uuid = extension_uuid};
+--					if (debug["sql"]) then
+						freeswitch.consoleLog("notice", "[caller_id] SQL: "..sql.."; params:" .. json.encode(params) .. "\n");
+--					end
+					dbh:query(sql,params);
+					local cache = require "resources.functions.cache";
+					local key = 'directory:'..sip_from_user..'@'..sip_from_host;
+					freeswitch.consoleLog("notice", "[caller_id] key: ".. key .. "\n");
+					if (cache.support() and key) then
+						cache.del(key);
+					end
 				end
 			end
 		else
