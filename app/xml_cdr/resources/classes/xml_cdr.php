@@ -191,6 +191,7 @@ if (!class_exists('xml_cdr')) {
 			$this->fields[] = "hangup_cause";
 			$this->fields[] = "hangup_cause_q850";
 			$this->fields[] = "sip_hangup_disposition";
+			$this->fields[] = "record_type";
 			if (is_array($_SESSION['cdr']['field'])) {
 				foreach ($_SESSION['cdr']['field'] as $field) {
 					$tokens = explode(' ', $field);
@@ -489,6 +490,7 @@ if (!class_exists('xml_cdr')) {
 						//$this->array[$key]['digits_dialed'] = urldecode($xml->variables->digits_dialed);
 						$this->array[$key]['sip_hangup_disposition'] = urldecode($xml->variables->sip_hangup_disposition);
 						$this->array[$key]['pin_number'] = urldecode($xml->variables->pin_number);
+						$this->array[$key]['record_type'] = isset($xml->variables->record_type)?urldecode($xml->variables->record_type):$_REQUEST['record_type'];
 
 					//time
 						$start_epoch = urldecode($xml->variables->start_epoch);
