@@ -14,6 +14,9 @@
 --		<action application="lua" data="app.lua caller_id"/>
 --	</condition>
 
+
+	permanent = argv[2] or 'false';
+
 	 if (session:ready()) then
 --get the variables
 		extension_uuid = session:getVariable("extension_uuid");
@@ -21,6 +24,8 @@
 		caller_id_sound_current = session:getVariable("caller_id_sound_current");
 		caller_id_sound_prompt = session:getVariable("caller_id_sound_prompt");
 		caller_id_sound_goodbye = session:getVariable("caller_id_sound_goodbye");
+		sip_from_user = session:getVariable("sip_from_user");
+		sip_from_host = session:getVariable("sip_from_host");
 
 --prepare the api object
 		api = freeswitch.API();
@@ -48,11 +53,30 @@
 			digit_timeout = 5000;	-- in ms
 			tmp_caller_id = session:playAndGetDigits(min_digits, max_digits, max_tries, digit_timeout, "#", caller_id_sound_prompt, "", "\\d+");
 			freeswitch.consoleLog("notice", "[caller_id] Temporal caller ID for " .. extension_uuid .. ' is ' .. tmp_caller_id .. "\n");
-			api:execute('db','insert/'..realm..'/'..key..'/'..tmp_caller_id);
+			if (permanent == 'false') then
+				api:execute('db','insert/'..realm..'/'..key..'/'..tmp_caller_id);
+			else
+				sql = 'UPDATE v_extensions SET outbound_caller_id_number = :tmp_caller_id WHERE extension_uuid = :extension_uuid';
+				local Database = require "resources.functions.database";
+				local dbh = Database.new('system');
+				local params = {tmp_caller_id = tmp_caller_id, extension_uuid = extension_uuid};
+				if (debug["sql"]) then
+					freeswitch.consoleLog("notice", "[caller_id] SQL: "..sql.."; params:" .. json.encode(params) .. "\n");
+				end
+				dbh:query(sql,params);
+				local cache = require "resources.functions.cache";
+				local key = 'directory:'..sip_from_user..'@'..sip_from_host;
+				freeswitch.consoleLog("notice", "[caller_id] key: ".. key .. "\n");
+				if (cache.support() and key) then
+					cache.del(key);
+				end
+			end
 		else
 			freeswitch.consoleLog("notice", "[caller_id] A temporal caller ID number already exists or some basic sounds are missing.\n");
 		end
 		if (caller_id_sound_goodbye ~= nil) then
 			session:execute('playback',caller_id_sound_goodbye);
 		end
+
+	session:hangup();
 	end
