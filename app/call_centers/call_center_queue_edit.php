@@ -351,10 +351,10 @@
 			$dialplan_xml .= "	</condition>\n";
 			$dialplan_xml .= "	<condition field=\"destination_number\" expression=\"^(callcenter\+)?".xml::sanitize($queue_extension)."$\">\n";
 			$dialplan_xml .= "		<action application=\"answer\" data=\"\"/>\n";
-			$dialplan_xml .= "              <action application=\"bind_digit_action\" data=\"queue-callback,*,exec:execute_extension,callback-\${caller_id_number}-\${destination_number} XML \${domain_name}\"/>\n";
-			$dialplan_xml .= "              <action application=\"digit_action_set_realm\" data=\"inqueue\"/>\n";
-			$dialplan_xml .= "              <action application=\"set\" data=\"bridge_pre_execute_aleg_app=clear_digit_action\"/>\n";
-			$dialplan_xml .= "              <action application=\"set\" data=\"bridge_pre_execute_aleg_data=all\"/>\n";
+			$dialplan_xml .= "		<action application=\"bind_digit_action\" data=\"queue-callback,*,exec:execute_extension,callback-\${caller_id_number}-\${destination_number} XML \${domain_name}\"/>\n";
+			$dialplan_xml .= "		<action application=\"digit_action_set_realm\" data=\"inqueue\"/>\n";
+			$dialplan_xml .= "		<action application=\"set\" data=\"bridge_pre_execute_aleg_app=clear_digit_action\"/>\n";
+			$dialplan_xml .= "		<action application=\"set\" data=\"bridge_pre_execute_aleg_data=all\"/>\n";
 			if (is_uuid($call_center_queue_uuid)) {
 				$dialplan_xml .= "		<action application=\"set\" data=\"call_center_queue_uuid=".xml::sanitize($call_center_queue_uuid)."\"/>\n";
 			}
