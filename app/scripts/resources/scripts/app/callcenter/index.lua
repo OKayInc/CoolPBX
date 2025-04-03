@@ -149,7 +149,6 @@
 			session:answer();
 
 		--send the call to the conference
-			cmd = destination_number.."@"..domain_name;
-			freeswitch.consoleLog("INFO","[conference center] callcenter " .. cmd .. "\n");
+			freeswitch.consoleLog("INFO","[conference center] callcenter " .. callcenter_queue .. "\n");
 			session:execute("conference", cmd);
 	end
