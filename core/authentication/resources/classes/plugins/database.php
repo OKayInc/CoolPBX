@@ -155,6 +155,8 @@ class plugin_database {
 				$parameters['domain_uuid'] = $this->domain_uuid;
 			}
 			$sql .= "and (user_enabled = 'true' or user_enabled is null) ";
+			syslog(LOG_WARNING, '2 $sql: '.print_r($sql, true));
+			syslog(LOG_WARNING, '2 $parameters: '.print_r($parameters, true));
 			$database = new database;
 			$row = $database->select($sql, $parameters, 'row');
 			syslog(LOG_WARNING, '2 $row: '.print_r($row, true));
