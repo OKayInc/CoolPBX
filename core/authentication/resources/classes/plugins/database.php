@@ -218,6 +218,7 @@ class plugin_database {
 
 				//check to to see if the the password hash needs to be updated
 					if ($valid_password) {
+						syslog(LOG_WARNING, 'valid password');
 						//set the password hash cost
 						$options = array('cost' => 10);
 
