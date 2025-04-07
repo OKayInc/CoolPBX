@@ -157,6 +157,7 @@ class plugin_database {
 			$sql .= "and (user_enabled = 'true' or user_enabled is null) ";
 			$database = new database;
 			$row = $database->select($sql, $parameters, 'row');
+			syslog(LOG_WARNING, '2 $row: '.print_r($row, true));
 			if (is_array($row)) {
 
 				//set the domain details
