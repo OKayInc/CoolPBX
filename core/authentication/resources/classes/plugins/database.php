@@ -24,7 +24,7 @@ class plugin_database {
 	 * @return array [authorized] => true or false
 	 */
 	function database() {
-
+	syslog(LOG_WARNING, '2 $_REQUEST: '.print_r($_REQUEST, true));
 		//pre-process some settings
 			$settings['theme']['favicon'] = !empty($_SESSION['theme']['favicon']['text']) ? $_SESSION['theme']['favicon']['text'] : PROJECT_PATH.'/themes/default/favicon.ico';
 			$settings['login']['destination'] = !empty($_SESSION['login']['destination']['text']) ? $_SESSION['login']['destination']['text'] : '';
