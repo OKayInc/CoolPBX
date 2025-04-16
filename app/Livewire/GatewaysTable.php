@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Facades\FreeSwitch;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,12 +27,11 @@ class GatewaysTable extends DataTableComponent
 
     public function getGatewayStatuses() 
     {
-        $fsapi = new FreeSWITCHAPIController();
         $gateways = Gateway::all();
 
         foreach ($gateways as $gateway) {
 
-            $response = $fsapi->execute('sofia', 'xmlstatus gateway ' . $gateway->gateway_uuid);
+            $response = FreeSwitch::getGatewayStatus($gateway->gateway_uuid);
 
             if ($response == "Invalid Gateway!") {
                 $this->gatewayStatuses[$gateway->gateway_uuid] = [
@@ -58,8 +58,7 @@ class GatewaysTable extends DataTableComponent
 
     public function startGateway($gatewayUuid)
     {
-        $fsapi = new FreeSWITCHAPIController();
-        $response = $fsapi->execute('sofia', 'profile external rescan');
+        FreeSwitch::execute('sofia', 'profile external rescan');
 
         $this->getGatewayStatuses();
 
@@ -68,8 +67,7 @@ class GatewaysTable extends DataTableComponent
 
     public function stopGateway($gatewayUuid)
     {
-        $fsapi = new FreeSWITCHAPIController();
-        $response = $fsapi->execute('sofia', 'profile external killgw ' . $gatewayUuid);
+        FreeSwitch::execute('sofia', 'profile external killgw ' . $gatewayUuid);
 
         $this->getGatewayStatuses();
 
@@ -189,7 +187,6 @@ class GatewaysTable extends DataTableComponent
     public function columns(): array
     {
         $canEdit = auth()->user()->hasPermission('gateway_edit');
-        $canDelete = auth()->user()->hasPermission('gateway_delete');
 
         $columns = [
             Column::make("Gateway", "gateway")

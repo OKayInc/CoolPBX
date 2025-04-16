@@ -40,4 +40,32 @@ class FreeSWITCHAPIController extends Controller
     {
         return FreeSwitch::getServerStatus();
     }
+
+    /**
+     * Check if connected to the FreeSWITCH server
+     *
+     * @return bool Connection status
+     */
+    public function isConnected(): bool
+    {
+        return FreeSwitch::isConnected();
+    }
+    
+    /**
+     * Force a reconnection to the FreeSWITCH server
+     *
+     * @return bool Success status
+     */
+    public function reconnect(): bool
+    {
+        return FreeSwitch::reconnect();
+    }
+
+    /**
+     * Close the connection to the FreeSWITCH server
+     */
+    public function closeConnection(): void
+    {
+        FreeSwitch::closeConnection();
+    }
 }

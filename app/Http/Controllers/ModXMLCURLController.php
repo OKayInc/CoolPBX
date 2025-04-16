@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\FreeSwitch;
 use App\Http\Controllers\DefaultSetting;
 use App\Http\Controllers\DefaultSettingController;
-use App\Http\Controllers\FreeSWITCHAPIController;
 
 use App\Models\AccessControl;
 use App\Models\AccessControlNode;
@@ -1535,7 +1535,7 @@ class ModXMLCURLController extends Controller
         }
         else{
             $continue = true;
-            $api = new FreeSWITCHAPIController;
+            // $api = new FreeSWITCHAPIController;
             $default_settings = new DefaultSettingController;
             $use_fs_path = $default_settings->get('config', 'xml_handler.fs_path', 'boolean') ?? 'false';
             $number_as_presence_id = $default_settings->get('config', 'xml_handler.number_as_presence_id', 'boolean') ?? 'true';
@@ -1562,7 +1562,8 @@ class ModXMLCURLController extends Controller
                 $local_hostname = $this->get_hostname($request);    // TODO: verify this
                 $reg_user = $dialed_extension;
                 if ($dial_string_based_on_userid == 'false'){
-                    $reg_user = $api->execute('user_data', $dialed_extension . '@' . $domain_name . ' attr id', $local_hostname);
+                    // $reg_user = $api->execute('user_data', $dialed_extension . '@' . $domain_name . ' attr id', $local_hostname);
+                    $reg_user = FreeSwitch::execute('user_data', $dialed_extension . '@' . $domain_name . ' attr id', $local_hostname);
                 }
                 else{
                     $reg_user = $dialed_extension;
