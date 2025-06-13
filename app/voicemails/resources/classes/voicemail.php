@@ -187,7 +187,7 @@
 						$this->voicemail_uuid = $row['voicemail_uuid'];
 						$this->voicemail_id = $row['voicemail_id'];
 						$result = $this->voicemail_messages();
-						$voicemail_count = count($result);
+						$voicemail_count = is_array($result)?count($result):0;
 						$row['messages'] = $result;
 					}
 				}
