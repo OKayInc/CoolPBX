@@ -31,4 +31,6 @@ return [
     'CHECK_COUNTRY_CODE' => 1,
     'CHECK_NATIONAL_DESTINATION_CODE' => 2,
     'CHECK_SUBSCRIBER_NUMBER' => 4,
+
+    'sounds_dir' => '/usr/share/freeswitch/sounds'
 ];

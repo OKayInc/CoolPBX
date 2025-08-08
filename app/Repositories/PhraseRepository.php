@@ -38,4 +38,12 @@ class PhraseRepository
     {
         return $phrase->delete();
     }
+
+    public function getAllForDomain($domainUuid)
+    {
+        return Phrase::where('domain_uuid', $domainUuid)
+            ->where('phrase_enabled', 'true')
+            ->orderBy('phrase_name')
+            ->get(['phrase_name', 'phrase_uuid']);
+    }
 }
