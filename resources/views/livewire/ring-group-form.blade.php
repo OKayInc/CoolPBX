@@ -414,10 +414,11 @@
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_ringback" class="form-label">Ring Back</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_ringback') is-invalid @enderror"
-                                            id="ring_group_ringback" wire:model="ring_group_ringback"
-                                            placeholder="Ringback tone">
+
+                                        <x-switch-ringback name="ring_group_ringback" :selected="$ring_group_ringback"
+                                            wire:model="ring_group_ringback"
+                                            class="form-select @error('ring_group_ringback') is-invalid @enderror" />
+
                                         @error('ring_group_ringback')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
