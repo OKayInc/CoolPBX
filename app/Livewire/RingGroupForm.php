@@ -128,7 +128,6 @@ class RingGroupForm extends Component
     {
         try {
             $this->available_sounds = $this->soundsService->getAllSounds();
-            dd($this->available_sounds);
         } catch (\Exception $e) {
             throw $e;
             \Log::error('Error loading sounds: ' . $e->getMessage());

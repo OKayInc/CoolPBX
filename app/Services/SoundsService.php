@@ -44,7 +44,6 @@ class SoundsService
         $sounds['phrases'] = $this->getPhrases();
         $sounds['sounds'] = $this->getSoundFiles('en', 'us', 'callie');
 
-        dd( $sounds);
 
         return $sounds;
     }
@@ -56,7 +55,7 @@ class SoundsService
      */
     protected function getMiscellaneousSounds(): array
     {
-        if (!$this->isSuperAdmin()) {
+        if (!Auth::user()->hasGroup('superadmin')) {
             return [];
         }
 

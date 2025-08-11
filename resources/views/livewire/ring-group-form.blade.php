@@ -128,27 +128,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="ring_group_greeting" class="form-label">Greeting</label>
-                                <select id="ring_group_greeting"
-                                    class="form-control @error('ring_group_greeting') is-invalid @enderror"
-                                    wire:model="ring_group_greeting">
-                                    <option value="">-- Select a greeting --</option>
-
-                                    @foreach ($soundOptions as $sound)
-                                        <option value="{{ $sound['value'] }}">
-                                            {{ $sound['name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                @error('ring_group_greeting')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div> --}}
-                         <div class="col-md-6">
+                        <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label for="ring_group_greeting" class="form-label">Greeting</label>
 
@@ -178,7 +158,7 @@
                                     @endforeach
 
                                     <!-- Para superadmin: mostrar opción custom si no está en la lista -->
-                                    @if (auth()->user()->isSuperAdmin() && !empty($ring_group_greeting))
+                                    @if (auth()->user()->hasGroup('superadmin') && !empty($ring_group_greeting))
                                         @php
                                             $found = false;
                                             foreach ($filtered_sounds as $sounds) {
@@ -212,7 +192,7 @@
                                     </div>
                                 @endif
                             </div>
-                        </div> 
+                        </div>
                     </div>
 
                     <!-- Caller ID Settings -->
@@ -433,7 +413,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="ring_group_ringback" class="form-label">Ringback</label>
+                                        <label for="ring_group_ringback" class="form-label">Ring Back</label>
                                         <input type="text"
                                             class="form-control @error('ring_group_ringback') is-invalid @enderror"
                                             id="ring_group_ringback" wire:model="ring_group_ringback"
@@ -484,11 +464,15 @@
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_timeout_action" class="form-label">Timeout
-                                            Action</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_timeout_action') is-invalid @enderror"
-                                            id="ring_group_timeout_action" wire:model="ring_group_timeout_action"
-                                            placeholder="app:data">
+                                            Destination</label>
+
+                                        <x-switch-destinations name="ring_group_timeout_action" :selected="$ring_group_timeout_action ?? ''"
+                                            extension-type="dialplan" ring-group-type="dialplan"
+                                            voice-mail-type="dialplan" call-center-type="dialplan"
+                                            conference-center-type="dialplan" ivr-menu-type="dialplan"
+                                            time-condition-type="dialplan" tone-type="dialplan"
+                                            wire:model="ring_group_timeout_action" />
+
                                         @error('ring_group_timeout_action')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror

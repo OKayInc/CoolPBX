@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\Storage;
 
 class SoundFileRepository
 {
-    public function getAllSoundFiles($language = 'en', $dialect = 'us', $voice = 'callie')
+    public function getAllSoundFiles($language = null, $dialect = null, $voice = null)
     {
-        // Lógica para escanear storage/app/public/sounds/
-        // Retornar array con estructura ['name' => ..., 'value' => ...]    
-        return [];
+        return getSounds($language, $dialect, $voice);
     }
 }
