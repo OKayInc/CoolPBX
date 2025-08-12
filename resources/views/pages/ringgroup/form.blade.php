@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<livewire:ringgroup-form :ringgroupUuid="$ringgroupUuid ?? null"/>
+<livewire:ringgroup-form :ringGroupUuid="$ringGroupUuid ?? null"/>
 @endsection

@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
 
 class RingGroupForm extends Component
 {
-    public $ringGroupUuid;
+    public ?string $ringGroupUuid = null;
     public $domainUuid;
     public $isEditing = false;
 
@@ -36,7 +36,7 @@ class RingGroupForm extends Component
     public $ring_group_forward_destination = '';
     public $ring_group_forward_toll_allow = '';
     public $ring_group_timeout_action = '';
-    public $ring_group_context = '';
+    public $ring_group_context = 'hornblower.tel';
     public $ring_group_enabled = 'true';
     public $ring_group_description = '';
 
@@ -63,8 +63,8 @@ class RingGroupForm extends Component
     protected $rules = [
         'ring_group_name' => 'required|string|max:255',
         'ring_group_extension' => 'required|string|max:255',
-        'ring_group_strategy' => 'required|in:simultaneous,sequence,enterprise,rollover,random',
-        'ring_group_call_timeout' => 'required|numeric|min:5|max:300',
+        'ring_group_strategy' => 'nullable|in:simultaneous,sequence,enterprise,rollover,random',
+        'ring_group_call_timeout' => 'nullable|numeric|min:5|max:300',
         'ring_group_caller_id_name' => 'nullable|string|max:255',
         'ring_group_caller_id_number' => 'nullable|numeric',
         'ring_group_cid_name_prefix' => 'nullable|string|max:255',
@@ -79,8 +79,8 @@ class RingGroupForm extends Component
         'ring_group_forward_destination' => 'nullable|string|max:255',
         'ring_group_forward_toll_allow' => 'nullable|string|max:255',
         'ring_group_timeout_action' => 'nullable|string|max:255',
-        'ring_group_context' => 'required|string|max:255',
-        'ring_group_enabled' => 'required|in:true,false',
+        'ring_group_context' => 'nullable|string|max:255',
+        'ring_group_enabled' => 'nullable|in:true,false',
         'ring_group_description' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_number' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_delay' => 'nullable|numeric|min:0|max:300',
@@ -110,7 +110,7 @@ class RingGroupForm extends Component
         $this->ring_group_context = auth()->user()->domain_name;
 
         if ($ringGroupUuid) {
-            $this->ringGroupUuid = $ringGroupUuid;
+            $this->ringGroupUuid = $ringGroupUuid->ring_group_uuid;
             $this->isEditing = true;
             $this->loadRingGroup();
         } else {
@@ -121,7 +121,6 @@ class RingGroupForm extends Component
         $this->loadAvailableUsers();
         $this->loadAvailableSounds();
         $this->updateMissedCallDataVisibility();
-        
     }
 
     public function loadAvailableSounds()
@@ -184,7 +183,7 @@ class RingGroupForm extends Component
         $this->ring_group_forward_enabled = $ringGroup->ring_group_forward_enabled ?? 'false';
         $this->ring_group_forward_destination = $ringGroup->ring_group_forward_destination ?? '';
         $this->ring_group_forward_toll_allow = $ringGroup->ring_group_forward_toll_allow ?? '';
-        $this->ring_group_context = $ringGroup->ring_group_context;
+        $this->ring_group_context = $ringGroup->ring_group_context ?? 'hornblower.tel';
         $this->ring_group_enabled = $ringGroup->ring_group_enabled ?? 'true';
         $this->ring_group_description = $ringGroup->ring_group_description ?? '';
 
@@ -275,6 +274,12 @@ class RingGroupForm extends Component
             return;
         }
 
+        $userExists = collect($this->ring_group_users)->contains('user_uuid', $this->selected_user_uuid);
+        if ($userExists) {
+            session()->flash('error', 'El usuario ya está en el grupo.');
+            return;
+        }
+
         if ($this->isEditing) {
             $result = $this->ringGroupRepository->addUser(
                 $this->ringGroupUuid,
@@ -289,10 +294,16 @@ class RingGroupForm extends Component
                 $this->selected_user_uuid = '';
             }
         } else {
-            session()->flash('error', 'Debe guardar el Ring Group antes de agregar usuarios.');
+            $user = collect($this->available_users)->firstWhere('user_uuid', $this->selected_user_uuid);
+
+            if ($user) {
+                $this->ring_group_users[] = $user;
+                $this->loadAvailableUsers();
+                $this->selected_user_uuid = '';
+                session()->flash('message', 'Add user successfully.');
+            }
         }
     }
-
     public function removeUser($userUuid)
     {
         if ($this->isEditing) {
@@ -300,6 +311,13 @@ class RingGroupForm extends Component
             session()->flash('message', 'Usuario eliminado correctamente.');
             $this->loadRingGroup();
             $this->loadAvailableUsers();
+        } else {
+            $this->ring_group_users = array_filter($this->ring_group_users, function ($user) use ($userUuid) {
+                return $user['user_uuid'] !== $userUuid;
+            });
+            $this->ring_group_users = array_values($this->ring_group_users);
+            $this->loadAvailableUsers();
+            session()->flash('message', 'Usuario eliminado de la lista.');
         }
     }
 
@@ -340,12 +358,22 @@ class RingGroupForm extends Component
             if (!$this->isEditing) {
                 $ringGroup = $this->ringGroupRepository->create($data);
                 $this->ringGroupUuid = $ringGroup->ring_group_uuid;
+
+                foreach ($this->ring_group_users as $user) {
+                    $this->ringGroupRepository->addUser(
+                        $this->ringGroupUuid,
+                        $user['user_uuid'],
+                        $this->domainUuid
+                    );
+                }
+
                 $this->isEditing = true;
-                session()->flash('message', 'Ring Group creado correctamente.');
+                return redirect()->route('ring_groups.index');
+                session()->flash('message', 'Create successfully.');
             } else {
                 $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
                 $this->ringGroupRepository->update($ringGroup, $data);
-                session()->flash('message', 'Ring Group actualizado correctamente.');
+                session()->flash('message', 'Update successfully.');
             }
 
             if (!empty($this->destinations_to_delete)) {
@@ -357,7 +385,8 @@ class RingGroupForm extends Component
                 $this->loadRingGroup();
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al guardar: ' . $e->getMessage());
+            throw $e;   
+            session()->flash('error', 'Error' . $e->getMessage());
         }
     }
 
@@ -372,6 +401,7 @@ class RingGroupForm extends Component
                 session()->flash('message', 'Ring Group copiado correctamente.');
                 return redirect()->route('ring-groups.edit', $newRingGroup->ring_group_uuid);
             } catch (\Exception $e) {
+                throw $e;
                 session()->flash('error', 'Error al copiar: ' . $e->getMessage());
             }
         }
@@ -385,10 +415,11 @@ class RingGroupForm extends Component
                 $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
                 $this->ringGroupRepository->delete($ringGroup);
 
-                session()->flash('message', 'Ring Group eliminado correctamente.');
+                session()->flash('message', 'Delete successfully.');
                 return redirect()->route('ring_groups.index');
             } catch (\Exception $e) {
-                session()->flash('error', 'Error al eliminar: ' . $e->getMessage());
+                throw $e;
+                session()->flash('error', 'Error: ' . $e->getMessage());
             }
         }
         $this->showDeleteConfirmation = false;

@@ -322,7 +322,7 @@ class RingGroupRepository
             'dialplan_order' => 101,
             'dialplan_enabled' => $ringGroup->ring_group_enabled,
             'dialplan_description' => $ringGroup->ring_group_description,
-            'app_uuid' => '1d61fb65-1eec-bc73-a6ee-a6203b4fe6f2', // Ring Groups app UUID
+            'app_uuid' => '1d61fb65-1eec-bc73-a6ee-a6203b4fe6f2',
         ]);
     }
 

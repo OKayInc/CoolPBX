@@ -153,6 +153,7 @@ class RepositoryServiceProvider extends ServiceProvider
             );
         });
 
+    
     }
 
     /**

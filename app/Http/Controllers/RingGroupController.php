@@ -26,7 +26,7 @@ class RingGroupController extends Controller
 
     public function edit(string $uuid)
     {
-        $ringgroupUuid = $this->ringGroupRepository->findByUuid($uuid);
-        return view('pages.ringgroup.form', compact('ringgroupUuid'));
+        $ringGroupUuid = $this->ringGroupRepository->findByUuid($uuid);
+        return view('pages.ringgroup.form', compact('ringGroupUuid'));
     }
 }

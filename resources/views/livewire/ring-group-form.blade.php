@@ -72,8 +72,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="ring_group_strategy" class="form-label">Strategy <span
-                                        class="text-danger">*</span></label>
+                                <label for="ring_group_strategy" class="form-label">Strategy </label>
                                 <select class="form-select @error('ring_group_strategy') is-invalid @enderror"
                                     id="ring_group_strategy" wire:model="ring_group_strategy" required>
                                     <option value="simultaneous">Simultaneous</option>
@@ -89,8 +88,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="ring_group_call_timeout" class="form-label">Call Timeout<span
-                                        class="text-danger">*</span></label>
+                                <label for="ring_group_call_timeout" class="form-label">Call Timeout</label>
                                 <input type="number"
                                     class="form-control @error('ring_group_call_timeout') is-invalid @enderror"
                                     id="ring_group_call_timeout" wire:model="ring_group_call_timeout" min="5"
@@ -337,7 +335,6 @@
                     </div>
 
                     <!-- Users Configuration -->
-                    @if ($isEditing)
                         <h5 class="mt-4 mb-3">Ring Group Users</h5>
                         <div class="card mb-4">
                             <div class="card-body">
@@ -391,7 +388,6 @@
                                 @endif
                             </div>
                         </div>
-                    @endif
 
                     <!-- Advanced Options -->
                     <h5 class="mt-4 mb-3">Advanced Options</h5>
@@ -424,6 +420,21 @@
                                         @enderror
                                     </div>
                                 </div>
+                                {{-- <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="" class="form-label"> User List </label>
+                                        <select class="form-select @error('ring_group_user_list') is-invalid @enderror"
+                                            id="user_uuid" wire:model="ring_group_user_list">
+                                            <option value="">Select User List</option>
+                                            @foreach ($user_lists as $list)
+                                                <option value="{{ $list->id }}">{{ $list->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('ring_group_user_list')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div> --}}
                             </div>
 
                             <div class="row">
@@ -481,8 +492,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="ring_group_context" class="form-label">Context <span
-                                                class="text-danger">*</span></label>
+                                        <label for="ring_group_context" class="form-label">Context</label>
                                         <input type="text"
                                             class="form-control @error('ring_group_context') is-invalid @enderror"
                                             id="ring_group_context" wire:model="ring_group_context"
@@ -564,7 +574,7 @@
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
                             <i class="fas fa-save"></i>
-                            {{ $isEditing ? 'Update Ring Group' : 'Create Ring Group' }}
+                            {{ $isEditing ? 'Update' : 'Create' }}
                         </button>
                         <a href="{{ route('ring_groups.index') }}" class="btn btn-secondary ms-2 px-4 py-2"
                             style="border-radius: 4px;">
