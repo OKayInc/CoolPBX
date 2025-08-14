@@ -10,17 +10,19 @@
 
                 <div class="card-tools">
                     <div class="d-flex gap-2 " role="group" aria-label="RingGroup actions">
-                        @can('device_all')
+                        @can('ring_group_all')
                             <a href="{{ route('ring_groups.index', ['show_all' => 1]) }}" class="btn btn-primary btn-sm">
                                 <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Show All') }}
                             </a>
                         @endcan
 
+                        @can('ring_group_add')
                         <div class="d-flex gap-2 " role="menu" aria-label="Menu actions">
                             <a href="{{ route('ring_groups.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus mr-1"></i> {{ __('Add') }}
                             </a>
                         </div>
+                        @endcan
                     </div>
                 </div>
             </div>

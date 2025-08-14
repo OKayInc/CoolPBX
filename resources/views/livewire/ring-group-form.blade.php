@@ -8,22 +8,25 @@
                     </h3>
                     <div>
                         @if ($isEditing)
-                            <button type="button" class="btn btn-danger btn-sm me-2"
+                            @can('ring_group_delete')
+                            <button type="button" class="btn btn-primary btn-sm me-2"
                                 wire:click="$set('showDeleteConfirmation', true)">
                                 <i class="fa fa-trash" aria-hidden="true"></i> Delete
                             </button>
+                            @endcan
 
-                            <button type="button" class="btn btn-info btn-sm"
+                            @can('ring_group_add')
+                            <button type="button" class="btn btn-primary btn-sm"
                                 wire:click="$set('showCopyConfirmation', true)">
                                 <i class="fa fa-clone" aria-hidden="true"></i> Copy
                             </button>
+                            @endcan
                         @endif
                     </div>
                 </div>
             </div>
 
             <div class="card-body">
-                <!-- Flash Messages -->
                 @if (session()->has('message'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('message') }}
@@ -39,7 +42,6 @@
                 @endif
 
                 <form wire:submit.prevent="save">
-                    <!-- Basic Information -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
@@ -113,7 +115,6 @@
                         </div>
                     </div>
 
-                    <!-- Advanced Settings -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
@@ -121,7 +122,7 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" role="switch"
                                         id="ring_group_enabled" wire:model="ring_group_enabled" value="true"
-                                        {{ $ring_group_enabled === 'true' ? 'checked' : '' }}>
+                                        {{ $ring_group_enabled ? 'checked' : '' }}>
                                     <label class="form-check-label" for="ring_group_enabled">Enabled</label>
                                 </div>
                             </div>
@@ -130,7 +131,6 @@
                             <div class="form-group mb-3">
                                 <label for="ring_group_greeting" class="form-label">Greeting</label>
 
-                                <!-- Buscador opcional (como tienes implementado) -->
                                 <select id="ring_group_greeting"
                                     class="form-control @error('ring_group_greeting') is-invalid @enderror"
                                     wire:model="ring_group_greeting">
@@ -148,7 +148,6 @@
                                         @endif
                                     @endforeach
 
-                                    <!-- Para superadmin: mostrar opción custom si no está en la lista -->
                                     @if (auth()->user()->hasGroup('superadmin') && !empty($ring_group_greeting))
                                         @php
                                             $found = false;
@@ -186,11 +185,12 @@
                         </div>
                     </div>
 
-                    <!-- Caller ID Settings -->
+
                     <h5 class="mt-4 mb-3">Caller ID Settings</h5>
                     <div class="card mb-4">
                         <div class="card-body">
                             <div class="row">
+                                @can('ring_group_caller_id_name')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_caller_id_name" class="form-label">Caller ID
@@ -204,6 +204,8 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
+                                @can('ring_group_caller_id_number')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_caller_id_number" class="form-label">Caller ID
@@ -217,8 +219,10 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
                             </div>
                             <div class="row">
+                                @can('ring_group_cid_name_prefix')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_cid_name_prefix" class="form-label">CID Name
@@ -232,6 +236,8 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
+                                @can('ring_group_cid_number_prefix')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_cid_number_prefix" class="form-label">CID Number
@@ -245,11 +251,11 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
                             </div>
                         </div>
                     </div>
 
-                    <!-- Destinations Configuration -->
                     <h5 class="mt-4 mb-3">Destinations Configuration</h5>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -260,7 +266,9 @@
                                             <th>Destination Number</th>
                                             <th class="text-center">Delay (sec)</th>
                                             <th class="text-center">Timeout (sec)</th>
+                                            @can('ring_group_prompt')
                                             <th class="text-center">Prompt</th>
+                                            @endcan
                                             <th class="text-center">Enabled</th>
                                             <th class="text-center">Action</th>
                                         </tr>
@@ -297,13 +305,17 @@
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror
                                                 </td>
+                                                @can('ring_group_prompt')
                                                 <td class="text-center">
                                                     <input class="form-check-input" type="checkbox"
-                                                        wire:model="ring_group_destinations.{{ $index }}.destination_prompt">
+                                                        wire:model="ring_group_destinations.{{ $index }}.destination_prompt"
+                                                        {{ $destination['destination_prompt'] ? 'checked' : '' }}>
                                                 </td>
+                                                @endcan
                                                 <td class="text-center">
                                                     <input class="form-check-input" type="checkbox"
-                                                        wire:model="ring_group_destinations.{{ $index }}.destination_enabled">
+                                                        wire:model="ring_group_destinations.{{ $index }}.destination_enabled"
+                                                        {{ $destination['destination_enabled'] ? 'checked' : '' }}>
                                                 </td>
                                                 <td class="text-center">
                                                     @if (count($ring_group_destinations) > 1)
@@ -327,11 +339,9 @@
                         </div>
                     </div>
 
-                    <!-- Users Configuration -->
                     <h5 class="mt-4 mb-3">Ring Group Users</h5>
                     <div class="card mb-4">
                         <div class="card-body">
-                            <!-- Add User -->
                             <div class="row mb-3">
                                 <div class="col-md-8">
                                     <select class="form-select" wire:model="selected_user_uuid">
@@ -349,7 +359,6 @@
                                 </div>
                             </div>
 
-                            <!-- Current Users -->
                             @if (count($ring_group_users) > 0)
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
@@ -382,7 +391,6 @@
                         </div>
                     </div>
 
-                    <!-- Advanced Options -->
                     <h5 class="mt-4 mb-3">Advanced Options</h5>
                     <div class="card mb-4">
                         <div class="card-body">
@@ -413,59 +421,10 @@
                                         @enderror
                                     </div>
                                 </div>
-                                {{-- <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="" class="form-label"> User List </label>
-                                        <select class="form-select @error('ring_group_user_list') is-invalid @enderror"
-                                            id="user_uuid" wire:model="ring_group_user_list">
-                                            <option value="">Select User List</option>
-                                            @foreach ($user_lists as $list)
-                                                <option value="{{ $list->id }}">{{ $list->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('ring_group_user_list')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div> --}}
                             </div>
 
-                            {{-- <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_missed_call_app" class="form-label">Missed Call
-                                            App</label>
-                                        <select
-                                            class="form-select @error('ring_group_missed_call_app') is-invalid @enderror"
-                                            id="ring_group_missed_call_app" wire:model="ring_group_missed_call_app">
-                                            <option value="">None</option>
-                                            <option value="email">Email</option>
-                                            <option value="text">Text</option>
-                                        </select>
-                                        @error('ring_group_missed_call_app')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    @if ($showMissedCallData)
-                                        <div class="form-group mb-3">
-                                            <label for="ring_group_missed_call_data" class="form-label">Missed Call
-                                                Data</label>
-                                            <input type="text"
-                                                class="form-control @error('ring_group_missed_call_data') is-invalid @enderror"
-                                                id="ring_group_missed_call_data"
-                                                wire:model="ring_group_missed_call_data"
-                                                placeholder="Email or text number">
-                                            @error('ring_group_missed_call_data')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    @endif
-                                </div>
-                            </div> --}}
-
                             <div class="row">
+                                @can('ring_group_missed_call')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_missed_call_app" class="form-label">Missed Call
@@ -497,14 +456,14 @@
                                             <input type="text"
                                                 class="form-control @error('ring_group_missed_call_data') is-invalid @enderror"
                                                 id="ring_group_missed_call_data"
-                                                wire:model="ring_group_missed_call_data"
-                                                placeholder="">
+                                                wire:model="ring_group_missed_call_data" placeholder="">
                                             @error('ring_group_missed_call_data')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     @endif
                                 </div>
+                                @endcan
                             </div>
 
                             <div class="row">
@@ -525,22 +484,24 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @can('ring_group_context')
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_context" class="form-label">Context</label>
                                         <input type="text"
                                             class="form-control @error('ring_group_context') is-invalid @enderror"
                                             id="ring_group_context" wire:model="ring_group_context"
-                                            placeholder="Context" required>
+                                            value="{{ auth()->user()->domain->domain_name }}">
                                         @error('ring_group_context')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
                             </div>
 
-                            <!-- Toggle Options -->
                             <div class="row">
+                                @can('ring_group_forward')
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-3">
                                         <input class="form-check-input" type="checkbox"
@@ -573,7 +534,6 @@
                                 </div>
                             </div>
 
-                            <!-- Forward Settings -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
@@ -589,6 +549,7 @@
                                         @enderror
                                     </div>
                                 </div>
+                                @endcan
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_forward_toll_allow" class="form-label">Forward Toll

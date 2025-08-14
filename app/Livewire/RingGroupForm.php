@@ -36,7 +36,7 @@ class RingGroupForm extends Component
     public $ring_group_forward_destination = '';
     public $ring_group_forward_toll_allow = '';
     public $ring_group_timeout_action = '';
-    public $ring_group_context = 'hornblower.tel';
+    public $ring_group_context;
     public $ring_group_enabled = 'true';
     public $ring_group_description = '';
 
@@ -71,24 +71,24 @@ class RingGroupForm extends Component
         'ring_group_cid_number_prefix' => 'nullable|numeric',
         'ring_group_distinctive_ring' => 'nullable|string|max:255',
         'ring_group_ringback' => 'nullable|string|max:255',
-        'ring_group_call_forward_enabled' => 'in:true,false',
-        'ring_group_follow_me_enabled' => 'in:true,false',
+        'ring_group_call_forward_enabled' => 'bail|nullable',
+        'ring_group_follow_me_enabled' => 'bail|nullable',
         'ring_group_missed_call_app' => 'nullable|in:email,text',
         'ring_group_missed_call_data' => 'nullable|string|max:255',
-        'ring_group_forward_enabled' => 'in:true,false',
+        'ring_group_forward_enabled' => 'bail|nullable',
         'ring_group_forward_destination' => 'nullable|string|max:255',
         'ring_group_forward_toll_allow' => 'nullable|string|max:255',
         'ring_group_timeout_action' => 'nullable|string|max:255',
         'ring_group_context' => 'nullable|string|max:255',
-        'ring_group_enabled' => 'nullable|in:true,false',
+        'ring_group_enabled' => 'bail|nullable',
         'ring_group_description' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_number' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_delay' => 'nullable|numeric|min:0|max:300',
         'ring_group_destinations.*.domain_uuid' => 'nullable|string',
         'ring_group_destinations.*.ring_group_uuid' => 'nullable|string',
         'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|min:5|max:300',
-        'ring_group_destinations.*.destination_prompt' => 'nullable|boolean',
-        'ring_group_destinations.*.destination_enabled' => 'boolean',
+        'ring_group_destinations.*.destination_prompt' => 'bail|nullable',
+        'ring_group_destinations.*.destination_enabled' => 'bail|nullable',
     ];
 
     protected $messages = [
@@ -109,7 +109,7 @@ class RingGroupForm extends Component
     public function mount($ringGroupUuid = null)
     {
         $this->domainUuid = auth()->user()->domain_uuid;
-        $this->ring_group_context = auth()->user()->domain_name;
+        $this->ring_group_context = auth()->user()->domain->domain_name;
 
         if ($ringGroupUuid) {
             $this->ringGroupUuid = $ringGroupUuid->ring_group_uuid;
@@ -178,15 +178,15 @@ class RingGroupForm extends Component
         $this->ring_group_cid_number_prefix = $ringGroup->ring_group_cid_number_prefix ?? '';
         $this->ring_group_distinctive_ring = $ringGroup->ring_group_distinctive_ring ?? '';
         $this->ring_group_ringback = $ringGroup->ring_group_ringback ?? '${us-ring}';
-        $this->ring_group_call_forward_enabled = $ringGroup->ring_group_call_forward_enabled ?? 'false';
-        $this->ring_group_follow_me_enabled = $ringGroup->ring_group_follow_me_enabled ?? 'false';
+        $this->ring_group_call_forward_enabled = $ringGroup->ring_group_call_forward_enabled === 'true' ? true : false;
+        $this->ring_group_follow_me_enabled = $ringGroup->ring_group_follow_me_enabled === 'true' ? true : false;
         $this->ring_group_missed_call_app = $ringGroup->ring_group_missed_call_app ?? '';
         $this->ring_group_missed_call_data = $ringGroup->ring_group_missed_call_data ?? '';
-        $this->ring_group_forward_enabled = $ringGroup->ring_group_forward_enabled ?? 'false';
+        $this->ring_group_forward_enabled = $ringGroup->ring_group_forward_enabled === 'true' ? true : false;
         $this->ring_group_forward_destination = $ringGroup->ring_group_forward_destination ?? '';
         $this->ring_group_forward_toll_allow = $ringGroup->ring_group_forward_toll_allow ?? '';
-        $this->ring_group_context = $ringGroup->ring_group_context ?? 'hornblower.tel';
-        $this->ring_group_enabled = $ringGroup->ring_group_enabled ?? 'true';
+        $this->ring_group_context = $ringGroup->ring_group_context ?? auth()->user()->domain->domain_name;
+        $this->ring_group_enabled = $ringGroup->ring_group_enabled === 'true' ? true : false;
         $this->ring_group_description = $ringGroup->ring_group_description ?? '';
 
         if ($ringGroup->ring_group_timeout_app) {
@@ -202,7 +202,7 @@ class RingGroupForm extends Component
                 'destination_delay' => $destination->destination_delay ?? 0,
                 'destination_timeout' => $destination->destination_timeout ?? 30,
                 'destination_prompt' => $destination->destination_prompt ?? false,
-                'destination_enabled' => $destination->destination_enabled === 'true',
+                'destination_enabled' => $destination->destination_enabled === true,
             ];
         })->toArray();
 
@@ -286,7 +286,6 @@ class RingGroupForm extends Component
 
         $userExists = collect($this->ring_group_users)->contains('user_uuid', $this->selected_user_uuid);
         if ($userExists) {
-            session()->flash('error', 'El usuario ya está en el grupo.');
             return;
         }
 
@@ -405,8 +404,8 @@ class RingGroupForm extends Component
                 $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
                 $newRingGroup = $this->ringGroupRepository->copy($ringGroup);
 
-                session()->flash('message', 'Ring Group copiado correctamente.');
-                return redirect()->route('ring-groups.edit', $newRingGroup->ring_group_uuid);
+                session()->flash('message', 'Ring Group copied successfully..');
+                return redirect()->route('ring_groups.index', $newRingGroup->ring_group_uuid);
             } catch (\Exception $e) {
                 throw $e;
                 session()->flash('error', 'Error al copiar: ' . $e->getMessage());
@@ -447,13 +446,13 @@ class RingGroupForm extends Component
             'ring_group_cid_number_prefix' => $this->ring_group_cid_number_prefix,
             'ring_group_distinctive_ring' => $this->ring_group_distinctive_ring ?: '',
             'ring_group_ringback' => $this->ring_group_ringback,
-            'ring_group_call_forward_enabled' => $this->ring_group_call_forward_enabled,
-            'ring_group_follow_me_enabled' => $this->ring_group_follow_me_enabled,
-            'ring_group_forward_enabled' => $this->ring_group_forward_enabled,
+            'ring_group_call_forward_enabled' => $this->ring_group_call_forward_enabled ? 'true' : 'false',
+            'ring_group_follow_me_enabled' => $this->ring_group_follow_me_enabled ? 'true' : 'false',
+            'ring_group_forward_enabled' => $this->ring_group_forward_enabled ? 'true' : 'false',
             'ring_group_forward_destination' => $this->ring_group_forward_destination,
             'ring_group_forward_toll_allow' => $this->ring_group_forward_toll_allow,
-            'ring_group_context' => $this->ring_group_context,
-            'ring_group_enabled' => $this->ring_group_enabled,
+            'ring_group_context' => $this->ring_group_context ?: auth()->user()->domain->domain_name,
+            'ring_group_enabled' => $this->ring_group_enabled ? 'true' : 'false',
             'ring_group_description' => $this->ring_group_description,
 
         ];

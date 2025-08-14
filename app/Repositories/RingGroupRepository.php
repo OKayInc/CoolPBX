@@ -57,34 +57,13 @@ class RingGroupRepository
             $ringGroupUuid = $data['ring_group_uuid'] ?? Str::uuid();
             $dialplanUuid = $data['dialplan_uuid'] ?? Str::uuid();
 
+            $filteredData = $this->applyRingGroupPermissions($data);
+
             $ringGroup = $this->model->create([
                 'ring_group_uuid' => $ringGroupUuid,
                 'domain_uuid' => $data['domain_uuid'],
-                'ring_group_name' => $data['ring_group_name'],
-                'ring_group_extension' => $data['ring_group_extension'],
-                'ring_group_greeting' => $data['ring_group_greeting'] ?? null,
-                'ring_group_strategy' => $data['ring_group_strategy'],
-                'ring_group_call_timeout' => $data['ring_group_call_timeout'],
-                'ring_group_caller_id_name' => $data['ring_group_caller_id_name'] ?? null,
-                'ring_group_caller_id_number' => $data['ring_group_caller_id_number'] ?? null,
-                'ring_group_cid_name_prefix' => $data['ring_group_cid_name_prefix'] ?? null,
-                'ring_group_cid_number_prefix' => $data['ring_group_cid_number_prefix'] ?? null,
-                'ring_group_distinctive_ring' => $data['ring_group_distinctive_ring'] ?? null,
-                'ring_group_ringback' => $data['ring_group_ringback'] ?? '${us-ring}',
-                'ring_group_call_forward_enabled' => $data['ring_group_call_forward_enabled'] ?? 'false',
-                'ring_group_follow_me_enabled' => $data['ring_group_follow_me_enabled'] ?? 'false',
-                'ring_group_missed_call_app' => $data['ring_group_missed_call_app'] ?? null,
-                'ring_group_missed_call_data' => $data['ring_group_missed_call_data'] ?? null,
-                'ring_group_forward_enabled' => $data['ring_group_forward_enabled'] ?? 'false',
-                'ring_group_forward_destination' => $data['ring_group_forward_destination'] ?? null,
-                'ring_group_forward_toll_allow' => $data['ring_group_forward_toll_allow'] ?? null,
-                'ring_group_timeout_app' => $data['ring_group_timeout_app'] ?? null,
-                'ring_group_timeout_data' => $data['ring_group_timeout_data'] ?? null,
-                'ring_group_context' => $data['ring_group_context'] ?? auth()->user()->domain_name,
-                'ring_group_enabled' => $data['ring_group_enabled'] ?? 'true',
-                'ring_group_description' => $data['ring_group_description'] ?? null,
                 'dialplan_uuid' => $dialplanUuid,
-            ]);
+            ] + $filteredData);
 
             if (isset($data['ring_group_destinations']) && is_array($data['ring_group_destinations'])) {
                 $this->createDestinations($ringGroup['ring_group_uuid'], $data['domain_uuid'], $data['ring_group_destinations']);
@@ -106,31 +85,9 @@ class RingGroupRepository
         try {
             DB::beginTransaction();
 
-            $ringGroup->update([
-                'ring_group_name' => $data['ring_group_name'] ?? $ringGroup->ring_group_name,
-                'ring_group_extension' => $data['ring_group_extension'] ?? $ringGroup->ring_group_extension,
-                'ring_group_greeting' => $data['ring_group_greeting'] ?? $ringGroup->ring_group_greeting,
-                'ring_group_strategy' => $data['ring_group_strategy'] ?? $ringGroup->ring_group_strategy,
-                'ring_group_call_timeout' => $data['ring_group_call_timeout'] ?? $ringGroup->ring_group_call_timeout,
-                'ring_group_caller_id_name' => $data['ring_group_caller_id_name'] ?? $ringGroup->ring_group_caller_id_name,
-                'ring_group_caller_id_number' => $data['ring_group_caller_id_number'] ?? $ringGroup->ring_group_caller_id_number,
-                'ring_group_cid_name_prefix' => $data['ring_group_cid_name_prefix'] ?? $ringGroup->ring_group_cid_name_prefix,
-                'ring_group_cid_number_prefix' => $data['ring_group_cid_number_prefix'] ?? $ringGroup->ring_group_cid_number_prefix,
-                'ring_group_distinctive_ring' => $data['ring_group_distinctive_ring'] ?? $ringGroup->ring_group_distinctive_ring,
-                'ring_group_ringback' => $data['ring_group_ringback'] ?? $ringGroup->ring_group_ringback,
-                'ring_group_call_forward_enabled' => $data['ring_group_call_forward_enabled'] ?? $ringGroup->ring_group_call_forward_enabled,
-                'ring_group_follow_me_enabled' => $data['ring_group_follow_me_enabled'] ?? $ringGroup->ring_group_follow_me_enabled,
-                'ring_group_missed_call_app' => $data['ring_group_missed_call_app'] ?? $ringGroup->ring_group_missed_call_app,
-                'ring_group_missed_call_data' => $data['ring_group_missed_call_data'] ?? $ringGroup->ring_group_missed_call_data,
-                'ring_group_forward_enabled' => $data['ring_group_forward_enabled'] ?? $ringGroup->ring_group_forward_enabled,
-                'ring_group_forward_destination' => $data['ring_group_forward_destination'] ?? $ringGroup->ring_group_forward_destination,
-                'ring_group_forward_toll_allow' => $data['ring_group_forward_toll_allow'] ?? $ringGroup->ring_group_forward_toll_allow,
-                'ring_group_timeout_app' => $data['ring_group_timeout_app'] ?? $ringGroup->ring_group_timeout_app,
-                'ring_group_timeout_data' => $data['ring_group_timeout_data'] ?? $ringGroup->ring_group_timeout_data,
-                'ring_group_context' => $data['ring_group_context'] ?? $ringGroup->ring_group_context,
-                'ring_group_enabled' => $data['ring_group_enabled'] ?? $ringGroup->ring_group_enabled,
-                'ring_group_description' => $data['ring_group_description'] ?? $ringGroup->ring_group_description,
-            ]);
+            $filteredData = $this->applyRingGroupPermissions($data, $ringGroup);
+            
+            $ringGroup->update($filteredData);
 
             if (isset($data['ring_group_destinations']) && is_array($data['ring_group_destinations'])) {
                 $this->updateDestinations($ringGroup->ring_group_uuid, $ringGroup->domain_uuid, $data['ring_group_destinations']);
@@ -201,8 +158,6 @@ class RingGroupRepository
                 $newUser->ring_group_uuid = $newRingGroupUuid;
                 $newUser->save();
             }
-
-            // Copiar dialplan (se creará cuando se asigne una extensión)
 
             DB::commit();
             return $newRingGroup->load(['destinations', 'users', 'dialplan']);
@@ -284,9 +239,87 @@ class RingGroupRepository
         return auth()->user()->hasPermission($permissionName);
     }
 
+    /**
+     * Apply ring group permissions filtering to data based on user permissions
+     */
+    private function applyRingGroupPermissions(array $data, ?RingGroup $existingRingGroup = null): array
+    {
+        $filteredData = [];
+        $user = auth()->user();
+
+        $filteredData['ring_group_name'] = $data['ring_group_name'] ?? ($existingRingGroup->ring_group_name ?? null);
+        $filteredData['ring_group_extension'] = $data['ring_group_extension'] ?? ($existingRingGroup->ring_group_extension ?? null);
+        $filteredData['ring_group_strategy'] = $data['ring_group_strategy'] ?? ($existingRingGroup->ring_group_strategy ?? null);
+        $filteredData['ring_group_call_timeout'] = $data['ring_group_call_timeout'] ?? ($existingRingGroup->ring_group_call_timeout ?? 30);
+
+        $filteredData['ring_group_greeting'] = $data['ring_group_greeting'] ?? ($existingRingGroup->ring_group_greeting ?? null);
+        $filteredData['ring_group_distinctive_ring'] = $data['ring_group_distinctive_ring'] ?? ($existingRingGroup->ring_group_distinctive_ring ?? null);
+        $filteredData['ring_group_ringback'] = $data['ring_group_ringback'] ?? ($existingRingGroup->ring_group_ringback ?? '${us-ring}');
+        $filteredData['ring_group_call_forward_enabled'] = $data['ring_group_call_forward_enabled'] ?? ($existingRingGroup->ring_group_call_forward_enabled ?? 'false');
+        $filteredData['ring_group_follow_me_enabled'] = $data['ring_group_follow_me_enabled'] ?? ($existingRingGroup->ring_group_follow_me_enabled ?? 'false');
+        $filteredData['ring_group_forward_toll_allow'] = $data['ring_group_forward_toll_allow'] ?? ($existingRingGroup->ring_group_forward_toll_allow ?? null);
+        $filteredData['ring_group_enabled'] = $data['ring_group_enabled'] ?? ($existingRingGroup->ring_group_enabled ?? 'true');
+        $filteredData['ring_group_description'] = $data['ring_group_description'] ?? ($existingRingGroup->ring_group_description ?? null);
+
+        if ($user->hasPermission('ring_group_caller_id_name')) {
+            $filteredData['ring_group_caller_id_name'] = $data['ring_group_caller_id_name'] ?? ($existingRingGroup->ring_group_caller_id_name ?? null);
+        }
+
+        if ($user->hasPermission('ring_group_caller_id_number')) {
+            $filteredData['ring_group_caller_id_number'] = $data['ring_group_caller_id_number'] ?? ($existingRingGroup->ring_group_caller_id_number ?? null);
+        }
+
+        if ($user->hasPermission('ring_group_cid_name_prefix')) {
+            $filteredData['ring_group_cid_name_prefix'] = $data['ring_group_cid_name_prefix'] ?? ($existingRingGroup->ring_group_cid_name_prefix ?? null);
+        }
+
+        if ($user->hasPermission('ring_group_cid_number_prefix')) {
+            $filteredData['ring_group_cid_number_prefix'] = $data['ring_group_cid_number_prefix'] ?? ($existingRingGroup->ring_group_cid_number_prefix ?? null);
+        }
+
+        if ($user->hasPermission('ring_group_missed_call')) {
+            $filteredData['ring_group_missed_call_app'] = $data['ring_group_missed_call_app'] ?? ($existingRingGroup->ring_group_missed_call_app ?? null);
+            $filteredData['ring_group_missed_call_data'] = $data['ring_group_missed_call_data'] ?? ($existingRingGroup->ring_group_missed_call_data ?? null);
+
+            if (!empty($filteredData['ring_group_missed_call_app']) && !empty($filteredData['ring_group_missed_call_data'])) {
+                $validatedData = $this->validateMissedCallData($filteredData['ring_group_missed_call_app'], $filteredData['ring_group_missed_call_data']);
+                if ($validatedData === null) {
+                    unset($filteredData['ring_group_missed_call_app'], $filteredData['ring_group_missed_call_data']);
+                } else {
+                    $filteredData['ring_group_missed_call_data'] = $validatedData;
+                }
+            }
+        }
+
+        if ($user->hasPermission('ring_group_forward')) {
+            $filteredData['ring_group_forward_enabled'] = $data['ring_group_forward_enabled'] ?? ($existingRingGroup->ring_group_forward_enabled ?? 'false');
+            $filteredData['ring_group_forward_destination'] = $data['ring_group_forward_destination'] ?? ($existingRingGroup->ring_group_forward_destination ?? null);
+        }
+
+        if ($user->hasPermission('ring_group_context')) {
+            $filteredData['ring_group_context'] = $data['ring_group_context'] ?? ($existingRingGroup->ring_group_context ?? auth()->user()->domain->domain_name);
+        } else {
+            if (is_null($existingRingGroup)) {
+                $filteredData['ring_group_context'] = auth()->user()->domain->domain_name;
+            }
+        }
+
+        if (isset($data['ring_group_timeout_action'])) {
+            $timeoutArray = explode(':', $data['ring_group_timeout_action']);
+            $timeoutApp = array_shift($timeoutArray);
+            $timeoutData = join(':', $timeoutArray);
+            
+            $filteredData['ring_group_timeout_app'] = $timeoutApp;
+            $filteredData['ring_group_timeout_data'] = $timeoutData;
+        }
+
+        return $filteredData;
+    }
+
     private function createDestinations(string $ringGroupUuid, string $domainUuid, array $destinations)
     {
         foreach ($destinations as $destination) {
+            if (!empty($destination['destination_number'])) {
                 $this->ringGroupDestination->create([
                     'ring_group_destination_uuid' => $destination['ring_group_destination_uuid'] ?? Str::uuid(),
                     'ring_group_uuid' => $ringGroupUuid,
@@ -294,10 +327,12 @@ class RingGroupRepository
                     'destination_number' => $destination['destination_number'],
                     'destination_delay' => $destination['destination_delay'] ?? 0,
                     'destination_timeout' => $destination['destination_timeout'] ?? 30,
-                    'destination_prompt' => $destination['destination_prompt'] ?? 'false',
+                    'destination_prompt' => $this->userHasPermission('ring_group_prompt') ? 
+                        ($destination['destination_prompt'] ?? 'false') : 'false',
                     'destination_enabled' => $destination['destination_enabled'] ?? 'true',
                 ]);
-            }        
+            }
+        }
     }
 
     private function updateDestinations(string $ringGroupUuid, string $domainUuid, array $destinations)
@@ -311,12 +346,12 @@ class RingGroupRepository
     {
         $dialplanXml = $this->buildDialplanXml($ringGroup);
 
-        return $this->dialplan->create([
+        $this->dialplan->create([
             'domain_uuid' => $ringGroup->domain_uuid,
             'dialplan_uuid' => $dialplanUuid,
             'dialplan_name' => $ringGroup->ring_group_name,
             'dialplan_number' => $ringGroup->ring_group_extension,
-            'dialplan_context' => $ringGroup->ring_group_context,
+            'dialplan_context' => $ringGroup->ring_group_context ?: auth()->user()->domain->domain_name,
             'dialplan_continue' => 'false',
             'dialplan_xml' => $dialplanXml,
             'dialplan_order' => 101,
