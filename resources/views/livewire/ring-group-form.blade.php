@@ -131,13 +131,6 @@
                                 <label for="ring_group_greeting" class="form-label">Greeting</label>
 
                                 <!-- Buscador opcional (como tienes implementado) -->
-                                @if (!empty($available_sounds))
-                                    <div class="mb-2">
-                                        <input type="text" class="form-control form-control-sm"
-                                            placeholder="Search sounds..." wire:model.live="sounds_search">
-                                    </div>
-                                @endif
-
                                 <select id="ring_group_greeting"
                                     class="form-control @error('ring_group_greeting') is-invalid @enderror"
                                     wire:model="ring_group_greeting">
@@ -335,59 +328,59 @@
                     </div>
 
                     <!-- Users Configuration -->
-                        <h5 class="mt-4 mb-3">Ring Group Users</h5>
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <!-- Add User -->
-                                <div class="row mb-3">
-                                    <div class="col-md-8">
-                                        <select class="form-select" wire:model="selected_user_uuid">
-                                            <option value="">Select user...</option>
-                                            @foreach ($available_users as $user)
-                                                <option value="{{ $user['user_uuid'] }}">{{ $user['username'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="button" class="btn btn-primary" wire:click="addUser">
-                                            <i class="fas fa-plus"></i> Add User
-                                        </button>
-                                    </div>
+                    <h5 class="mt-4 mb-3">Ring Group Users</h5>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <!-- Add User -->
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <select class="form-select" wire:model="selected_user_uuid">
+                                        <option value="">Select user...</option>
+                                        @foreach ($available_users as $user)
+                                            <option value="{{ $user['user_uuid'] }}">{{ $user['username'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
-
-                                <!-- Current Users -->
-                                @if (count($ring_group_users) > 0)
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>User</th>
-                                                    <th class="text-center">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($ring_group_users as $user)
-                                                    <tr>
-                                                        <td>{{ $user['username'] }}</td>
-                                                        <td class="text-center">
-                                                            <button type="button" class="btn btn-sm btn-danger"
-                                                                wire:click="removeUser('{{ $user['user_uuid'] }}')">
-                                                                <i class="fas fa-times"></i> Remove
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @else
-                                    <div class="alert alert-info">
-                                        No users assigned to this Ring Group.
-                                    </div>
-                                @endif
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary" wire:click="addUser">
+                                        <i class="fas fa-plus"></i> Add User
+                                    </button>
+                                </div>
                             </div>
+
+                            <!-- Current Users -->
+                            @if (count($ring_group_users) > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th class="text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($ring_group_users as $user)
+                                                <tr>
+                                                    <td>{{ $user['username'] }}</td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            wire:click="removeUser('{{ $user['user_uuid'] }}')">
+                                                            <i class="fas fa-times"></i> Remove
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="alert alert-info">
+                                    No users assigned to this Ring Group.
+                                </div>
+                            @endif
                         </div>
+                    </div>
 
                     <!-- Advanced Options -->
                     <h5 class="mt-4 mb-3">Advanced Options</h5>
@@ -437,7 +430,7 @@
                                 </div> --}}
                             </div>
 
-                            <div class="row">
+                            {{-- <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="ring_group_missed_call_app" class="form-label">Missed Call
@@ -464,6 +457,48 @@
                                                 id="ring_group_missed_call_data"
                                                 wire:model="ring_group_missed_call_data"
                                                 placeholder="Email or text number">
+                                            @error('ring_group_missed_call_data')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    @endif
+                                </div>
+                            </div> --}}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="ring_group_missed_call_app" class="form-label">Missed Call
+                                            App</label>
+                                        <select
+                                            class="form-select @error('ring_group_missed_call_app') is-invalid @enderror"
+                                            id="ring_group_missed_call_app"
+                                            wire:model.live="ring_group_missed_call_app">
+                                            <option value="">None</option>
+                                            <option value="email">Email</option>
+                                            <option value="text">Text</option>
+                                        </select>
+                                        @error('ring_group_missed_call_app')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    @if ($showMissedCallData)
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_missed_call_data" class="form-label">Missed Call
+                                                Data
+                                                @if ($ring_group_missed_call_app == 'email')
+                                                    (Email Address)
+                                                @elseif($ring_group_missed_call_app == 'text')
+                                                    (Phone Number)
+                                                @endif
+                                            </label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_missed_call_data') is-invalid @enderror"
+                                                id="ring_group_missed_call_data"
+                                                wire:model="ring_group_missed_call_data"
+                                                placeholder="">
                                             @error('ring_group_missed_call_data')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror

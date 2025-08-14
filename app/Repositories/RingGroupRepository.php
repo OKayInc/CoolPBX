@@ -6,9 +6,11 @@ use App\Models\RingGroup;
 use App\Models\RingGroupDestination;
 use App\Models\RingGroupUser;
 use App\Models\Dialplan;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class RingGroupRepository
 {
@@ -85,7 +87,7 @@ class RingGroupRepository
             ]);
 
             if (isset($data['ring_group_destinations']) && is_array($data['ring_group_destinations'])) {
-                $this->createDestinations($ringGroupUuid, $data['domain_uuid'], $data['ring_group_destinations']);
+                $this->createDestinations($ringGroup['ring_group_uuid'], $data['domain_uuid'], $data['ring_group_destinations']);
             }
 
             $this->createDialplan($ringGroup, $dialplanUuid, $data);
@@ -180,7 +182,7 @@ class RingGroupRepository
             $newRingGroup = $ringGroup->replicate();
             $newRingGroup->ring_group_uuid = $newRingGroupUuid;
             $newRingGroup->ring_group_name = $ringGroup->ring_group_name . ' (Copy)';
-            $newRingGroup->ring_group_extension = null; // Dejar vacío para que se asigne manualmente
+            $newRingGroup->ring_group_extension = null; 
             $newRingGroup->dialplan_uuid = $newDialplanUuid;
             $newRingGroup->save();
 
@@ -285,7 +287,6 @@ class RingGroupRepository
     private function createDestinations(string $ringGroupUuid, string $domainUuid, array $destinations)
     {
         foreach ($destinations as $destination) {
-            if (!empty($destination['destination_number'])) {
                 $this->ringGroupDestination->create([
                     'ring_group_destination_uuid' => $destination['ring_group_destination_uuid'] ?? Str::uuid(),
                     'ring_group_uuid' => $ringGroupUuid,
@@ -296,8 +297,7 @@ class RingGroupRepository
                     'destination_prompt' => $destination['destination_prompt'] ?? 'false',
                     'destination_enabled' => $destination['destination_enabled'] ?? 'true',
                 ]);
-            }
-        }
+            }        
     }
 
     private function updateDestinations(string $ringGroupUuid, string $domainUuid, array $destinations)

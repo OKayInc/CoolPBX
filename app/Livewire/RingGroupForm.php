@@ -58,7 +58,7 @@ class RingGroupForm extends Component
 
     protected $soundsService;
 
-    protected $ringGroupRepository;
+    protected RingGroupRepository $ringGroupRepository;
 
     protected $rules = [
         'ring_group_name' => 'required|string|max:255',
@@ -84,6 +84,8 @@ class RingGroupForm extends Component
         'ring_group_description' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_number' => 'nullable|string|max:255',
         'ring_group_destinations.*.destination_delay' => 'nullable|numeric|min:0|max:300',
+        'ring_group_destinations.*.domain_uuid' => 'nullable|string',
+        'ring_group_destinations.*.ring_group_uuid' => 'nullable|string',
         'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|min:5|max:300',
         'ring_group_destinations.*.destination_prompt' => 'nullable|boolean',
         'ring_group_destinations.*.destination_enabled' => 'boolean',
@@ -195,6 +197,8 @@ class RingGroupForm extends Component
             return [
                 'ring_group_destination_uuid' => $destination->ring_group_destination_uuid,
                 'destination_number' => $destination->destination_number,
+                'domain_uuid' => $destination->domain_uuid,
+                'ring_group_uuid' => $destination->ring_group_uuid,
                 'destination_delay' => $destination->destination_delay ?? 0,
                 'destination_timeout' => $destination->destination_timeout ?? 30,
                 'destination_prompt' => $destination->destination_prompt ?? false,
@@ -212,6 +216,8 @@ class RingGroupForm extends Component
             $this->ring_group_destinations[] = [
                 'ring_group_destination_uuid' => null,
                 'destination_number' => '',
+                'domain_uuid' => $this->domainUuid,
+                'ring_group_uuid' => $this->ringGroupUuid,
                 'destination_delay' => 0,
                 'destination_timeout' => 30,
                 'destination_prompt' => false,
@@ -224,8 +230,10 @@ class RingGroupForm extends Component
     {
         for ($i = 0; $i < 3; $i++) {
             $this->ring_group_destinations[] = [
-                'ring_group_destination_uuid' => null,
+                'ring_group_destination_uuid' => '',
                 'destination_number' => '',
+                'domain_uuid' => $this->domainUuid,
+                'ring_group_uuid' => $this->ringGroupUuid,
                 'destination_delay' => 0,
                 'destination_timeout' => 30,
                 'destination_prompt' => false,
@@ -239,6 +247,8 @@ class RingGroupForm extends Component
         $this->ring_group_destinations[] = [
             'ring_group_destination_uuid' => null,
             'destination_number' => '',
+            'domain_uuid' => $this->domainUuid,
+            'ring_group_uuid' => $this->ringGroupUuid,
             'destination_delay' => 0,
             'destination_timeout' => 30,
             'destination_prompt' => false,
@@ -321,17 +331,17 @@ class RingGroupForm extends Component
         }
     }
 
-    public function updatedRingGroupMissedCallApp()
+    public function updatedRingGroupMissedCallApp($value)
     {
-        $this->updateMissedCallDataVisibility();
-        if (empty($this->ring_group_missed_call_app)) {
+        $this->showMissedCallData = in_array($value, ['email', 'text']);
+        if (!$this->showMissedCallData) {
             $this->ring_group_missed_call_data = '';
         }
     }
 
     private function updateMissedCallDataVisibility()
     {
-        $this->showMissedCallData = !empty($this->ring_group_missed_call_app);
+        $this->showMissedCallData = in_array($this->ring_group_missed_call_app, ['email', 'text']);
     }
 
     public function updatedRingGroupDestinations()
@@ -355,7 +365,18 @@ class RingGroupForm extends Component
         try {
             $data = $this->prepareData();
 
-            if (!$this->isEditing) {
+            if ($this->isEditing) {
+                $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
+                $this->ringGroupRepository->update($ringGroup, $data);
+                session()->flash('message', 'Update successfully.');
+
+                if (!empty($this->destinations_to_delete)) {
+                    $this->ringGroupRepository->deleteDestinations($this->ringGroupUuid, $this->destinations_to_delete);
+                    $this->destinations_to_delete = [];
+                }
+
+                $this->loadRingGroup();
+            } else {
                 $ringGroup = $this->ringGroupRepository->create($data);
                 $this->ringGroupUuid = $ringGroup->ring_group_uuid;
 
@@ -367,25 +388,11 @@ class RingGroupForm extends Component
                     );
                 }
 
-                $this->isEditing = true;
                 return redirect()->route('ring_groups.index');
                 session()->flash('message', 'Create successfully.');
-            } else {
-                $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
-                $this->ringGroupRepository->update($ringGroup, $data);
-                session()->flash('message', 'Update successfully.');
-            }
-
-            if (!empty($this->destinations_to_delete)) {
-                $this->ringGroupRepository->deleteDestinations($this->ringGroupUuid, $this->destinations_to_delete);
-                $this->destinations_to_delete = [];
-            }
-
-            if ($this->isEditing) {
-                $this->loadRingGroup();
             }
         } catch (\Exception $e) {
-            throw $e;   
+            throw $e;
             session()->flash('error', 'Error' . $e->getMessage());
         }
     }
@@ -431,24 +438,27 @@ class RingGroupForm extends Component
             'domain_uuid' => $this->domainUuid,
             'ring_group_name' => $this->ring_group_name,
             'ring_group_extension' => $this->ring_group_extension,
-            'ring_group_greeting' => $this->ring_group_greeting ?: null,
+            'ring_group_greeting' => $this->ring_group_greeting,
             'ring_group_strategy' => $this->ring_group_strategy,
             'ring_group_call_timeout' => $this->ring_group_call_timeout,
-            'ring_group_caller_id_name' => $this->ring_group_caller_id_name ?: null,
-            'ring_group_caller_id_number' => $this->ring_group_caller_id_number ?: null,
-            'ring_group_cid_name_prefix' => $this->ring_group_cid_name_prefix ?: null,
-            'ring_group_cid_number_prefix' => $this->ring_group_cid_number_prefix ?: null,
-            'ring_group_distinctive_ring' => $this->ring_group_distinctive_ring ?: null,
+            'ring_group_caller_id_name' => $this->ring_group_caller_id_name,
+            'ring_group_caller_id_number' => $this->ring_group_caller_id_number,
+            'ring_group_cid_name_prefix' => $this->ring_group_cid_name_prefix,
+            'ring_group_cid_number_prefix' => $this->ring_group_cid_number_prefix,
+            'ring_group_distinctive_ring' => $this->ring_group_distinctive_ring ?: '',
             'ring_group_ringback' => $this->ring_group_ringback,
             'ring_group_call_forward_enabled' => $this->ring_group_call_forward_enabled,
             'ring_group_follow_me_enabled' => $this->ring_group_follow_me_enabled,
             'ring_group_forward_enabled' => $this->ring_group_forward_enabled,
-            'ring_group_forward_destination' => $this->ring_group_forward_destination ?: null,
-            'ring_group_forward_toll_allow' => $this->ring_group_forward_toll_allow ?: null,
+            'ring_group_forward_destination' => $this->ring_group_forward_destination,
+            'ring_group_forward_toll_allow' => $this->ring_group_forward_toll_allow,
             'ring_group_context' => $this->ring_group_context,
             'ring_group_enabled' => $this->ring_group_enabled,
-            'ring_group_description' => $this->ring_group_description ?: null,
+            'ring_group_description' => $this->ring_group_description,
+
         ];
+
+
 
         if (!empty($this->ring_group_missed_call_app) && !empty($this->ring_group_missed_call_data)) {
             $validatedData = $this->ringGroupRepository->validateMissedCallData(
@@ -457,7 +467,8 @@ class RingGroupForm extends Component
             );
 
             if ($validatedData) {
-                $data['ring_group_missed_call_app'] = $this->ring_group_missed_call_app;
+                $data['ring_group_missed_call_app'] = $this->ring_group_missed_call_app ?: null;
+                $data['ring_group_missed_call_data'] = $this->ring_group_missed_call_data ?: null;
                 $data['ring_group_missed_call_data'] = $validatedData;
             }
         }

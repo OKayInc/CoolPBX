@@ -11,7 +11,7 @@
                 <div class="card-tools">
                     <div class="d-flex gap-2 " role="group" aria-label="RingGroup actions">
                         @can('device_all')
-                            <a href="" class="btn btn-primary btn-sm">
+                            <a href="{{ route('ring_groups.index', ['show_all' => 1]) }}" class="btn btn-primary btn-sm">
                                 <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Show All') }}
                             </a>
                         @endcan
