@@ -469,8 +469,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="ring_group_timeout_action" class="form-label">Timeout
-                                            Destination</label>
+                                        <label for="ring_group_timeout_action" class="form-label">Timeout Destination</label>
 
                                         <x-switch-destinations name="ring_group_timeout_action" :selected="$ring_group_timeout_action ?? ''"
                                             extension-type="dialplan" ring-group-type="dialplan"

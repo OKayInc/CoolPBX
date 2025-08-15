@@ -34,17 +34,17 @@ class RingGroupRepository
     public function getAll(string $domainUuid = null)
     {
         $query = $this->model->with(['destinations', 'users', 'dialplan']);
-        
+
         if ($domainUuid) {
             $query->where('domain_uuid', $domainUuid);
         }
-        
+
         return $query->get();
     }
 
     public function findByUuid(string $ringGroupUuid)
     {
-        return $this->model->with(['destinations', 'users', 'dialplan'])
+        return $this->model->with(['destinations', 'users', 'dialplan', 'ringGroupUsers'])
             ->where('ring_group_uuid', $ringGroupUuid)
             ->first();
     }
@@ -54,26 +54,27 @@ class RingGroupRepository
         try {
             DB::beginTransaction();
 
-            $ringGroupUuid = $data['ring_group_uuid'] ?? Str::uuid();
-            $dialplanUuid = $data['dialplan_uuid'] ?? Str::uuid();
+            $dialplanUuid = $data['dialplan_uuid'] ?? Str::uuid()->toString();
 
             $filteredData = $this->applyRingGroupPermissions($data);
 
             $ringGroup = $this->model->create([
-                'ring_group_uuid' => $ringGroupUuid,
+                'ring_group_uuid' => Str::uuid()->toString(),
                 'domain_uuid' => $data['domain_uuid'],
                 'dialplan_uuid' => $dialplanUuid,
             ] + $filteredData);
+
 
             if (isset($data['ring_group_destinations']) && is_array($data['ring_group_destinations'])) {
                 $this->createDestinations($ringGroup['ring_group_uuid'], $data['domain_uuid'], $data['ring_group_destinations']);
             }
 
-            $this->createDialplan($ringGroup, $dialplanUuid, $data);
+
+            $this->createDialplan($ringGroup, $dialplanUuid);
+
 
             DB::commit();
             return $ringGroup->load(['destinations', 'users', 'dialplan']);
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -86,7 +87,7 @@ class RingGroupRepository
             DB::beginTransaction();
 
             $filteredData = $this->applyRingGroupPermissions($data, $ringGroup);
-            
+
             $ringGroup->update($filteredData);
 
             if (isset($data['ring_group_destinations']) && is_array($data['ring_group_destinations'])) {
@@ -97,7 +98,6 @@ class RingGroupRepository
 
             DB::commit();
             return $ringGroup->load(['destinations', 'users', 'dialplan']);
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -110,9 +110,9 @@ class RingGroupRepository
             DB::beginTransaction();
 
             $this->ringGroupDestination->where('ring_group_uuid', $ringGroup->ring_group_uuid)->delete();
-            
+
             $this->ringGroupUser->where('ring_group_uuid', $ringGroup->ring_group_uuid)->delete();
-            
+
             if ($ringGroup->dialplan_uuid) {
                 $this->dialplan->where('dialplan_uuid', $ringGroup->dialplan_uuid)->delete();
             }
@@ -121,7 +121,6 @@ class RingGroupRepository
 
             DB::commit();
             return $result;
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -133,35 +132,32 @@ class RingGroupRepository
         try {
             DB::beginTransaction();
 
-            $newRingGroupUuid = Str::uuid();
-            $newDialplanUuid = Str::uuid();
+            $ringGroup = $this->findByUuid($ringGroup->ring_group_uuid);
+
 
             $newRingGroup = $ringGroup->replicate();
-            $newRingGroup->ring_group_uuid = $newRingGroupUuid;
+            $newRingGroup->ring_group_uuid = Str::uuid();
             $newRingGroup->ring_group_name = $ringGroup->ring_group_name . ' (Copy)';
-            $newRingGroup->ring_group_extension = null; 
-            $newRingGroup->dialplan_uuid = $newDialplanUuid;
+            $newRingGroup->ring_group_extension = null;
+            $newRingGroup->dialplan_uuid = Str::uuid();
             $newRingGroup->save();
 
-            $destinations = $ringGroup->destinations;
-            foreach ($destinations as $destination) {
+            foreach ($ringGroup->destinations as $destination) {
                 $newDestination = $destination->replicate();
                 $newDestination->ring_group_destination_uuid = Str::uuid();
-                $newDestination->ring_group_uuid = $newRingGroupUuid;
+                $newDestination->ring_group_uuid = $newRingGroup->ring_group_uuid;
                 $newDestination->save();
             }
 
-            $users = $ringGroup->users;
-            foreach ($users as $user) {
-                $newUser = $user->replicate();
+            foreach ($ringGroup->ringGroupUsers as $rgUser) {
+                $newUser = $rgUser->replicate();
                 $newUser->ring_group_user_uuid = Str::uuid();
-                $newUser->ring_group_uuid = $newRingGroupUuid;
+                $newUser->ring_group_uuid = $newRingGroup->ring_group_uuid;
                 $newUser->save();
             }
 
             DB::commit();
-            return $newRingGroup->load(['destinations', 'users', 'dialplan']);
-
+            return $newRingGroup;
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -213,13 +209,13 @@ class RingGroupRepository
         switch ($app) {
             case 'email':
                 $data = str_replace([';', ' '], [',', ''], $data);
-                
+
                 if (str_contains($data, ',')) {
                     $emails = explode(',', $data);
-                    $validEmails = array_filter($emails, function($email) {
+                    $validEmails = array_filter($emails, function ($email) {
                         return filter_var($email, FILTER_VALIDATE_EMAIL);
                     });
-                    
+
                     return !empty($validEmails) ? implode(',', $validEmails) : null;
                 } else {
                     return filter_var($data, FILTER_VALIDATE_EMAIL) ? $data : null;
@@ -308,7 +304,7 @@ class RingGroupRepository
             $timeoutArray = explode(':', $data['ring_group_timeout_action']);
             $timeoutApp = array_shift($timeoutArray);
             $timeoutData = join(':', $timeoutArray);
-            
+
             $filteredData['ring_group_timeout_app'] = $timeoutApp;
             $filteredData['ring_group_timeout_data'] = $timeoutData;
         }
@@ -327,7 +323,7 @@ class RingGroupRepository
                     'destination_number' => $destination['destination_number'],
                     'destination_delay' => $destination['destination_delay'] ?? 0,
                     'destination_timeout' => $destination['destination_timeout'] ?? 30,
-                    'destination_prompt' => $this->userHasPermission('ring_group_prompt') ? 
+                    'destination_prompt' => $this->userHasPermission('ring_group_prompt') ?
                         ($destination['destination_prompt'] ?? 'false') : 'false',
                     'destination_enabled' => $destination['destination_enabled'] ?? 'true',
                 ]);
@@ -338,27 +334,28 @@ class RingGroupRepository
     private function updateDestinations(string $ringGroupUuid, string $domainUuid, array $destinations)
     {
         $this->ringGroupDestination->where('ring_group_uuid', $ringGroupUuid)->delete();
-        
+
         $this->createDestinations($ringGroupUuid, $domainUuid, $destinations);
     }
 
-    private function createDialplan(RingGroup $ringGroup, string $dialplanUuid, array $data)
+    private function createDialplan(RingGroup $ringGroup, string $dialplanUuid)
     {
-        $dialplanXml = $this->buildDialplanXml($ringGroup);
+        $dialplanXml = $this->buildDialplanXml($ringGroup, $dialplanUuid);
 
-        $this->dialplan->create([
+        $dialplan = $this->dialplan->create([
             'domain_uuid' => $ringGroup->domain_uuid,
-            'dialplan_uuid' => $dialplanUuid,
             'dialplan_name' => $ringGroup->ring_group_name,
             'dialplan_number' => $ringGroup->ring_group_extension,
-            'dialplan_context' => $ringGroup->ring_group_context ?: auth()->user()->domain->domain_name,
-            'dialplan_continue' => 'false',
+            'dialplan_context' => $ringGroup->ring_group_context,
             'dialplan_xml' => $dialplanXml,
-            'dialplan_order' => 101,
             'dialplan_enabled' => $ringGroup->ring_group_enabled,
             'dialplan_description' => $ringGroup->ring_group_description,
-            'app_uuid' => '1d61fb65-1eec-bc73-a6ee-a6203b4fe6f2',
+            'dialplan_uuid' => $dialplanUuid,
         ]);
+
+        $dialplan->update(['dialplan_uuid' => $dialplanUuid]);
+
+        $dialplan->refresh(); 
     }
 
     private function updateDialplan(RingGroup $ringGroup, array $data)
@@ -368,10 +365,10 @@ class RingGroupRepository
         }
 
         $dialplan = $this->dialplan->where('dialplan_uuid', $ringGroup->dialplan_uuid)->first();
-        
+
         if ($dialplan) {
             $dialplanXml = $this->buildDialplanXml($ringGroup);
-            
+
             $dialplan->update([
                 'dialplan_name' => $ringGroup->ring_group_name,
                 'dialplan_number' => $ringGroup->ring_group_extension,
@@ -385,9 +382,9 @@ class RingGroupRepository
         return $dialplan;
     }
 
-    private function buildDialplanXml(RingGroup $ringGroup): string
+    private function buildDialplanXml(RingGroup $ringGroup, string $dialplanUuid): string
     {
-        $xml = "<extension name=\"" . htmlspecialchars($ringGroup->ring_group_name) . "\" continue=\"\" uuid=\"" . htmlspecialchars($ringGroup->dialplan_uuid) . "\">\n";
+        $xml = "<extension name=\"" . htmlspecialchars($ringGroup->ring_group_name) . "\" continue=\"\" uuid=\"" . htmlspecialchars($dialplanUuid) . "\">\n";
         $xml .= "	<condition field=\"destination_number\" expression=\"^" . htmlspecialchars($ringGroup->ring_group_extension) . "$\">\n";
         $xml .= "		<action application=\"ring_ready\" data=\"\"/>\n";
         $xml .= "		<action application=\"set\" data=\"ring_group_uuid=" . htmlspecialchars($ringGroup->ring_group_uuid) . "\"/>\n";

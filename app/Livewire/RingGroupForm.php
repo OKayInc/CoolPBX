@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Requests\RingGroupRequest;
 use Livewire\Component;
 use App\Repositories\RingGroupRepository;
 use App\Models\RingGroup;
@@ -60,50 +61,17 @@ class RingGroupForm extends Component
 
     protected RingGroupRepository $ringGroupRepository;
 
-    protected $rules = [
-        'ring_group_name' => 'required|string|max:255',
-        'ring_group_extension' => 'required|string|max:255',
-        'ring_group_strategy' => 'nullable|in:simultaneous,sequence,enterprise,rollover,random',
-        'ring_group_call_timeout' => 'nullable|numeric|min:5|max:300',
-        'ring_group_caller_id_name' => 'nullable|string|max:255',
-        'ring_group_caller_id_number' => 'nullable|numeric',
-        'ring_group_cid_name_prefix' => 'nullable|string|max:255',
-        'ring_group_cid_number_prefix' => 'nullable|numeric',
-        'ring_group_distinctive_ring' => 'nullable|string|max:255',
-        'ring_group_ringback' => 'nullable|string|max:255',
-        'ring_group_call_forward_enabled' => 'bail|nullable',
-        'ring_group_follow_me_enabled' => 'bail|nullable',
-        'ring_group_missed_call_app' => 'nullable|in:email,text',
-        'ring_group_missed_call_data' => 'nullable|string|max:255',
-        'ring_group_forward_enabled' => 'bail|nullable',
-        'ring_group_forward_destination' => 'nullable|string|max:255',
-        'ring_group_forward_toll_allow' => 'nullable|string|max:255',
-        'ring_group_timeout_action' => 'nullable|string|max:255',
-        'ring_group_context' => 'nullable|string|max:255',
-        'ring_group_enabled' => 'bail|nullable',
-        'ring_group_description' => 'nullable|string|max:255',
-        'ring_group_destinations.*.destination_number' => 'nullable|string|max:255',
-        'ring_group_destinations.*.destination_delay' => 'nullable|numeric|min:0|max:300',
-        'ring_group_destinations.*.domain_uuid' => 'nullable|string',
-        'ring_group_destinations.*.ring_group_uuid' => 'nullable|string',
-        'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|min:5|max:300',
-        'ring_group_destinations.*.destination_prompt' => 'bail|nullable',
-        'ring_group_destinations.*.destination_enabled' => 'bail|nullable',
-    ];
-
-    protected $messages = [
-        'ring_group_name.required' => 'El nombre es requerido.',
-        'ring_group_extension.required' => 'La extensión es requerida.',
-        'ring_group_strategy.required' => 'La estrategia es requerida.',
-        'ring_group_call_timeout.required' => 'El tiempo límite de llamada es requerido.',
-        'ring_group_context.required' => 'El contexto es requerido.',
-        'ring_group_enabled.required' => 'El estado habilitado es requerido.',
-    ];
 
     public function boot(RingGroupRepository $ringGroupRepository, SoundsService $soundsService)
     {
         $this->ringGroupRepository = $ringGroupRepository;
         $this->soundsService = $soundsService;
+    }
+
+    public function rules()
+    {
+        $request = new RingGroupRequest();
+        return $request->rules();
     }
 
     public function mount($ringGroupUuid = null)
@@ -163,7 +131,6 @@ class RingGroupForm extends Component
         $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
 
         if (!$ringGroup) {
-            session()->flash('error', 'Ring Group no encontrado.');
             return redirect()->route('ring_groups.index');
         }
 
@@ -355,11 +322,12 @@ class RingGroupForm extends Component
     public function save()
     {
         if (!empty($this->ring_group_greeting) && !$this->soundsService->validateSound($this->ring_group_greeting)) {
-            $this->addError('ring_group_greeting', 'El saludo seleccionado no es válido.');
+            $this->addError('ring_group_greeting', 'Invalid greeting sound selected.');
             return;
         }
 
         $this->validate();
+        dd($this->validate());
 
         try {
             $data = $this->prepareData();
@@ -402,10 +370,12 @@ class RingGroupForm extends Component
         if ($this->isEditing) {
             try {
                 $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
+
                 $newRingGroup = $this->ringGroupRepository->copy($ringGroup);
+                // dd($newRingGroup);
 
                 session()->flash('message', 'Ring Group copied successfully..');
-                return redirect()->route('ring_groups.index', $newRingGroup->ring_group_uuid);
+                return redirect()->route('ring_groups.edit', $newRingGroup->ring_group_uuid);
             } catch (\Exception $e) {
                 throw $e;
                 session()->flash('error', 'Error al copiar: ' . $e->getMessage());

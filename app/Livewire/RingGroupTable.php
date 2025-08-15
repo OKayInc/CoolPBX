@@ -30,6 +30,10 @@ class RingGroupTable extends DataTableComponent
             $tableConfig->setTableRowUrl(function ($row) use ($canEdit) {
                 return route('ring_groups.edit', $row->ring_group_uuid);
             });
+
+            if (request('show_all')) {
+                $this->show_all = true;
+            }
         }
     }
 
@@ -199,7 +203,7 @@ class RingGroupTable extends DataTableComponent
 
         if ($this->show_all) {
             array_splice($columns, 3, 0, [
-                Column::make("Domain", "domain_name")
+                Column::make("Domain", "domain.domain_name")
                     ->sortable()
                     ->searchable(),
             ]);
@@ -212,13 +216,13 @@ class RingGroupTable extends DataTableComponent
     {
         $query = RingGroup::query();
 
-        if($this->show_all){
+        if ($this->show_all) {
             $query->leftJoin('v_domains', 'v_ring_groups.domain_uuid', '=', 'v_domains.domain_uuid')
-                  ->select('v_ring_groups.*', 'v_domains.domain_name');
+                ->select('v_ring_groups.*', 'v_domains.domain_name');
         } else {
             $query->where(function ($q) {
                 $q->where('v_ring_groups.domain_uuid', auth()->user()->domain_uuid)
-                  ->orWhereNull('v_ring_groups.domain_uuid');
+                    ->orWhereNull('v_ring_groups.domain_uuid');
             });
         }
 
