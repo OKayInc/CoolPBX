@@ -6,11 +6,8 @@ use App\Models\RingGroup;
 use App\Models\RingGroupDestination;
 use App\Models\RingGroupUser;
 use App\Models\Dialplan;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class RingGroupRepository
 {
@@ -31,7 +28,7 @@ class RingGroupRepository
         $this->dialplan = $dialplan;
     }
 
-    public function getAll(string $domainUuid = null)
+    public function getAll(string $domainUuid)
     {
         $query = $this->model->with(['destinations', 'users', 'dialplan']);
 
@@ -325,7 +322,7 @@ class RingGroupRepository
                     'destination_timeout' => $destination['destination_timeout'] ?? 30,
                     'destination_prompt' => $this->userHasPermission('ring_group_prompt') ?
                         ($destination['destination_prompt'] ?? 'false') : 'false',
-                    'destination_enabled' => $destination['destination_enabled'] ?? 'true',
+                    'destination_enabled' => $destination['destination_enabled'],
                 ]);
             }
         }
@@ -367,7 +364,7 @@ class RingGroupRepository
         $dialplan = $this->dialplan->where('dialplan_uuid', $ringGroup->dialplan_uuid)->first();
 
         if ($dialplan) {
-            $dialplanXml = $this->buildDialplanXml($ringGroup);
+            $dialplanXml = $this->buildDialplanXml($ringGroup, $dialplan->dialplan_uuid);
 
             $dialplan->update([
                 'dialplan_name' => $ringGroup->ring_group_name,

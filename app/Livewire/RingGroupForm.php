@@ -264,7 +264,7 @@ class RingGroupForm extends Component
             );
 
             if ($result) {
-                session()->flash('message', 'Usuario agregado correctamente.');
+                session()->flash('message', 'User added successfully.');
                 $this->loadRingGroup();
                 $this->loadAvailableUsers();
                 $this->selected_user_uuid = '';
@@ -293,7 +293,7 @@ class RingGroupForm extends Component
             });
             $this->ring_group_users = array_values($this->ring_group_users);
             $this->loadAvailableUsers();
-            session()->flash('message', 'Usuario eliminado de la lista.');
+            session()->flash('message', 'User removed successfully.');
         }
     }
 
@@ -327,7 +327,6 @@ class RingGroupForm extends Component
         }
 
         $this->validate();
-        dd($this->validate());
 
         try {
             $data = $this->prepareData();
@@ -372,13 +371,12 @@ class RingGroupForm extends Component
                 $ringGroup = $this->ringGroupRepository->findByUuid($this->ringGroupUuid);
 
                 $newRingGroup = $this->ringGroupRepository->copy($ringGroup);
-                // dd($newRingGroup);
 
                 session()->flash('message', 'Ring Group copied successfully..');
                 return redirect()->route('ring_groups.edit', $newRingGroup->ring_group_uuid);
             } catch (\Exception $e) {
                 throw $e;
-                session()->flash('error', 'Error al copiar: ' . $e->getMessage());
+                session()->flash('error', 'Error ' . $e->getMessage());
             }
         }
         $this->showCopyConfirmation = false;
