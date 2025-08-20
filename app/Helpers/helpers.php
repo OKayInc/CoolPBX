@@ -258,3 +258,12 @@ if (!function_exists('currency_convert')) {
         return (double) $money * currency_convert_rate($to, $from);
     }
 }
+
+if (!function_exists('getPaymentGatewayConfig')) {
+	function getPaymentGatewayConfig($paymentGateway)
+	{
+		$paymentGateways = config('paymentgateways');
+
+		return $paymentGateways[$paymentGateway];
+	}
+}

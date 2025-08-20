@@ -16,6 +16,8 @@ class BillingPaymentRequest extends FormRequest
 	{
 		return [
 			'amount' => 'bail|required|numeric|min:1',
+			'stripeToken' => 'bail|sometimes|string',
+			'stripeCard' => 'bail|sometimes|string',
 		];
 	}
 }

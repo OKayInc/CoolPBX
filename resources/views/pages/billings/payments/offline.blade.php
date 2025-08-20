@@ -125,7 +125,7 @@
                             <label class="form-label">Amount</label>
 
                             @php
-                                $credit = $defaultCharge;
+                                $credit = $paymentGatewayConfig["default_charge"];
 
                                 if($billing->credit_type === 'postpaid' && $billing->balance < 0)
                                 {

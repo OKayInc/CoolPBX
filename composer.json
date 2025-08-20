@@ -19,7 +19,8 @@
         "rappasoft/laravel-livewire-tables": "^3.7",
         "socialiteproviders/okta": "^4.4",
         "spatie/livewire-filepond": "^1.4",
-        "staudenmeir/laravel-cte": "^1.12"
+        "staudenmeir/laravel-cte": "^1.12",
+        "stripe/stripe-php": "^17.5"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

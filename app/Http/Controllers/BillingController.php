@@ -458,26 +458,29 @@ class BillingController extends Controller
 
 	public function paymentCreate(Billing $billing, string $paymentGateway)
 	{
-		$paymentGateways = config('paymentgateways');
-
-		$paymentgatewayConfig = $paymentGateways[$paymentGateway];
-
-		$defaultCharge = $paymentgatewayConfig['default_charge'];
+		$paymentGatewayConfig = getPaymentGatewayConfig($paymentGateway);
 
         $billingFixedCharges = $billing->billingFixedCharges()
             ->where("currency", "%")
             ->where("times", ">", 0)
             ->get();
 
-		return view("pages.billings.payments.{$paymentGateway}", compact("billing", "paymentGateway", "defaultCharge", "billingFixedCharges"));
+		return view("pages.billings.payments.{$paymentGateway}", compact("billing", "paymentGateway", "paymentGatewayConfig", "billingFixedCharges"));
 	}
 
 	public function paymentStore(BillingPaymentRequest $request, Billing $billing, string $paymentGateway)
 	{
-		$PaymentGatewayFactory = PaymentGatewayFactory::make($paymentGateway);
+		try
+		{
+			$PaymentGatewayFactory = PaymentGatewayFactory::make($paymentGateway);
 
-		$PaymentGatewayFactory->createPayment($billing, $request->validated());
+			$PaymentGatewayFactory->createPayment($billing, $request->validated());
 
-		return redirect()->route("billings.payment", $billing);
+			return redirect()->route("billings.payment", $billing)->with("success", "Payment created successfully");
+		}
+		catch(\Exception $e)
+		{
+			return back()->with("error", $e->getMessage());
+		}
 	}
 }

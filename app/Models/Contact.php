@@ -64,6 +64,11 @@ class Contact extends Model
 		return $this->hasMany(ContactEmail::class, 'contact_uuid', 'contact_uuid');
 	}
 
+	public function primaryEmail()
+	{
+		return $this->emails()->where('email_primary', 1)->first();
+	}
+
 	public function groups(): BelongsToMany {
 		return $this->belongsToMany(Group::class, 'v_contact_groups', 'contact_uuid', 'group_uuid');
 //		$this->belongsToMany(Group::class)->using(UserGroup::class);
