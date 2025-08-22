@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\DomainAPIController;
 use App\Http\Controllers\API\ExtensionAPIController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\EmailQueueController;
 use App\Http\Controllers\UserActivationController;
 use App\Http\Middleware\VerifyAuthenticationKey;
 use App\Http\Requests\UserRequest;
@@ -39,4 +40,5 @@ Route::middleware(VerifyAuthenticationKey::class)->group(function () {
 Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(function () {
     Route::get('/domains', [DomainAPIController::class, 'index'])->name('domains.all');
     Route::get('/extensions', [ExtensionAPIController::class, 'index'])->name('extensions.all');
+    Route::post('/email/test', [EmailQueueController::class, 'testEmail']);
 });

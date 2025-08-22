@@ -201,7 +201,6 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
     Route::resource('/email-queues', EmailQueueController::class);
-    Route::get('/email-queue/email_status', [EmailQueueController::class, 'findByStatus'])->name('emailqueue.findByStatus');
 });
 
 Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding){

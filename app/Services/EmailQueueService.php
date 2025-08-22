@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class EmailQueueService
 {
-    protected $emailQueueRepository;
+    protected EmailQueueRepository $emailQueueRepository;
 
     public function __construct(EmailQueueRepository $emailQueueRepository)
     {
