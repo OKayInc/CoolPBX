@@ -15,6 +15,7 @@ use App\Http\Controllers\BillingDealController;
 use App\Http\Controllers\BillingInvoiceController;
 use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
+use App\Http\Controllers\CallCenterQueueController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ExtensionController;
@@ -198,6 +199,8 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/devices/devices_vendors', DeviceVendorController::class);
     Route::get('devices/import', [DeviceController::class, 'import'])->name('devices.import');
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
+
+    Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
 
 
 });
