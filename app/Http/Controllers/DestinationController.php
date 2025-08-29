@@ -2,8 +2,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DestinationRequest;
+use App\Models\Carrier;
 use App\Models\Destination;
 use App\Models\Domain;
+use App\Models\Fax;
 use App\Models\Group;
 use App\Models\User;
 use App\Repositories\DestinationRepository;
@@ -29,11 +31,13 @@ class DestinationController extends Controller
 
 	public function create()
 	{
+		$faxes = Fax::all();
+		$carriers = Carrier::all();
 		$users = User::all();
 		$groups = Group::all();
 		$domains = Domain::all();
 
-		return view("pages.destinations.form", compact("users", "groups", "domains"));
+		return view("pages.destinations.form", compact("faxes", "carriers", "users", "groups", "domains"));
 	}
 
 	public function store(DestinationRequest $request)
@@ -54,11 +58,13 @@ class DestinationController extends Controller
 
 	public function edit(Destination $destination)
 	{
+		$faxes = Fax::all();
+		$carriers = Carrier::all();
 		$users = User::all();
 		$groups = Group::all();
 		$domains = Domain::all();
 
-		return view("pages.destinations.form", compact("destination", "users", "groups", "domains"));
+		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "users", "groups", "domains"));
 	}
 
 	public function update(DestinationRequest $request, Destination $destination)

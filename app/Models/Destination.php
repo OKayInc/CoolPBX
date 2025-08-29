@@ -38,6 +38,7 @@ class Destination extends Model
         'group_uuid',
         'destination_type',
         'destination_number',
+        'destination_prefix',
         'destination_trunk_prefix',
         'destination_area_code',
         'destination_condition_field',

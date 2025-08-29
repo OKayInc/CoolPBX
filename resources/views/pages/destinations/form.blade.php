@@ -20,8 +20,8 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="type" class="form-label">Type</label>
-                            <select class="form-select" name="type">
+                            <label for="destination_type" class="form-label">Type</label>
+                            <select class="form-select" name="destination_type">
                                 <option value="inbound" @selected(old('destination_type', $callblock->destination_type ?? null) == "inbound")>Inbound</option>
                                 <option value="outbound" @selected(old('destination_type', $callblock->destination_type ?? null) == "outbound")>Outbound</option>
                                 <option value="local" @selected(old('destination_type', $callblock->destination_type ?? null) == "local")>Local</option>
@@ -128,7 +128,7 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="destination_condition_field" class="form-label">Area code</label>
+                            <label for="destination_condition_field" class="form-label">Condition</label>
                             <input
                                 type="text"
                                 class="form-control @error('destination_condition_field') is-invalid @enderror"
@@ -210,6 +210,109 @@
                 @endcan
 
                 @can('destination_conditions')
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="condition_field_1" class="form-label">Additional Condition</label>
+                            <input name="condition_field_1" list="condition_list" class="form-control" placeholder="{{ __('Type') }}">
+                            <datalist id="condition_list">
+                                <option value="context">Context</option>
+                                <option value="username">Username</option>
+                                <option value="rdnis">RDNIS</option>
+                                <option value="destination_number">Destination Number</option>
+                                <option value="public">Public</option>
+                                <option value="caller_id_name">Caller ID Name</option>
+                                <option value="caller_id_number">Caller ID Number</option>
+                                <option value="ani">ANI</option>
+                                <option value="ani2">ANI2</option>
+                                <option value="uuid">UUID</option>
+                                <option value="source">Source</option>
+                                <option value="chan_name">Channel Name</option>
+                                <option value="network_addr">Network Address</option>
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">&nbsp;</label>
+                            <input
+                                type="text"
+                                class="form-control @error('condition_expression_1') is-invalid @enderror"
+                                id="condition_expression_1"
+                                name="condition_expression_1"
+                                value="{{ old('condition_expression_1') }}"
+                                placeholder="{{ __('Expression') }}"
+                            >
+                            @error('condition_expression_1')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+                @endcan
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="destination_actions" class="form-label">Action</label>
+                            <x-switch-destinations name="destination_actions" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" />
+                            @error('action_1')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                @can('destination_fax')
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fax_uuid" class="form-label">Fax</label>
+                            <select
+                                class="form-select @error('fax_uuid') is-invalid @enderror"
+                                id="fax_uuid"
+                                name="fax_uuid"
+                            >
+                                <option value=""></option>
+                                @foreach($faxes as $fax)
+                                    <option value="{{ $fax->fax_uuid }}"
+                                        @selected(old('fax_uuid', $destination->fax_uuid ?? '') == $fax->fax_uuid)>
+                                        {{ $fax->fax_extension }} {{ $fax->fax_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('fax_uuid')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+                @endcan
+
+                @can('provider_edit')
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="carrier_uuid" class="form-label">Carrier</label>
+                            <select
+                                class="form-select @error('carrier_uuid') is-invalid @enderror"
+                                id="carrier_uuid"
+                                name="carrier_uuid"
+                            >
+                                <option value=""></option>
+                                @foreach($carriers as $carrier)
+                                    <option value="{{ $carrier->carrier_uuid }}"
+                                        @selected(old('carrier_uuid', $destination->carrier_uuid ?? '') == $carrier->carrier_uuid)>
+                                        {{ $carrier->carrier_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('carrier_uuid')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
                 @endcan
 
                 @can('user_edit')
@@ -308,7 +411,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_hold_music" class="form-label">Hold music</label>
-                            <x-switch-music-on-hold name="destination_hold_music" withMusicOnHold=true withStreams=true />
+                            <x-switch-music-on-hold name="destination_hold_music" selected="{{ $destination->destination_hold_music ?? null }}" withMusicOnHold=true withStreams=true />
                         </div>
                     </div>
                 </div>
@@ -340,7 +443,7 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="destination_accountcode" class="form-label"> Distinctive ring</label>
+                            <label for="destination_accountcode" class="form-label">Account code</label>
                             <input
                                 type="text"
                                 class="form-control @error('destination_accountcode') is-invalid @enderror"
@@ -414,10 +517,10 @@
                             <label class="form-label d-block">Order</label>
                             <select class="form-select" name="destination_order" required>
                                 @for ($i = 1; $i <= 999; $i++)
-                                    <option value="{{ $i }}">{{ $i }}</option>
+                                    <option value="{{ $i }}" @selected(old('destination_order', $destination->destination_order ?? null) == $i)>{{ $i }}</option>
                                 @endfor
                             </select>
-                            @error('dialplan_order')
+                            @error('destination_order')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
