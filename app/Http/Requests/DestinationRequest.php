@@ -25,6 +25,7 @@ class DestinationRequest extends FormRequest
 			"destination_caller_id_number" => "bail|nullable|numeric|integer|min:0",
 			"destination_context" => "bail|nullable|string|max:255",
 			"destination_conditions" => "bail|nullable|string|max:255",
+			"condition_expressions" => "bail|nullable|string|max:255",
 			"destination_actions" => "bail|nullable|string|max:255",
 			"fax_uuid" => "bail|nullable|uuid|exists:App\Models\Fax,fax_uuid",
 			"carrier_uuid" => "bail|nullable|uuid|exists:App\Models\Carrier,carrier_uuid",

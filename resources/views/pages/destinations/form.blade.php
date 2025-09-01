@@ -213,23 +213,11 @@
                 <div class="row mt-3">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="condition_field_1" class="form-label">Additional Condition</label>
-                            <input name="condition_field_1" list="condition_list" class="form-control" placeholder="{{ __('Type') }}">
-                            <datalist id="condition_list">
-                                <option value="context">Context</option>
-                                <option value="username">Username</option>
-                                <option value="rdnis">RDNIS</option>
-                                <option value="destination_number">Destination Number</option>
-                                <option value="public">Public</option>
-                                <option value="caller_id_name">Caller ID Name</option>
-                                <option value="caller_id_number">Caller ID Number</option>
-                                <option value="ani">ANI</option>
-                                <option value="ani2">ANI2</option>
-                                <option value="uuid">UUID</option>
-                                <option value="source">Source</option>
-                                <option value="chan_name">Channel Name</option>
-                                <option value="network_addr">Network Address</option>
-                            </datalist>
+                            <label for="destination_conditions" class="form-label">Additional Condition</label>
+                            <select name="destination_conditions" class="form-select">
+                                <option value=""></option>
+                                <option value="caller_id_number" @selected(old('destination_conditions', $destination->destination_conditions ?? '') == "caller_id_number")>Caller ID Number</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -237,13 +225,13 @@
                             <label class="form-label">&nbsp;</label>
                             <input
                                 type="text"
-                                class="form-control @error('condition_expression_1') is-invalid @enderror"
-                                id="condition_expression_1"
-                                name="condition_expression_1"
-                                value="{{ old('condition_expression_1') }}"
+                                class="form-control @error('condition_expressions') is-invalid @enderror"
+                                id="condition_expressions"
+                                name="condition_expressions"
+                                value="{{ old('condition_expressions') }}"
                                 placeholder="{{ __('Expression') }}"
                             >
-                            @error('condition_expression_1')
+                            @error('condition_expressions')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -255,7 +243,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_actions" class="form-label">Action</label>
-                            <x-switch-destinations name="destination_actions" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" />
+                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" />
                             @error('action_1')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -465,11 +453,11 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="domain_uuid" class="form-label">Usage</label><br>
-                            <label><input type="checkbox" class="form-check-input" name="destination_type_voice" value="1" @checked(old('destination_type_voice', data_get($destination ?? null, 'destination_type_voice')) == 1)> Voice</label>&nbsp;
-                            <label><input type="checkbox" class="form-check-input" name="destination_type_fax" value="1" @checked(old('destination_type_voice', data_get($destination ?? null, 'destination_type_voice')) == 1)> Fax</label>&nbsp;
-                            <label><input type="checkbox" class="form-check-input" name="destination_type_text" value="1" @checked(old('destination_type_voice', data_get($destination ?? null, 'destination_type_voice')) == 1)> Text</label>&nbsp;
+                            <label><input type="checkbox" class="form-check-input" name="destination_type_voice" value="1" @checked(old('destination_type_voice', $destination->destination_type_voice ?? '') == 1)> Voice</label>&nbsp;
+                            <label><input type="checkbox" class="form-check-input" name="destination_type_fax" value="1" @checked(old('destination_type_fax', $destination->destination_type_fax ?? '') == 1)> Fax</label>&nbsp;
+                            <label><input type="checkbox" class="form-check-input" name="destination_type_text" value="1" @checked(old('destination_type_text', $destination->destination_type_text ?? '') == 1)> Text</label>&nbsp;
                             @can('destination_emergency')
-                                <label><input type="checkbox" class="form-check-input" name="destination_type_emergency" value="1" @checked(old('destination_type_voice', data_get($destination ?? null, 'destination_type_voice')) == 1)> Emergency</label>
+                                <label><input type="checkbox" class="form-check-input" name="destination_type_emergency" value="1" @checked(old('destination_type_emergency', $destination->destination_type_emergency ?? '') == 1)> Emergency</label>&nbsp;
                             @endcan
                             @error('destination_type_voice')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
