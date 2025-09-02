@@ -15,11 +15,16 @@
                                 <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Show All') }}
                             </a>
                         @endcan
-                        <div class="d-flex gap-2 " role="menu" aria-label="Menu actions">
+                        @can('call_center_queue_add')
                             <a href="{{route('call_center_queues.create')}}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus mr-1"></i> {{ __('Add') }}
                             </a>
-                        </div>
+                        @endcan
+
+                        <a href="{{route('call_center_agent.index')}}" class="btn btn-primary btn-sm">
+                            <i class="fa fa-users" aria-hidden="true"></i> {{__('Agents')}}
+
+                        </a>
 
                     </div>
                 </div>

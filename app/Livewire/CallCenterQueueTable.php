@@ -96,8 +96,11 @@ class CallCenterQueueTable extends DataTableComponent
         $selectRows = $this->getSelected();
 
         try {
+            DB::beginTransaction();
             CallCenterQueue::whereIn('call_center_queue_uuid', $selectRows)->delete();
             CallCenterTier::whereIn('call_center_queue_uuid', $selectRows)->delete();
+
+            DB::commit();
 
             $this->clearSelected();
             $this->dispatch('refresh');

@@ -251,9 +251,6 @@ public function deleteTier($index, $tierUuid = null)
                 return;
             }
         }
-
-        // You could add additional checks for queue_extension if needed
-        // Similar logic for checking extension duplicates
     }
 
     public function save()

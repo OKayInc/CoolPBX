@@ -16,12 +16,12 @@ class CallCenterQueueController extends Controller
 
     public function index()
     {
-        return view("pages.callCenter.index");
+        return view("pages.callCenterQueue.index");
     }
 
     public function create()
     {
-        return view("pages.callCenter.form");
+        return view("pages.callCenterQueue.form");
     }
 
     public function edit($queueUuid)
@@ -29,6 +29,6 @@ class CallCenterQueueController extends Controller
         $callCenterQeueue = $this->callCenterQueueRepository->findByUuid($queueUuid);
         $queueUuid = $callCenterQeueue->call_center_queue_uuid;
 
-        return view("pages.callCenter.form", compact("queueUuid"));
+        return view("pages.callCenterQueue.form", compact("queueUuid"));
     }
 }
