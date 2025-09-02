@@ -1,14 +1,14 @@
 <div>
 	<div class="container-fluid">
-		<div class="card card-primary mt-3 card-outline">
+		<div class="card card-primary mt-3">
 			<div class="card-header">
 				<h3 class="card-title">
 					{{ isset($carrier) ? 'Edit Carrier' : 'Create Carrier' }}
 				</h3>
 			</div>
 
-			<div class="card-body">
-				<form wire:submit.prevent="save" method="POST">
+			<form wire:submit.prevent="save" method="POST">
+				<div class="card-body">
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
@@ -250,21 +250,24 @@
 							</div>
 						</div>
 					</div>
-
-					<div class="card-footer">
-						<button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
-							{{ isset($carrier) ? 'Update Carrier' : 'Create Carrier' }}
-						</button>
-						<a href="{{ route('carriers.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
-							Cancel
-						</a>
-					</div>
-				</form>
-
-					@include('pages.lcr.partial.table')
-
 					@endif
+				</div>
+
+				<div class="card-footer">
+					<button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
+						{{ isset($carrier) ? 'Update Carrier' : 'Create Carrier' }}
+					</button>
+					<a href="{{ route('carriers.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+						Cancel
+					</a>
+				</div>
+			</form>
+
+			@if (isset($carrier))
+			<div class="card-body">
+				@include('pages.lcr.partial.table')
 			</div>
+			@endif
 		</div>
 	</div>
 </div>
