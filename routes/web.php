@@ -17,6 +17,7 @@ use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceProfileController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
+use App\Models\Destination;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -82,6 +84,11 @@ Route::middleware(['auth','permission'])->group(function () {
 
     // BRIDGE
     Route::resource('/bridges', BridgeController::class)->name('bridges', 'bridges');
+
+    // DESTINATION
+    Route::get('/destinations/export', [DestinationController::class, 'exportGet'])->name('destinations.exportget', 'destinations.exportget');
+    Route::post('/destinations/export', [DestinationController::class, 'exportPost'])->name('destinations.exportpost', 'destinations.exportpost');
+    Route::resource('/destinations', DestinationController::class)->name('destinations', 'destinations');
 
     // DIALPLAN
     Route::resource('/dialplans', DialplanController::class)->name('dialplans', 'dialplans');
