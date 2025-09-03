@@ -15,8 +15,8 @@ class UniqueLcrDigitsDateRange implements ValidationRule
     public function __construct(?string $currentUuid = null, ?string $dateStart = null, ?string $dateEnd = null)
     {
         $this->currentUuid = $currentUuid;
-        $this->dateStart = $dateStart ?: now()->toDateString();
-        $this->dateEnd = $dateEnd ?: now()->addYears(10)->toDateString();
+        $this->dateStart = $dateStart;
+        $this->dateEnd = $dateEnd;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
