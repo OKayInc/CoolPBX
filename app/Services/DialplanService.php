@@ -24,19 +24,19 @@ class DialplanService
         $this->dialplanDetailRepository = $dialplanDetailRepository;
     }
 
-	public function setInbound(InboundDialplanRequest $request, ?Destination $destination)
+	public function setInbound(array $data, ?Destination $destination)
 	{
 		$dialplanData = [
             "domain_uuid" => Session::get("domain_uuid"),
-            "app_uuid" => $request->input("app_uuid"),
-            "dialplan_name" => $request->input("dialplan_name"),
+            "app_uuid" => $data["app_uuid"],
+            "dialplan_name" => $data["dialplan_name"],
             "dialplan_number" => isset($destination) ? $destination->destination_number : null,
-            "dialplan_order" => $request->input("dialplan_order"),
+            "dialplan_order" => $data["dialplan_order"],
             "dialplan_continue" => "false",
             "dialplan_destination" => "false",
             "dialplan_context" => "public",
-            "dialplan_enabled" => $request->input("dialplan_enabled") ?? "false",
-            "dialplan_description" => $request->input("dialplan_description"),
+            "dialplan_enabled" => $data["dialplan_enabled"] ?? "false",
+            "dialplan_description" => $data["dialplan_description"],
         ];
 
         $dialplan = $this->dialplanRepository->create($dialplanData);
@@ -45,15 +45,21 @@ class DialplanService
 
 		$y = 0;
 
-		$condition_field_1 = $request->input("condition_field_1");
-		$condition_expression_1 = $request->input("condition_expression_1");
-		// $condition_field_2 = $request->input("condition_field_2"); //TODO: remove?
-		// $condition_expression_2 = $request->input("condition_expression_2"); //TODO: remove?
+		$condition_field_1 = $data["condition_field_1"];
+		$condition_expression_1 = $data["condition_expression_1"];
+		// $condition_field_2 = $data["condition_field_2"]; //TODO: remove?
+		// $condition_expression_2 = $data["condition_expression_2"]; //TODO: remove?
+
 		$destination_accountcode = '';
 		$destination_carrier = '';
         $destination_carrier_uuid = '';
-		$limit = $request->input("limit");
-		$caller_id_outbound_prefix = $request->input("caller_id_outbound_prefix");
+        $destination_cid_name_prefix = '';
+        $destination_record = '';
+        $$destination_hold_music = '';
+        $$destination_distinctive_ring = '';
+
+		$limit = $data["limit"] ?? 0;
+		$caller_id_outbound_prefix = $data["caller_id_outbound_prefix"] ?? '';
 		$fax_uuid = null;
 		$domain_name = Session::get("domain_name");
 		$condition_expression_2 = null;
@@ -69,10 +75,14 @@ class DialplanService
 			$destination_carrier = $destination->carrier ? $destination->carrier->carrier_name : null;
             $destination_carrier_uuid = $destination->carrier ? $destination->carrier->carrier_uuid : null;
 			$destination_accountcode = $destination->destination_accountcode;
+			$destination_cid_name_prefix = $destination->destination_cid_name_prefix;
+			$destination_record = $destination->destination_record;
+			$destination_hold_music = $destination->destination_hold_music;
+			$destination_distinctive_ring = $destination->destination_distinctive_ring;
 		}
 
-		$action_1 = $request->input("action_1");
-		// $action_2 = $request->input("action_2"); //TODO: remove?
+		$action_1 = $data["action_1"];
+		// $action_2 = $data["action_2"]; //TODO: remove?
 
 		list($action_application_1, $action_data_1) = $this->parseAction($action_1);
 		// list($action_application_2, $action_data_2) = $this->parseAction($action_2); //TODO: remove?
@@ -96,6 +106,31 @@ class DialplanService
 		{
 			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "carrier={$destination_carrier}", order: $y++ * 10);
             $dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "carrier_uuid={$destination_carrier_uuid}", order: $y++ * 10);
+		}
+
+		if($destination_cid_name_prefix)
+		{
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "effective_caller_id_name={$destination_cid_name_prefix}#\${caller_id_name}", order: $y++ * 10, inline:"false");
+		}
+
+		if($destination_record == 'true')
+		{
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "record_path=\${recordings_dir}/\${domain_name}/archive/\${strftime(%Y)}/\${strftime(%b)}/\${strftime(%d)}", order: $y++ * 10, inline:"true");
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "record_name=\${uuid}.\${record_ext}", order: $y++ * 10, inline:"true");
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "record_append=true", order: $y++ * 10, inline:"true");
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "record_in_progress=true", order: $y++ * 10, inline:"true");
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "set", data: "recording_follow_transfer=true", order: $y++ * 10, inline:"true");
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "record_session", data: "\${record_path}/\${record_name}", order: $y++ * 10, inline:"false");
+		}
+
+		if($destination_hold_music)
+		{
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "export", data: "hold_music={$destination_hold_music}", order: $y++ * 10, inline:"true");
+		}
+
+		if($destination_distinctive_ring)
+		{
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "action", type: "export", data: "sip_h_Alert-Info={$destination_distinctive_ring}", order: $y++ * 10, inline:"true");
 		}
 
 		if($limit)
@@ -146,6 +181,8 @@ class DialplanService
 		$xml = $this->dialplanRepository->buildXML($dialplan);
 
 		$this->dialplanRepository->update($dialplan->dialplan_uuid, ["dialplan_xml" => $xml]);
+
+		return $dialplan;
 	}
 
 	public function setOutbound(OutboundDialplanRequest $request)

@@ -98,7 +98,9 @@ class DialplanController extends Controller
 	{
 		$destination = Destination::where("domain_uuid", Session::get("domain_uuid"))->where("destination_uuid", $request->input("destination_uuid"))->first();
 
-		$dialplanService->setInbound($request, $destination);
+		$data = $request->validated();
+
+		$dialplanService->setInbound($data, $destination);
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
 	}
