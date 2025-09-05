@@ -9,7 +9,7 @@
             </h3>
         </div>
 
-        <form action="{{ isset($billing) ? route('billings.update', $billing->billing_uuid) : route('billings.store') }}"
+        <form action="{{ isset($billing) ? route('billing.update', $billing->billing_uuid) : route('billing.store') }}"
               method="POST">
             @csrf
             @if(isset($billing))
@@ -109,7 +109,7 @@
                                 max="28"
                                 step="1"
                                 placeholder="15"
-                                value="{{ old('billing_cycle', $billing->billing_cycle ?? '') }}"
+                                value="{{ old('billing_cycle', $billing->billing_cycle ?? (date('j') > 28 ? 28 : date('j'))) }}"
                                 required
                             >
                             @error('billing_cycle')
@@ -146,7 +146,6 @@
                                 min="-999999"
                                 step="0.01"
                                 value="{{ old('credit', $billing->credit ?? '') }}"
-                                required
                             >
                             @error('credit')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -186,7 +185,6 @@
                                 min="0"
                                 step="1"
                                 value="{{ old('pay_days', $billing->pay_days ?? '') }}"
-                                required
                             >
                             @error('pay_days')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -195,6 +193,7 @@
                     </div>
                 </div>
 
+                @if(isset($billing))
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -204,8 +203,9 @@
                                 class="form-control @error('balance') is-invalid @enderror"
                                 id="balance"
                                 name="balance"
-                                value="{{ old('balance', $billing->balance ?? '') }}"
+                                value="{{ old('balance', $billing->balance ?? 0) }}"
                                 required
+                                readonly
                             >
                             @error('balance')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -213,6 +213,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <div class="row mt-3">
                     <div class="col-md-6">
@@ -380,7 +381,7 @@
                 <button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
                     {{ isset($billing) ? 'Update Billing' : 'Create Billing' }}
                 </button>
-                <a href="{{ route('billings.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+                <a href="{{ route('billing.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
                     Cancel
                 </a>
             </div>
