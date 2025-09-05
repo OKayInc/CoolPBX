@@ -185,7 +185,6 @@
                                 min="0"
                                 step="1"
                                 value="{{ old('pay_days', $billing->pay_days ?? '') }}"
-                                required
                             >
                             @error('pay_days')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
