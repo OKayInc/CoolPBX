@@ -109,7 +109,7 @@
                                 max="28"
                                 step="1"
                                 placeholder="15"
-                                value="{{ old('billing_cycle', $billing->billing_cycle ?? (date('j') > 28 ?? 28 : date('j')) }}"
+                                value="{{ old('billing_cycle', $billing->billing_cycle ?? (date('j') > 28 ? 28 : date('j'))) }}"
                                 required
                             >
                             @error('billing_cycle')
