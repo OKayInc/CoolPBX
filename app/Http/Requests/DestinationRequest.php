@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 
 class DestinationRequest extends FormRequest
@@ -46,4 +47,46 @@ class DestinationRequest extends FormRequest
 			"destination_description" => "bail|nullable|string|max:255",
 		];
 	}
+
+    protected function prepareForValidation()
+    {
+		$destination_type = $this->input('destination_type');
+		$destination_context = $this->input('destination_context');
+		$app_uuid = '';
+
+		switch($destination_type)
+		{
+			case 'inbound':
+
+				$app_uuid = 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4';
+
+				if(empty($destination_context))
+				{
+					$destination_context = 'public';
+				}
+
+				break;
+
+			case 'outbound':
+
+				if(empty($destination_context))
+				{
+					$destination_context = Session::get("domain_name");
+				}
+
+				break;
+
+			case 'local';
+
+				$app_uuid = 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4';
+
+				break;
+		}
+
+        $this->merge([
+			'app_uuid' => $app_uuid,
+            'domain_uuid' => $this->input('domain_uuid') ?: Session::get("domain_uuid"),
+			'destination_context' => $destination_context,
+        ]);
+    }
 }
