@@ -9,7 +9,7 @@
             </h3>
         </div>
 
-        <form action="{{ isset($billing) ? route('billings.update', $billing->billing_uuid) : route('billings.store') }}"
+        <form action="{{ isset($billing) ? route('billing.update', $billing->billing_uuid) : route('billing.store') }}"
               method="POST">
             @csrf
             @if(isset($billing))
@@ -380,7 +380,7 @@
                 <button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
                     {{ isset($billing) ? 'Update Billing' : 'Create Billing' }}
                 </button>
-                <a href="{{ route('billings.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+                <a href="{{ route('billing.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
                     Cancel
                 </a>
             </div>
