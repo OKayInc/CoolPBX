@@ -10,7 +10,7 @@
 		<form action="{{ route('destinations.exportpost') }}" method="post">
 			@csrf
 			<div class="card-body">
-				<h4>Select the fields you wish to include in the export.</h4>
+				<p>Select the fields you wish to include in the export.</p>
 				<div class="form-group">
 					<label><input type="checkbox" class="form-check-input select-group"> Select all</label>
 				</div>

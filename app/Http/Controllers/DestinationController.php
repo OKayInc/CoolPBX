@@ -137,6 +137,11 @@ class DestinationController extends Controller
         return redirect()->route('destinations.index');
     }
 
+    public function import()
+    {
+        return view('pages.destinations.import');
+    }
+
 	public function exportGet()
 	{
 		$available_columns = $this->available_columns;

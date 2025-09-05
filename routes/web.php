@@ -86,6 +86,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/bridges', BridgeController::class)->name('bridges', 'bridges');
 
     // DESTINATION
+    Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
     Route::get('/destinations/export', [DestinationController::class, 'exportGet'])->name('destinations.exportget', 'destinations.exportget');
     Route::post('/destinations/export', [DestinationController::class, 'exportPost'])->name('destinations.exportpost', 'destinations.exportpost');
     Route::resource('/destinations', DestinationController::class)->name('destinations', 'destinations');

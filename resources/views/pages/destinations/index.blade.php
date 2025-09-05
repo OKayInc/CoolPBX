@@ -19,6 +19,11 @@
                     <a href="{{ route('destinations.index', array_merge(request()->all(), ['type' => 'local'])) }}" class="btn btn-primary btn-sm">
                         <i class="fa fa-vector-square" aria-hidden="true"></i> {{ __('Local') }}
                     </a>
+                    @can('destination_import')
+                    <a href="{{ route('destinations.import') }}" class="btn btn-primary btn-sm">
+                        <i class="fa fa-file-import" aria-hidden="true"></i> {{ __('Import') }}
+                    </a>
+                    @endcan
                     @can('destination_export')
                     <a href="{{ route('destinations.exportget') }}" class="btn btn-primary btn-sm">
                         <i class="fa fa-file-export" aria-hidden="true"></i> {{ __('Export') }}
