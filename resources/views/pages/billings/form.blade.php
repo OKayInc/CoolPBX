@@ -146,7 +146,6 @@
                                 min="-999999"
                                 step="0.01"
                                 value="{{ old('credit', $billing->credit ?? '') }}"
-                                required
                             >
                             @error('credit')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
