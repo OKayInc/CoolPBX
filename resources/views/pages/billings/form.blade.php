@@ -109,7 +109,7 @@
                                 max="28"
                                 step="1"
                                 placeholder="15"
-                                value="{{ old('billing_cycle', $billing->billing_cycle ?? '') }}"
+                                value="{{ old('billing_cycle', $billing->billing_cycle ?? (date('j') > 28 ?? 28 : date('j')) }}"
                                 required
                             >
                             @error('billing_cycle')
@@ -195,6 +195,7 @@
                     </div>
                 </div>
 
+                @if(isset($billing))
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -204,8 +205,9 @@
                                 class="form-control @error('balance') is-invalid @enderror"
                                 id="balance"
                                 name="balance"
-                                value="{{ old('balance', $billing->balance ?? '') }}"
+                                value="{{ old('balance', $billing->balance ?? 0) }}"
                                 required
+                                readonly
                             >
                             @error('balance')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -213,6 +215,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <div class="row mt-3">
                     <div class="col-md-6">
