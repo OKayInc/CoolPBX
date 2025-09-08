@@ -87,8 +87,7 @@ Route::middleware(['auth','permission'])->group(function () {
 
     // DESTINATION
     Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
-    Route::get('/destinations/export', [DestinationController::class, 'exportGet'])->name('destinations.exportget', 'destinations.exportget');
-    Route::post('/destinations/export', [DestinationController::class, 'exportPost'])->name('destinations.exportpost', 'destinations.exportpost');
+    Route::get('/destinations/export', [DestinationController::class, 'export'])->name('destinations.export', 'destinations.export');
     Route::resource('/destinations', DestinationController::class)->name('destinations', 'destinations');
 
     // DIALPLAN

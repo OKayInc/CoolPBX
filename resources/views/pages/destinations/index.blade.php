@@ -25,7 +25,7 @@
                     </a>
                     @endcan
                     @can('destination_export')
-                    <a href="{{ route('destinations.exportget') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('destinations.export') }}" class="btn btn-primary btn-sm">
                         <i class="fa fa-file-export" aria-hidden="true"></i> {{ __('Export') }}
                     </a>
                     @endcan
