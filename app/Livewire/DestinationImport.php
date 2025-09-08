@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Destination;
 use App\Repositories\DestinationRepository;
+use App\Repositories\DialplanRepository;
+use App\Services\DialplanService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -36,10 +38,14 @@ class DestinationImport extends Component
 	];
 
 	protected $destinationRepository;
+	protected $dialplanRepository;
+	protected $dialplanService;
 
-    public function boot(DestinationRepository $destinationRepository)
+    public function boot(DestinationRepository $destinationRepository, DialplanRepository $dialplanRepository, DialplanService $dialplanService)
     {
         $this->destinationRepository = $destinationRepository;
+        $this->dialplanRepository = $dialplanRepository;
+        $this->dialplanService = $dialplanService;
     }
 
 	public function mount()
@@ -52,6 +58,7 @@ class DestinationImport extends Component
 		$this->availableFields = [
 			'destinations' => [
 				'dialplan_uuid',
+				'domain_uuid',
 				'fax_uuid',
 				'user_uuid',
 				'group_uuid',
@@ -170,6 +177,7 @@ class DestinationImport extends Component
 
 		$mappings = [
 			'dialplan_uuid' => 'destinations.dialplan_uuid',
+			'domain_uuid' => 'destinations.domain_uuid',
 			'fax_uuid' => 'destinations.fax_uuid',
 			'user_uuid' => 'destinations.user_uuid',
 			'group_uuid' => 'destinations.group_uuid',
@@ -275,25 +283,27 @@ class DestinationImport extends Component
 					{
 						$destinationData['domain_uuid'] = Session::get('domain_uuid');
 
-						$existingDestination = null;
+						$destination = null;
 
 						if (isset($destinationData['dialplan_uuid']))
 						{
-							$existingDestination = Destination::where('dialplan_uuid', $destinationData['dialplan_uuid'])
+							$destination = Destination::where('dialplan_uuid', $destinationData['dialplan_uuid'])
 								->where('domain_uuid', Session::get('domain_uuid'))
 								->first();
 						}
 
-						if ($existingDestination)
+						if ($destination)
 						{
-							$this->destinationRepository->update($existingDestination, $destinationData);
+							$this->destinationRepository->update($destination, $destinationData);
 						}
 						else
 						{
 							$destinationData['destination_uuid'] = Str::uuid();
 
-							$this->destinationRepository->create($destinationData);
+							$destination = $this->destinationRepository->create($destinationData);
 						}
+
+						$this->setDialPlan($destination, $destinationData);
 
 						$importCount++;
 					}
@@ -347,6 +357,34 @@ class DestinationImport extends Component
 		$this->headers = [];
 		$this->fieldMappings = [];
 		$this->importResults = [];
+	}
+
+	private function setDialPlan($destination, $data)
+	{
+		if($data["destination_type"] == "inbound")
+		{
+			if($destination->dialplan_uuid)
+			{
+				$this->dialplanRepository->delete($destination->dialplan_uuid);
+			}
+
+			$data["app_uuid"] = "c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4";
+			$data["dialplan_name"] = $data["destination_area_code"] ?? "" . $data["destination_number"] ?? "";
+			$data["dialplan_number"] = $data["destination_area_code"] ?? "" . $data["destination_number"] ?? "";
+			$data["dialplan_order"] = $data["destination_order"] ?? 0;
+			$data["dialplan_enabled"] = $data["destination_enabled"] ?? false;
+			$data["dialplan_description"] = $data["destination_description"] ?? "";
+			$data["condition_field_1"] = $data["destination_conditions"] ?? "";
+			$data["condition_expression_1"] = $data["condition_expressions"] ?? "";
+			$data["action_1"] = $data["destination_actions"] ?? "";
+
+			$dialplan = $this->dialplanService->setInbound($data, $destination);
+
+			if($dialplan)
+			{
+				$this->destinationRepository->update($destination, ["dialplan_uuid" => $dialplan->dialplan_uuid]);
+			}
+		}
 	}
 
 	public function render()

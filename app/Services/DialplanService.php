@@ -55,8 +55,8 @@ class DialplanService
         $destination_carrier_uuid = '';
         $destination_cid_name_prefix = '';
         $destination_record = '';
-        $$destination_hold_music = '';
-        $$destination_distinctive_ring = '';
+        $destination_hold_music = '';
+        $destination_distinctive_ring = '';
 
 		$limit = $data["limit"] ?? 0;
 		$caller_id_outbound_prefix = $data["caller_id_outbound_prefix"] ?? '';

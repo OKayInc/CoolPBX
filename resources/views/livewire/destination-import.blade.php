@@ -84,6 +84,7 @@
                                                 <strong>Destination Fields:</strong>
                                                 <ul class="list-unstyled small">
 													<li>• dialplan_uuid</li>
+													<li>• domain_uuid</li>
 													<li>• fax_uuid</li>
 													<li>• user_uuid</li>
 													<li>• group_uuid</li>
