@@ -98,7 +98,6 @@ class RingGroupForm extends Component
         try {
             $this->available_sounds = $this->soundsService->getAllSounds();
         } catch (\Exception $e) {
-            throw $e;
             \Log::error('Error loading sounds: ' . $e->getMessage());
             $this->available_sounds = [];
         }
@@ -358,7 +357,6 @@ class RingGroupForm extends Component
                 session()->flash('message', 'Create successfully.');
             }
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error' . $e->getMessage());
         }
     }
@@ -375,7 +373,6 @@ class RingGroupForm extends Component
                 session()->flash('message', 'Ring Group copied successfully..');
                 return redirect()->route('ring_groups.edit', $newRingGroup->ring_group_uuid);
             } catch (\Exception $e) {
-                throw $e;
                 session()->flash('error', 'Error ' . $e->getMessage());
             }
         }
@@ -392,7 +389,6 @@ class RingGroupForm extends Component
                 session()->flash('message', 'Delete successfully.');
                 return redirect()->route('ring_groups.index');
             } catch (\Exception $e) {
-                throw $e;
                 session()->flash('error', 'Error: ' . $e->getMessage());
             }
         }

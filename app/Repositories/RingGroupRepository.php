@@ -355,10 +355,10 @@ class RingGroupRepository
         $dialplan->refresh(); 
     }
 
-    private function updateDialplan(RingGroup $ringGroup, array $data)
+    private function updateDialplan(RingGroup $ringGroup)
     {
         if (!$ringGroup->dialplan_uuid) {
-            return $this->createDialplan($ringGroup, Str::uuid(), $data);
+            return $this->createDialplan($ringGroup, Str::uuid());
         }
 
         $dialplan = $this->dialplan->where('dialplan_uuid', $ringGroup->dialplan_uuid)->first();
