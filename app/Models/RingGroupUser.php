@@ -20,7 +20,13 @@ class RingGroupUser extends Pivot
 	const CREATED_AT = 'insert_date';
 	const UPDATED_AT = 'update_date';
 
-	public function domain(): BelongsTo {
+	public function domain(): BelongsTo
+	{
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
+	}
+
+	public function ringGroup(): BelongsTo
+	{
+		return $this->belongsTo(RingGroup::class, 'ring_group_uuid', 'ring_group_uuid');
 	}
 }
