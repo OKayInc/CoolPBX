@@ -49,7 +49,7 @@ class BillingController extends Controller
 
 		$billing = $this->billingRepository->create($data);
 
-		return redirect()->route("billings.edit", $billing->billing_uuid);
+		return redirect()->route("billing.edit", $billing->billing_uuid);
 	}
 
     public function show(Billing $billing)
@@ -69,14 +69,14 @@ class BillingController extends Controller
 	{
 		$this->billingRepository->update($billing, $request->validated());
 
-        return redirect()->route("billings.edit", $billing->billing_uuid);
+        return redirect()->route("billing.edit", $billing->billing_uuid);
 	}
 
     public function destroy(Billing $billing)
     {
         $this->billingRepository->delete($billing);
 
-        return redirect()->route('billings.index');
+        return redirect()->route('billing.index');
     }
 
     public function analysis(Request $request)

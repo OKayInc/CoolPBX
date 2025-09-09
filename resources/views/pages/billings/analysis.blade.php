@@ -10,7 +10,7 @@
         </div>
 
         <div class="card-body">
-            <form method="post" action="{{ route('billings.analysis') }}">
+            <form method="post" action="{{ route('billing.analysis') }}">
                 @csrf
                 <div class="row mt-3">
 
