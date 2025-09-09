@@ -31,6 +31,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationsController;
 use App\Http\Controllers\MusicOnHoldController;
 use App\Http\Controllers\PhraseController;
+use App\Http\Controllers\RingGroupController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
@@ -206,6 +207,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/import', [DeviceController::class, 'import'])->name('devices.import');
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
+    Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
 
 });
 

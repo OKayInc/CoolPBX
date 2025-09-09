@@ -20,6 +20,8 @@ use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\MenuItemGroup;
 use App\Models\Permission;
+use App\Models\Phrase;
+use App\Models\Recording;
 use App\Models\SipProfile;
 use App\Models\SipProfileDomain;
 use App\Models\SipProfileSetting;
@@ -37,6 +39,8 @@ use App\Repositories\PermissionRepository;
 use App\Repositories\SipProfileRepository;
 use App\Repositories\StreamRepository;
 use App\Repositories\ExtensionRepository;
+use App\Repositories\PhraseRepository;
+use App\Repositories\RecordingRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -137,6 +141,19 @@ class RepositoryServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->bind(RecordingRepository::class, function ($app) {
+            return new RecordingRepository(
+                $app->make(Recording::class)
+            );
+        });
+
+        $this->app->bind(PhraseRepository::class, function ($app) {
+            return new PhraseRepository(
+                $app->make(Phrase::class)
+            );
+        });
+
+    
     }
 
     /**

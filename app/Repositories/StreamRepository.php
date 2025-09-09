@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Stream;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Session;
 
 class StreamRepository
 {
@@ -37,5 +38,38 @@ class StreamRepository
     public function delete(Stream $stream): ?bool
     {
         return $stream->delete();
+    }
+
+    public function getOptions(): array
+    {
+        if (!class_exists(Stream::class)) {
+            return [];
+        }
+
+        $streams = Stream::where(function ($query) {
+            $query->where("domain_uuid", Session::get("domain_uuid"))
+                ->orWhereNull("domain_uuid");
+        })
+            ->where("stream_enabled", "true")
+            ->orderBy("stream_name", "asc")
+            ->get();
+
+        if ($streams->isEmpty()) {
+            return [];
+        }
+
+        $values = [];
+
+        foreach ($streams as $stream) {
+            $values[] = [
+                "id" => $stream->stream_location,
+                "name" => $stream->stream_name
+            ];
+        }
+
+        return [
+            "label" => __("Streams"),
+            "values" => $values
+        ];
     }
 }

@@ -18,7 +18,6 @@ class DomainRequest extends FormRequest
 
 	public function rules(): array
 	{
-        //dd($this);
 		$rule =  [
 			"domain_name" => [
                                 "bail",
