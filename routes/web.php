@@ -212,6 +212,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
+    Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
 
 
 

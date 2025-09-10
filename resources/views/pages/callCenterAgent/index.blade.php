@@ -11,7 +11,7 @@
                 <div class="card-tools">
                     <div class="d-flex gap-2 " role="group" aria-label="Group actions">
 
-                        <a href="" class="btn btn-primary btn-sm">
+                        <a href="{{route('callCenterAgentStatus')}}" class="btn btn-primary btn-sm">
                             <i class="fa-solid fa-user-clock"></i> {{__('Status')}}
                         </a>
 

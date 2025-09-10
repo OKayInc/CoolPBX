@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Repositories\CallCenterAgentRepository;
 use App\Models\CallCenterAgent;
 use App\Http\Requests\CallCenterAgentRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -47,30 +48,8 @@ class CallCenterAgentForm extends Component
 
     public function rules()
     {
-        return [
-            'domain_uuid' => 'nullable|string',
-            'agent_name' => 'required|string|max:255',
-            'agent_id' => [
-                'nullable',
-                'string',
-                'max:50',
-                Rule::unique('v_call_center_agents', 'agent_id')
-                    ->where('domain_uuid', $this->domain_uuid)
-                    ->ignore($this->agentUuid, 'call_center_agent_uuid')
-            ],
-            'agent_password' => 'nullable|string|max:255',
-            'agent_type' => 'nullable|in:callback,uuid-standby',
-            'agent_call_timeout' => 'nullable|integer|min:1|max:300',
-            'user_uuid' => 'nullable|string',
-            'agent_status' => 'nullable|in:Logged Out,Available,Available (On Demand),On Break',
-            'agent_contact' => 'nullable|string|max:255',
-            'agent_no_answer_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_max_no_answer' => 'nullable|integer|min:0|max:100',
-            'agent_wrap_up_time' => 'nullable|integer|min:0|max:300',
-            'agent_reject_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_busy_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_record' => 'nullable|in:true,false',
-        ];
+        $request = new CallCenterAgentRequest();
+        return $request->rules();
     }
 
     public function mount($agentUuid = null)
@@ -175,29 +154,6 @@ class CallCenterAgentForm extends Component
         }
     }
 
-    public function copyAgent()
-    {
-        if (!$this->isEditing) {
-            return;
-        }
-
-        try {
-            $newAgentName = $this->agent_name . ' (Copy)';
-            $newAgentId = $this->agent_id . '_copy';
-
-            $copiedAgent = $this->callCenterAgentRepository->copy(
-                $this->agentUuid,
-                $newAgentName,
-                $newAgentId
-            );
-
-            session()->flash('success', 'Agent copied successfully.');
-            return redirect()->route('call-center-agents.edit', $copiedAgent->call_center_agent_uuid);
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error copying agent: ' . $e->getMessage());
-        }
-    }
-
     public function save()
     {
         $this->validate();
@@ -235,10 +191,10 @@ class CallCenterAgentForm extends Component
         }
     }
 
-    public function delete()
+    public function delete():RedirectResponse
     {
         if (!$this->isEditing) {
-            return;
+            return redirect()->route('call_center_agent.index');
         }
 
         try {
@@ -248,6 +204,8 @@ class CallCenterAgentForm extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Error deleting agent: ' . $e->getMessage());
         }
+
+        return redirect()->route('call_center_agent.index');
     }
 
     public function render()

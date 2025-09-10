@@ -94,21 +94,6 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- <div class="col-md-6 mb-3">
-                                <label for="domain_uuid" class="form-label">{{ __('Domain') }}</label>
-                                <select class="form-select @error('domain_uuid') is-invalid @enderror"
-                                    id="domain_uuid" wire:model="domain_uuid">
-                                    @foreach ($availableDomains as $availableDomain)
-                                        <option value="{{ $availableDomain['domain_uuid'] }}">
-                                            {{ $availableDomain['domain_name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('domain_uuid')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div> --}}
                         </div>
 
                         <div class="row mb-4">

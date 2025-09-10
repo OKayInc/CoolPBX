@@ -135,31 +135,6 @@ class CallCenterAgentRepository
             throw $e;
         }
     }
-
-    public function copy(string $uuid, string $newAgentName, ?string $newAgentId = null): CallCenterAgent
-    {
-        try {
-            DB::beginTransaction();
-
-            $originalAgent = $this->findByUuid($uuid, true);
-            if (!$originalAgent) {
-                throw new Exception("Call center agent not found");
-            }
-
-            $newAgent = $originalAgent->replicate();
-            $newAgent->call_center_agent_uuid = Str::uuid();
-            $newAgent->agent_name = $newAgentName;
-            $newAgent->agent_id = $newAgentId;
-            $newAgent->save();
-
-            DB::commit();
-            return $newAgent;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
     public function getUsersForDomain(string $domainUuid): Collection
     {
         return $this->user

@@ -30,4 +30,9 @@ class CallCenterAgentController extends Controller
 
         return view("pages.callCenterAgent.form", compact("agentUuid"));
     }
+
+    public function showStatus()
+    {
+        return view("pages.callCenterAgent.status");
+    }
 }

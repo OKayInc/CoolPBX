@@ -9,20 +9,20 @@
                                 <i class="bi bi-telephone-inbound me-2"></i>
                                 {{ $isEditing ? 'Edit Call Center Queue' : 'New Call Center Queue' }}
                             </h4>
-                            @if($isEditing)
-                            <div class="card-tools">
-                                <div class="d-flex gap-2 " role="group" aria-label="Group actions">
-                                    <button wire:click="startCalLCenterQueue" class="btn btn-primary btn-sm">
-                                        <i class="fa fa-play" aria-hidden="true"></i> {{ __('Start') }}
-                                    </button>
-                                    <button wire:click="unloadCalLCenterQueue" class="btn btn-primary btn-sm">
-                                        <i class="fa fa-stop" aria-hidden="true"></i> {{ __('Stop') }}
-                                    </button>
-                                    <button class="btn btn-primary btn-sm" wire:click="reloadCalLCenterQueue">
-                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{__('Reload')}}
-                                    </button>
+                            @if ($isEditing)
+                                <div class="card-tools">
+                                    <div class="d-flex gap-2 " role="group" aria-label="Group actions">
+                                        <button wire:click="startCalLCenterQueue" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-play" aria-hidden="true"></i> {{ __('Start') }}
+                                        </button>
+                                        <button wire:click="unloadCalLCenterQueue" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-stop" aria-hidden="true"></i> {{ __('Stop') }}
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" wire:click="reloadCalLCenterQueue">
+                                            <i class="fa fa-refresh" aria-hidden="true"></i> {{ __('Reload') }}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
                             @endif
                         </div>
 
@@ -88,7 +88,7 @@
                                             <label for="queue_moh_sound" class="form-label">Music on Hold</label>
 
                                             <x-switch-music-on-hold name="queue_moh_sound" :selected="$queue_moh_sound"
-                                                :withMusicOnHold="true" :withRecordings="true" :withRingsTones="true" :withStreams="true"
+                                                :withMusicOnHold="true" :withRingsTones="true" :withStreams="true"
                                                 wire:model="queue_moh_sound" class="form-select" />
 
                                             @error('queue_moh_sound')
@@ -108,6 +108,62 @@
                                         @enderror
                                         <div class="form-text">Audio file to announce to callers while waiting</div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="queue_greeting" class="form-label">Greeting</label>
+
+                                            <select id="queue_greeting"
+                                                class="form-control @error('queue_greeting') is-invalid @enderror"
+                                                wire:model="queue_greeting">
+                                                <option value="">-- Select a greeting --</option>
+
+                                                @foreach ($available_sounds as $category => $sounds)
+                                                    @if (!empty($sounds))
+                                                        <optgroup label="{{ ucfirst($category) }}">
+                                                            @foreach ($sounds as $sound)
+                                                                <option value="{{ $sound['value'] }}">
+                                                                    {{ $sound['name'] }}
+                                                                </option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                    @endif
+                                                @endforeach
+
+                                                @if (auth()->user()->hasGroup('superadmin') && !empty($queue_greeting))
+                                                    @php
+                                                        $found = false;
+                                                        foreach ($available_sounds as $sounds) {
+                                                            foreach ($sounds as $sound) {
+                                                                if ($sound['value'] === $queue_greeting) {
+                                                                    $found = true;
+                                                                    break 2;
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @if (!$found)
+                                                        <option value="{{ $queue_greeting }}" selected>
+                                                            {{ $queue_greeting }}
+                                                        </option>
+                                                    @endif
+                                                @endif
+                                            </select>
+
+                                            @error('queue_greeting')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+
+                                            @if (!empty($queue_greeting))
+                                                <div class="mt-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                        wire:click="clearGreeting">
+                                                        Clear Selection
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="queue_announce_frequency" class="form-label">Announce Frequency
@@ -119,6 +175,17 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                         <div class="form-text">How often to play the announcement (0 = never)</div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="queue_cid_prefix" class="form-label">Caller ID Name Prefix <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" wire:model.lazy="queue_cid_prefix"
+                                            class="form-control @error('queue_cid_prefix') is-invalid @enderror"
+                                            id="queue_cid_prefix" placeholder="Enter queue name">
+                                        @error('queue_cid_prefix')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
 
                                     <div class="col-12 mb-3">
@@ -139,6 +206,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+
 
                                 <!-- Recording & Timeout Settings -->
                                 <div class="row mb-4">
@@ -204,11 +273,10 @@
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 id="queue_abandoned_resume_allowed"
-                                                wire:model="queue_abandoned_resume_allowed" value="true"
-                                                {{ $queue_abandoned_resume_allowed == 'true' ? 'checked' : '' }}>
+                                                wire:model.boolean="queue_abandoned_resume_allowed"
+                                                {{ $queue_abandoned_resume_allowed === 'true' || $queue_abandoned_resume_allowed === true ? 'checked' : '' }}>
                                             <label class="form-check-label"
-                                                for="queue_abandoned_resume_allowed">Abandoned
-                                                Resume Allowed</label>
+                                                for="queue_abandoned_resume_allowed">Abandoned Resume Allowed</label>
                                         </div>
                                     </div>
 
@@ -236,14 +304,13 @@
                                     <div class="col-md-6 mb-3">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_tier_rules_apply" wire:model="queue_tier_rules_apply"
-                                                value="true"
-                                                {{ $queue_tier_rules_apply == 'true' ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="queue_tier_rules_apply">Apply Tier
-                                                Rules</label>
+                                                id="queue_tier_rules_apply"
+                                                wire:model.boolean="queue_tier_rules_apply"
+                                                {{ $queue_tier_rules_apply === 'true' || $queue_tier_rules_apply === true ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="queue_tier_rules_apply">Tier Rules
+                                                Apply</label>
                                         </div>
                                     </div>
-
                                     <div class="col-md-6 mb-3">
                                         <label for="queue_tier_rule_wait_second" class="form-label">Tier Rule Wait
                                             Second</label>
@@ -259,20 +326,20 @@
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 id="queue_tier_rule_wait_multiply_level"
-                                                wire:model="queue_tier_rule_wait_multiply_level" value="true"
-                                                {{ $queue_tier_rule_wait_multiply_level == 'true' ? 'checked' : '' }}>
+                                                wire:model.boolean="queue_tier_rule_wait_multiply_level"
+                                                {{ $queue_tier_rule_wait_multiply_level === 'true' || $queue_tier_rule_wait_multiply_level === true ? 'checked' : '' }}>
                                             <label class="form-check-label"
-                                                for="queue_tier_rule_wait_multiply_level">Wait
-                                                Multiply Level</label>
+                                                for="queue_tier_rule_wait_multiply_level">Wait Multiply Level</label>
                                         </div>
                                     </div>
+
 
                                     <div class="col-md-6 mb-3">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 id="queue_tier_rule_no_agent_no_wait"
-                                                wire:model="queue_tier_rule_no_agent_no_wait" value="true"
-                                                {{ $queue_tier_rule_no_agent_no_wait == 'true' ? 'checked' : '' }}>
+                                                wire:model.boolean="queue_tier_rule_no_agent_no_wait"
+                                                {{ $queue_tier_rule_no_agent_no_wait === 'true' || $queue_tier_rule_no_agent_no_wait === true ? 'checked' : '' }}>
                                             <label class="form-check-label" for="queue_tier_rule_no_agent_no_wait">No
                                                 Agent No Wait</label>
                                         </div>
@@ -364,13 +431,13 @@
                                                             <td>
                                                                 <input type="number"
                                                                     wire:model="tiers.{{ $index }}.tier_level"
-                                                                    class="form-control" min="1"
+                                                                    class="form-control" min="0"
                                                                     placeholder="1">
                                                             </td>
                                                             <td>
                                                                 <input type="number"
                                                                     wire:model="tiers.{{ $index }}.tier_position"
-                                                                    class="form-control" min="1"
+                                                                    class="form-control" min="0"
                                                                     placeholder="1">
                                                             </td>
                                                             <td class="text-center">
