@@ -51,7 +51,7 @@ class DeviceProfileForm extends Component
 
         $this->loadDropdownData();
 
-        if ($this->isEditing) {
+        if ($this->isEditing) { 
             $this->loadDeviceProfile();
         } else {
             $this->initializeDefaults();
@@ -106,7 +106,6 @@ class DeviceProfileForm extends Component
             'profile_key_category' => '',
             'profile_key_id' => '',
             'profile_key_vendor' => '',
-            'profile_key_type' => '',
             'profile_key_subtype' => '',
             'profile_key_line' => '',
             'profile_key_value' => '',
@@ -143,7 +142,6 @@ class DeviceProfileForm extends Component
             'profile_setting_enabled' => 'true',
             'profile_setting_description' => '',
         ];
-
     }
 
     public function removeProfileSetting($index)
@@ -296,7 +294,6 @@ class DeviceProfileForm extends Component
                 return redirect()->route('devices_profiles.edit', $profile->device_profile_uuid);
             }
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error saving profile: ' . $e->getMessage());
         }
     }
@@ -313,6 +310,22 @@ class DeviceProfileForm extends Component
             return redirect()->route('devices_profiles.index');
         } catch (\Exception $e) {
             session()->flash('error', 'Error deleting profile: ' . $e->getMessage());
+        }
+    }
+
+    public function updateVendorFromType($index)
+    {
+        if (!isset($this->profileKeys[$index]['profile_key_type'])) {
+            return;
+        }
+
+        $selectedType = $this->profileKeys[$index]['profile_key_type'];
+
+        foreach ($this->vendorFunctions as $function) {
+            if ($function['value'] === $selectedType) {
+                $this->profileKeys[$index]['profile_key_vendor'] = $function['vendor_name'];
+                break;
+            }
         }
     }
 
