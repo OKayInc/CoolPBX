@@ -31,6 +31,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationsController;
 use App\Http\Controllers\MusicOnHoldController;
 use App\Http\Controllers\PhraseController;
+use App\Http\Controllers\RingGroupController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
@@ -69,25 +70,25 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
     // BILLING
-    Route::match(['get', 'post'], '/billings/analysis', [BillingController::class, 'analysis'])->name('billings.analysis', 'billings.analysis');
-    Route::get('/billings/pricing', [BillingController::class, 'pricing'])->name('billings.pricing', 'billings.pricing');
-    Route::resource('/billings/deals', BillingDealController::class)->names('billings.deals')->parameters(["deals" => "billingDeal"]);
-    Route::get('/billings/{billing}/export', [BillingController::class, 'export'])->name('billings.export', 'billings.export');
-    Route::get('/billings/{billing}/payment', [BillingController::class, 'payment'])->name('billings.payment', 'billings.payment');
-    Route::get('/billings/{billing}/transfer', [BillingController::class, 'transferGet'])->name('billings.transfer_get', 'billings.transfer_get');
-    Route::post('/billings/{billing}/transfer', [BillingController::class, 'transferPost'])->name('billings.transfer_post', 'billings.transfer_post');
-    Route::get('/billings/{billing}/{paymentGateway}/create', [BillingController::class, 'paymentCreate'])->name('billings.payment.create', 'billings.payment.create');
-    Route::post('/billings/{billing}/{paymentGateway}/store', [BillingController::class, 'paymentStore'])->name('billings.payment.store', 'billings.payment.store');
-    Route::get('/billings/{billing}/view', [BillingController::class, 'view'])->name('billings.view', 'billings.view');
-    Route::post('/billings/{billingInvoice}/process', [BillingInvoiceController::class, 'process'])->name('billings.process', 'billings.process');
-    Route::resource('/billings', BillingController::class)->name('billings', 'billings');
+    Route::match(['get', 'post'], '/billing/analysis', [BillingController::class, 'analysis'])->name('billing.analysis', 'billing.analysis');
+    Route::get('/billing/pricing', [BillingController::class, 'pricing'])->name('billing.pricing', 'billing.pricing');
+    Route::resource('/billing/deals', BillingDealController::class)->names('billing.deals')->parameters(["deals" => "billingDeal"]);
+    Route::get('/billing/{billing}/export', [BillingController::class, 'export'])->name('billing.export', 'billing.export');
+    Route::get('/billing/{billing}/payment', [BillingController::class, 'payment'])->name('billing.payment', 'billing.payment');
+    Route::get('/billing/{billing}/transfer', [BillingController::class, 'transferGet'])->name('billing.transfer_get', 'billing.transfer_get');
+    Route::post('/billing/{billing}/transfer', [BillingController::class, 'transferPost'])->name('billing.transfer_post', 'billing.transfer_post');
+    Route::get('/billing/{billing}/{paymentGateway}/create', [BillingController::class, 'paymentCreate'])->name('billing.payment.create', 'billing.payment.create');
+    Route::post('/billing/{billing}/{paymentGateway}/store', [BillingController::class, 'paymentStore'])->name('billing.payment.store', 'billing.payment.store');
+    Route::get('/billing/{billing}/view', [BillingController::class, 'view'])->name('billing.view', 'billing.view');
+    Route::post('/billing/{billingInvoice}/process', [BillingInvoiceController::class, 'process'])->name('billing.process', 'billing.process');
+    Route::resource('/billing', BillingController::class)->name('billing', 'billing');
 
     // BRIDGE
     Route::resource('/bridges', BridgeController::class)->name('bridges', 'bridges');
 
     // DESTINATION
-    Route::get('/destinations/export', [DestinationController::class, 'exportGet'])->name('destinations.exportget', 'destinations.exportget');
-    Route::post('/destinations/export', [DestinationController::class, 'exportPost'])->name('destinations.exportpost', 'destinations.exportpost');
+    Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
+    Route::get('/destinations/export', [DestinationController::class, 'export'])->name('destinations.export', 'destinations.export');
     Route::resource('/destinations', DestinationController::class)->name('destinations', 'destinations');
 
     // DIALPLAN
@@ -206,6 +207,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/import', [DeviceController::class, 'import'])->name('devices.import');
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
+    Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
 
 });
 

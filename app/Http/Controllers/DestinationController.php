@@ -9,6 +9,8 @@ use App\Models\Fax;
 use App\Models\Group;
 use App\Models\User;
 use App\Repositories\DestinationRepository;
+use App\Repositories\DialplanRepository;
+use App\Services\DialplanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Session;
@@ -16,42 +18,12 @@ use Illuminate\Support\Facades\Session;
 class DestinationController extends Controller
 {
 	protected $destinationRepository;
-	private $available_columns;
+	protected $dialplanRepository;
 
-	public function __construct(DestinationRepository $destinationRepository)
+	public function __construct(DestinationRepository $destinationRepository, DialplanRepository $dialplanRepository)
 	{
 		$this->destinationRepository = $destinationRepository;
-
-		$this->available_columns = [];
-		$this->available_columns[] = 'domain_uuid';
-		$this->available_columns[] = 'destination_uuid';
-		$this->available_columns[] = 'dialplan_uuid';
-		$this->available_columns[] = 'fax_uuid';
-		$this->available_columns[] = 'destination_type';
-		$this->available_columns[] = 'destination_number';
-		$this->available_columns[] = 'destination_trunk_prefix';
-		$this->available_columns[] = 'destination_area_code';
-		$this->available_columns[] = 'destination_prefix';
-		$this->available_columns[] = 'destination_condition_field';
-		$this->available_columns[] = 'destination_number_regex';
-		$this->available_columns[] = 'destination_caller_id_name';
-		$this->available_columns[] = 'destination_caller_id_number';
-		$this->available_columns[] = 'destination_cid_name_prefix';
-		$this->available_columns[] = 'destination_context';
-		$this->available_columns[] = 'destination_record';
-		$this->available_columns[] = 'destination_hold_music';
-		$this->available_columns[] = 'destination_accountcode';
-		$this->available_columns[] = 'destination_type_voice';
-		$this->available_columns[] = 'destination_type_fax';
-		$this->available_columns[] = 'destination_type_text';
-		$this->available_columns[] = 'destination_app';
-		$this->available_columns[] = 'destination_data';
-		$this->available_columns[] = 'destination_alternate_app';
-		$this->available_columns[] = 'destination_alternate_data';
-		$this->available_columns[] = 'destination_enabled';
-		$this->available_columns[] = 'destination_description';
-		$this->available_columns[] = 'destination_type_emergency';
-		$this->available_columns[] = 'destination_order';
+		$this->dialplanRepository = $dialplanRepository;
 	}
 
 	public function index(Request $request)
@@ -73,13 +45,18 @@ class DestinationController extends Controller
 		return view("pages.destinations.form", compact("faxes", "carriers", "users", "groups", "domains"));
 	}
 
-	public function store(DestinationRequest $request)
+	public function store(DestinationRequest $request, DialplanService $dialplanService)
 	{
 		$data = $request->validated();
 
-    	$data['domain_uuid'] = Session::get('domain_uuid');
-
 		$destination = $this->destinationRepository->create($data);
+
+		$dialplan = $this->setDialplan($destination, $data, $dialplanService);
+
+		if($dialplan)
+		{
+			$this->destinationRepository->update($destination, ["dialplan_uuid" => $dialplan->dialplan_uuid]);
+		}
 
 		return redirect()->route("destinations.edit", $destination->destination_uuid);
 	}
@@ -100,9 +77,23 @@ class DestinationController extends Controller
 		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "users", "groups", "domains"));
 	}
 
-	public function update(DestinationRequest $request, Destination $destination)
+	public function update(DestinationRequest $request, Destination $destination, DialplanService $dialplanService)
 	{
-		$this->destinationRepository->update($destination, $request->validated());
+		$data = $request->validated();
+
+		$this->destinationRepository->update($destination, $data);
+
+		if($destination->dialplan_uuid)
+		{
+			$this->dialplanRepository->delete($destination->dialplan_uuid);
+		}
+
+		$dialplan = $this->setDialplan($destination, $data, $dialplanService);
+
+		if($dialplan)
+		{
+			$this->destinationRepository->update($destination, ["dialplan_uuid" => $dialplan->dialplan_uuid]);
+		}
 
         return redirect()->route("destinations.edit", $destination->destination_uuid);
 	}
@@ -114,51 +105,34 @@ class DestinationController extends Controller
         return redirect()->route('destinations.index');
     }
 
-	public function exportGet()
+    public function import()
+    {
+        return view('pages.destinations.import');
+    }
+
+    public function export()
+    {
+        return view('pages.destinations.export');
+    }
+
+	private function setDialplan(Destination $destination, array $data, DialplanService $dialplanService)
 	{
-		$available_columns = $this->available_columns;
+		$dialplan = null;
 
-		return view("pages.destinations.export", compact("available_columns"));
-	}
-
-	public function exportPost(Request $request)
-	{
-		$selected_columns = $request->input("columns");
-
-		foreach($selected_columns as $c)
+		if($data["destination_type"] == "inbound")
 		{
-			if(!in_array($c, $this->available_columns))
-			{
-				return back()->with("error", "Column {$c} not enabled");
-			}
+			$data["dialplan_name"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
+			$data["dialplan_number"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
+			$data["dialplan_order"] = $data["destination_order"];
+			$data["dialplan_enabled"] = $data["destination_enabled"];
+			$data["dialplan_description"] = $data["destination_description"];
+			$data["condition_field_1"] = $data["destination_conditions"];
+			$data["condition_expression_1"] = $data["condition_expressions"];
+			$data["action_1"] = $data["destination_actions"];
+
+			$dialplan = $dialplanService->setInbound($data, $destination);
 		}
 
-		$destinations = Destination::select(array_values($selected_columns))->where("domain_uuid", Session::get("domain_uuid"))->get();
-
-		$filename = "destination_export_" . date("Y-m-d") . ".csv";
-
-		$headers = [
-			"Content-type"        => "text/csv; charset=UTF-8",
-			"Content-Disposition" => "attachment; filename=$filename",
-			"Pragma"              => "no-cache",
-			"Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-			"Expires"             => "0"
-		];
-
-		$csv = function() use ($destinations, $selected_columns)
-		{
-			$file = fopen('php://output', 'w');
-
-			fputcsv($file, $selected_columns);
-
-			foreach($destinations as $destination)
-			{
-				fputcsv($file, $destination->only($selected_columns));
-			}
-
-			fclose($file);
-		};
-
-		return Response::stream($csv, 200, $headers);
+		return $dialplan;
 	}
 }

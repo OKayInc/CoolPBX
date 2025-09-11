@@ -10,10 +10,12 @@ use Illuminate\Support\Str;
 class DialplanRepository
 {
     protected $model;
+    protected $dialplanDetailRepository;
 
-    public function __construct(Dialplan $dialplan)
+    public function __construct(Dialplan $dialplan, DialplanDetailRepository $dialplanDetailRepository)
     {
         $this->model = $dialplan;
+        $this->dialplanDetailRepository = $dialplanDetailRepository;
     }
 
     public function getAll(): Collection
@@ -58,6 +60,8 @@ class DialplanRepository
         if (!$dialplan) {
             return false;
         }
+
+        $this->dialplanDetailRepository->deleteByDialplan($dialplan);
 
         return $dialplan->delete();
     }

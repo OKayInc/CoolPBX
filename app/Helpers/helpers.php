@@ -98,64 +98,56 @@ if (!function_exists('getAccountCode')) {
     }
 }
 
-if(!function_exists('findInDirectory'))
-{
-	function findInDirectory($dir, $recursive)
-	{
-		$files = [];
+if (!function_exists('findInDirectory')) {
+    function findInDirectory($dir, $recursive)
+    {
+        $files = [];
 
-		$tree = glob(rtrim($dir, '/') . '/*');
+        $tree = glob(rtrim($dir, '/') . '/*');
 
-		if (is_array($tree))
-		{
-			foreach ($tree as $file)
-			{
-				if (is_dir($file) && $recursive)
-				{
-					$files = array_merge($files, findInDirectory($file, $recursive));
-				}
-				elseif (is_file($file))
-				{
-					$files[] = $file;
-				}
-			}
-		}
+        if (is_array($tree)) {
+            foreach ($tree as $file) {
+                if (is_dir($file) && $recursive) {
+                    $files = array_merge($files, findInDirectory($file, $recursive));
+                } elseif (is_file($file)) {
+                    $files[] = $file;
+                }
+            }
+        }
 
-		return $files;
-	}
+        return $files;
+    }
 }
 
-if(!function_exists('getSounds'))
-{
-	function getSounds($language = 'en', $dialect = 'us', $voice = 'callie', $rate = '8000'): array
-	{
-		//define an empty array
-		$array = [];
+if (!function_exists('getSounds')) {
+    function getSounds($language = null, $dialect = null, $voice = null, $rate = null): array
+    {
+        $array = [];
 
-		//set the variables
-		$switchSoundsDir = Setting::getSetting('switch', 'sounds', 'dir');
+        $language = $language ?? config('sounds.default_language');
+        $dialect  = $dialect  ?? config('sounds.default_dialect');
+        $voice    = $voice    ?? config('sounds.default_voice');
+        $rate     = $rate     ?? config('sounds.default_rate');
 
-		if (!empty($switchSoundsDir) && file_exists($switchSoundsDir))
-		{
-			$dir = $switchSoundsDir . '/' . $language . '/' . $dialect . '/' . $voice;
+        $baseDir = rtrim(config('sounds.path'), '/');
+        $dir = "{$baseDir}/{$language}/{$dialect}/{$voice}";
 
-			$files = findInDirectory($dir . '/*/' . $rate, true);
-		}
+        if (!is_dir($dir)) {
+            return [];
+        }
 
-		//loop through the languages
-		if (!empty($files))
-		{
-			foreach ($files as $file)
-			{
-				$file = substr($file, strlen($dir) + 1);
-				$file = str_replace("/" . $rate, "", $file);
-				$array[] = $file;
-			}
-		}
+        $files = findInDirectory("{$dir}/*/{$rate}", true);
 
-		//return the list of sounds
-		return $array;
-	}
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                $file = substr($file, strlen($dir) + 1);
+                $file = str_replace("/{$rate}", '', $file);
+                $array[] = $file;
+            }
+        }
+
+        return $array;
+    }
 }
 
 if (!function_exists('is_mac')) {
@@ -176,7 +168,7 @@ if (!function_exists('format_mac')) {
     }
 }
 
-if(!function_exists('array_find')) {
+if (!function_exists('array_find')) {
     function array_find(array $array, callable $callback): mixed
     {
         foreach ($array as $key => $value) {
@@ -189,13 +181,14 @@ if(!function_exists('array_find')) {
 }
 
 if (!function_exists('currency_select')) {
-	function currency_select($currency = '', $p100 = 0, $name='currency'){
+    function currency_select($currency = '', $p100 = 0, $name = 'currency')
+    {
 
         $billingCurrency = Setting::getSetting('billing', 'currency', 'text');
 
-		if (strlen(trim($currency))== 0){
-			$currency = (strlen($billingCurrency) ? $billingCurrency : 'USD');
-		}
+        if (strlen(trim($currency)) == 0) {
+            $currency = (strlen($billingCurrency) ? $billingCurrency : 'USD');
+        }
 
         $options = config('currencies');
 
@@ -212,11 +205,12 @@ if (!function_exists('currency_select')) {
         }
 
         echo '</select>';
-	}
+    }
 }
 
 if (!function_exists('github_raw_url')) {
-    function github_raw_url(string $url){
+    function github_raw_url(string $url)
+    {
         // from https://github.com/CoolPBX/templates/blob/main/provision/aastra/480i/aastra.cfg
         // to https://raw.githubusercontent.com/CoolPBX/templates/refs/heads/main/provision/aastra/480i/aastra.cfg
         // var rawLink = githubLink.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
@@ -227,7 +221,8 @@ if (!function_exists('github_raw_url')) {
 }
 
 if (!function_exists('number_series')) {
-    function number_series($number) {
+    function number_series($number)
+    {
         $ret = [];
         for ($i = strlen($number); $i > 0; $i--) {
             $ret[] = substr($number, 0, $i);
@@ -237,25 +232,27 @@ if (!function_exists('number_series')) {
 }
 
 if (!function_exists('currency_convert_rate')) {
-    function currency_convert_rate($to='USD',$from='USD', $debug=false){
+    function currency_convert_rate($to = 'USD', $from = 'USD', $debug = false)
+    {
         $currency_ttl = Setting::getSetting('billing', 'currency_database_cache_ttl', 'numeric') ?? 0;
 
         $rateConversion = RateConversion::where("from_iso4217", $from)
-        ->where("to_iso4217", $to)
-        ->when($currency_ttl >= 0, function ($query) use ($currency_ttl) {
-            $query->where('rate_epoch', '>=', (int)$currency_ttl);
-        })
-        ->orderBy("rate_epoch", "desc")
-        ->limit(1)
-        ->first();
+            ->where("to_iso4217", $to)
+            ->when($currency_ttl >= 0, function ($query) use ($currency_ttl) {
+                $query->where('rate_epoch', '>=', (int)$currency_ttl);
+            })
+            ->orderBy("rate_epoch", "desc")
+            ->limit(1)
+            ->first();
 
         return $rateConversion->rate ?? 1;
     }
 }
 
 if (!function_exists('currency_convert')) {
-    function currency_convert($money, $to='USD', $from='USD'){
-        return (double) $money * currency_convert_rate($to, $from);
+    function currency_convert($money, $to = 'USD', $from = 'USD')
+    {
+        return (float) $money * currency_convert_rate($to, $from);
     }
 }
 

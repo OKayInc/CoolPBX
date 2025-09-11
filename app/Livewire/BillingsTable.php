@@ -30,7 +30,7 @@ class BillingsTable extends DataTableComponent
             ->setTableRowUrl(function ($row) use ($canEdit)
             {
                 return $canEdit
-                    ? route('billings.edit', $row->billing_uuid)
+                    ? route('billing.edit', $row->billing_uuid)
                     : null;
             })
             ->setPaginationEnabled();
@@ -125,8 +125,8 @@ class BillingsTable extends DataTableComponent
 
             Column::make("Organization", "contactTo.contact_organization")
                 ->format(function ($value, $row, Column $column) {
-			        $json_url = route('billings.export', $row->billing_uuid) . '?format=json&prefix=XXX';
-			        $csv_url = route('billings.export', $row->billing_uuid) . '?format=csv&prefix=XXX';
+			        $json_url = route('billing.export', $row->billing_uuid) . '?format=json&prefix=XXX';
+			        $csv_url = route('billing.export', $row->billing_uuid) . '?format=csv&prefix=XXX';
 
                     return $value . "<br><small>JSON rates: {$json_url}<br/>CSV rates: {$csv_url}</small>";
                 })
@@ -158,16 +158,16 @@ class BillingsTable extends DataTableComponent
 
             Column::make("Actions", "billing_uuid")
                 ->format(function ($value, $row, Column $column) {
-                    $buttons = '<a href="' . route("billings.view", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-eye"></i></a>';
+                    $buttons = '<a href="' . route("billing.view", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-eye"></i></a>';
 
                     if(($row->credit_type != 'postpaid') || (!empty($row->whmcs_user_id)))
                     {
-                        $buttons .= '<a href="' . route("billings.payment", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-wallet"></i></a>';
+                        $buttons .= '<a href="' . route("billing.payment", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-wallet"></i></a>';
                     }
 
                     if(($row->child_count > 0) && ($row->balance > 0))
                     {
-                        $buttons .= '<a href="' . route("billings.transfer_get", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-money-bill-transfer"></i></a>';
+                        $buttons .= '<a href="' . route("billing.transfer_get", $row->billing_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-money-bill-transfer"></i></a>';
                     }
 
                     return $buttons;
