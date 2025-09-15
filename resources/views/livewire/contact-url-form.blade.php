@@ -21,8 +21,13 @@
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label for="url_address{{ $index }}" class="form-label">Adress</label>
-                                <input type="text" wire:model="urls.{{ $index }}.url_address" class="form-control"
+                                <input type="text" wire:model="urls.{{ $index }}.url_address" class="form-control @error('urls.' .$index .'.url_address') is-invalid
+                                @enderror"
                                     placeholder="http://...">
+                                @error('urls.' . $index .'.url_address')
+                                 <div class="invalid-feedback">
+                                    {{ $message }}
+                                 </div>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -30,8 +35,14 @@
                                 <input class="form-check-input" type="checkbox"
                                     wire:model="urls.{{ $index }}.url_primary"
                                     id="url_primary_{{ $index }}">
-                                <label class="form-check-label" for="url_primary_{{ $index }}">
+                                <label class="form-check-label @error('urls.' .$index .'.url_primary') is-invalid
+                                @enderror" for="url_primary_{{ $index }}">
                                     Primary </label>
+                                @error('urls.' . $index .'.url_primary')
+                                 <div class="invalid-feedback">
+                                    {{ $message }}
+                                 </div>
+                                @enderror
                             </div>
                         </div>
                         <div class="row mb-2">

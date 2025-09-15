@@ -97,7 +97,6 @@ class ContactAddressForm extends Component
                         'domain_uuid' => Session::get('domain_uuid'),
                         'address_street' => $address['address_street'],
                         'address_primary' => $address['address_primary'] ? 1 : 0,
-                        'address_street' => $address['address_street'],
                         'address_extended' => $address['address_extended'],
                         'address_locality' => $address['address_locality'],
                         'address_region' => $address['address_region'],

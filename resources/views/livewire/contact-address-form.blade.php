@@ -79,9 +79,9 @@
                                 </div>
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label for="address_description{{ $index }}"
+                                <label for="address_description_{{ $index }}"
                                     class="form-label">Description</label>
-                                <textarea id="address_description{{ $index }}" wire:model="phones.{{ $index }}.address_description"
+                                <textarea id="address_description_{{ $index }}" wire:model="addresses.{{ $index }}.address_description"
                                     class="form-control @error('phone_description') is-invalid @enderror" rows="3"></textarea>
                                 @error('address_description')
                                     <div class="invalid-feedback">{{ $message }}</div>

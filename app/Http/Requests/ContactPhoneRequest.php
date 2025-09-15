@@ -12,7 +12,7 @@ class ContactPhoneRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,20 +22,21 @@ class ContactPhoneRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'phones' => 'nullable|array',
-            'phones.*.phone_number' => 'nullable|numeric|integer|max_digits:15',
+            'phones.*.contact_uuid' => 'nullable',
+            'phones.*.domain_uuid' => 'nullable',
+            'phones.*.phone_number' => 'nullable|numeric|integer',
             'phones.*.phone_label' => 'nullable|string|max:50',
-            'phones.*.phone_type_voice' => 'boolean',
-            'phones.*.phone_type_video' => 'boolean',
-            'phones.*.phone_type_text' => 'boolean',
-            'phones.*.phone_type_fax' => 'boolean',
-            'phones.*.phone_speed_dial' => 'nullable|numeric|integer|max:10',
+            'phones.*.phone_type_voice' => 'nullable|boolean',
+            'phones.*.phone_type_video' => 'nullable|boolean',
+            'phones.*.phone_type_text' => 'nullable|boolean',
+            'phones.*.phone_type_fax' => 'nullable|boolean',
+            'phones.*.phone_speed_dial' => 'nullable|numeric|integer',
             'phones.*.phone_country_code' => ['nullable','numeric','integer','min:1','min_digits:1','max_digits:3','min:1', new E164(config('freeswitch.CHECK_COUNTRY_CODE'), '*')],
-            'phones.*.phone_extension' => 'nullable|numeric|integer|min:0|max:10',
-            'phones.*.phone_primary' => 'boolean',
+            'phones.*.phone_extension' => 'nullable|numeric|integer|min:0',
+            'phones.*.phone_primary' => 'nullable|boolean',
             'phones.*.phone_description' => 'nullable|string|max:255',
         ];
-        return $rules;
     }
 }

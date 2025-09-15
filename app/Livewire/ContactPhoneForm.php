@@ -73,6 +73,7 @@ class ContactPhoneForm extends Component
             'phone_description' => '',
 
         ];
+
     }
 
     public function removePhone($index)
@@ -84,12 +85,13 @@ class ContactPhoneForm extends Component
     public function save()
     {
         $this->validate();
+        dd($this->validate());
         try {
             ContactPhone::where('contact_uuid', $this->contactUuid)->delete();
 
             foreach ($this->phones as $phone) {
                 if (!empty($phone['phone_number'])) {
-                    ContactPhone::create([
+                    $phone = ContactPhone::create([
                         'contact_uuid' => $this->contactUuid,
                         'domain_uuid' => Session::get('domain_uuid'),
                         'phone_number' => $phone['phone_number'] ?? '',
@@ -109,8 +111,9 @@ class ContactPhoneForm extends Component
             $this->dispatch('addressesSaved')->to(ContactAddressForm::class);
         } catch (\Throwable $e) {
             DB::rollBack();
-            session()->flash('message', 'Error: ' . $e->getMessage());
             throw $e;
+            session()->flash('message', 'Error: ' . $e->getMessage());
+            
         }
     }
 
