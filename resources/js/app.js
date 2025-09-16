@@ -9,6 +9,7 @@ import { TempusDominus } from '@eonasdan/tempus-dominus';
 import '@eonasdan/tempus-dominus/dist/css/tempus-dominus.min.css'
 import UseBootstrapTag from 'use-bootstrap-tag'
 import 'use-bootstrap-tag/dist/use-bootstrap-tag.css'
+import './dashboard-charts.js';
 
 const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
 const Default = {

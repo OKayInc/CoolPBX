@@ -17,6 +17,7 @@ use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\DeviceController;
@@ -66,7 +67,7 @@ Route::middleware(['guest'])->group(function () {
 });
 
 Route::middleware(['auth','permission'])->group(function () {
-    Route::view('/dashboard', 'dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
     // BILLING
