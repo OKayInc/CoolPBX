@@ -120,4 +120,9 @@ class GroupPermissionController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function create()
+    {
+        return view('pages.permission.form');
+    }
 }

@@ -30,6 +30,7 @@ use App\Http\Controllers\ModXMLCURLController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationsController;
 use App\Http\Controllers\MusicOnHoldController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
 use App\Http\Controllers\XmlCDRController;
@@ -122,6 +123,8 @@ Route::middleware(['auth','permission'])->group(function () {
     #Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     //Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
     //Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+
+    Route::get('/permissions/create', [GroupPermissionController::class, 'create'])->name('permissions.create');
 
     // GATEWAY
     Route::resource('/gateways', GateWayController::class)->name('gateways', 'gateways');
