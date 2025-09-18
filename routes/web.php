@@ -15,6 +15,7 @@ use App\Http\Controllers\BillingDealController;
 use App\Http\Controllers\BillingInvoiceController;
 use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
+use App\Http\Controllers\CallBroadCastController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -209,6 +210,8 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
+
+    Route::resource('call_broadcasts', CallBroadCastController::class)->name('callbroadcasts', 'callbroadcasts');
 
 });
 
