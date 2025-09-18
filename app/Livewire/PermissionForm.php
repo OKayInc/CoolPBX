@@ -16,17 +16,14 @@ class PermissionForm extends Component
     public $permission;
     public $isEditing = false;
 
-    // Permission fields
     public ?string $application_uuid = null;
     public string $application_name = '';
     public string $permission_name = '';
     public ?string $permission_description = '';
 
-    // Group assignment
     public array $selectedGroups = [];
     public array $groupPermissions = [];
 
-    // Available data
     public array $availableGroups = [];
     public array $availableApplications = [];
 
@@ -89,7 +86,6 @@ class PermissionForm extends Component
             ->toArray();
 
         foreach ($this->permission->groupPermissions as $groupPermission) {
-            // dd($groupPermission);
             $this->groupPermissions[$groupPermission->group_uuid] = [
                 'assigned' => $groupPermission->permission_assigned === true,
                 'protected' => $groupPermission->permission_protected === true,
