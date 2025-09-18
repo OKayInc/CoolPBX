@@ -9,7 +9,7 @@
             </h3>
         </div>
 
-        <form method="post" action="{{ route('billings.payment.store', [$billing, $paymentGateway]) }}">
+        <form method="post" action="{{ route('billing.payment.store', [$billing, $paymentGateway]) }}">
             @csrf
 
 			<div class="card-body">
@@ -219,7 +219,7 @@
 				<button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
 					{{ 'Save' }}
 				</button>
-				<a href="{{ route('billings.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+				<a href="{{ route('billing.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
 					Cancel
 				</a>
 			</div>

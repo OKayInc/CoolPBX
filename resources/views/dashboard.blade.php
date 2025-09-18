@@ -1,4 +1,54 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container-fluid">
+    <div class="mt-3">
+        <div class="card-body">
+            <div class="row">
+                <x-widget-metric
+                    :title="$stats['service_level']['title']"
+                    :value="$stats['service_level']['value']"
+                    :subtitle="$stats['service_level']['subtitle']"
+                />
+                <x-widget-metric
+                    :title="$stats['average_abandon_time']['title']"
+                    :value="$stats['average_abandon_time']['value']"
+                    :subtitle="$stats['average_abandon_time']['subtitle']"
+                />
+                <x-widget-metric
+                    :title="$stats['average_wait_time']['title']"
+                    :value="$stats['average_wait_time']['value']"
+                    :subtitle="$stats['average_wait_time']['subtitle']"
+                />
+                <x-widget-metric
+                    :title="$stats['longest_wait_time']['title']"
+                    :value="$stats['longest_wait_time']['value']"
+                    :subtitle="$stats['longest_wait_time']['subtitle']"
+                />
+            </div>
+            <div class="row mt-4">
+                <x-widget-doughnut
+                    type="doughnut"
+                    :labels="array_keys($stats['active_agents']['metrics'])"
+                    :values="array_column($stats['active_agents']['metrics'], 'value')"
+                    :colors="array_column($stats['active_agents']['metrics'], 'color')"
+                    :count="$stats['active_agents']['count']"
+                    :title="$stats['active_agents']['title']"
+                />
+                <x-widget-doughnut
+                    type="doughnut"
+                    :labels="array_keys($stats['inbound_contacts']['metrics'])"
+                    :values="array_column($stats['inbound_contacts']['metrics'], 'value')"
+                    :colors="array_column($stats['inbound_contacts']['metrics'], 'color')"
+                    :count="$stats['inbound_contacts']['count']"
+                    :title="$stats['inbound_contacts']['title']"
+                />
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push("scripts")
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endpush

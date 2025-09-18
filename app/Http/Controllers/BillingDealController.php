@@ -34,7 +34,7 @@ class BillingDealController extends Controller
 
 		$billingDeal = $this->billingDealRepository->create($data);
 
-		return redirect()->route("billings.deals.edit", $billingDeal->billing_deal_uuid);
+		return redirect()->route("billing.deals.edit", $billingDeal->billing_deal_uuid);
 	}
 
     public function show(BillingDeal $billingDeal)
@@ -51,7 +51,7 @@ class BillingDealController extends Controller
 	{
 		$this->billingDealRepository->update($billingDeal, $request->validated());
 
-        return redirect()->route("billings.deals.edit", $billingDeal->billing_deal_uuid);
+        return redirect()->route("billing.deals.edit", $billingDeal->billing_deal_uuid);
 	}
 
     public function destroy(BillingDeal $billingDeal)

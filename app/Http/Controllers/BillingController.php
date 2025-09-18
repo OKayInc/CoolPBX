@@ -476,7 +476,7 @@ class BillingController extends Controller
 
 			$PaymentGatewayFactory->createPayment($billing, $request->validated());
 
-			return redirect()->route("billings.payment", $billing)->with("success", "Payment created successfully");
+			return redirect()->route("billing.payment", $billing)->with("success", "Payment created successfully");
 		}
 		catch(\Exception $e)
 		{

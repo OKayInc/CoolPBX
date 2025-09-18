@@ -16,7 +16,7 @@
 					<div class="info-box">
 						<div class="info-box-content">
 							<span class="info-box-text text-center">
-								<a href="{{ route('billings.payment.create', [$billing->billing_uuid, $paymentgateway]) }}">
+								<a href="{{ route('billing.payment.create', [$billing->billing_uuid, $paymentgateway]) }}">
 									<img src="{{ asset("assets/logos/{$paymentgateway}.png") }}" alt="{{ $paymentgateway }}">
 								</a>
 							</span>
