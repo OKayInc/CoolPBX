@@ -14,6 +14,12 @@
                         <i class="fas fa-users mr-1"></i> {{__('Users')}}
                     </a>
 
+                    @can('permission_view')
+                    <a href="{{ route('permissions.all') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-key mr-1"></i> {{__('Permissions')}}
+                    </a>
+                    @endcan
+
                     @can('group_add')
                     <a href="{{ route('groups.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> {{__('Add')}}

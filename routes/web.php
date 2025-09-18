@@ -114,6 +114,7 @@ Route::middleware(['auth','permission'])->group(function () {
     // PERMISSION
     //Route::resource('/permissions', PermissionController::class)->name('permissions', 'permissions');
     #Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.all');
     Route::get('/groups/{groupUuid}/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
     //Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
     //Route::get('/permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
@@ -125,6 +126,7 @@ Route::middleware(['auth','permission'])->group(function () {
     //Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
 
     Route::get('/permissions/create', [GroupPermissionController::class, 'create'])->name('permissions.create');
+    Route::get('/permissions/{permissionUuid}/edit', [GroupPermissionController::class, 'edit'])->name('permissions.edit');
 
     // GATEWAY
     Route::resource('/gateways', GateWayController::class)->name('gateways', 'gateways');

@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<livewire:group-permission-form :groupUuid="$groupUuid ?? null"/>
+<livewire:permission-form :permissionUuid="$permissionUuid ?? null"/>
 @endsection
