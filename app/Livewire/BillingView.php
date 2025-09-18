@@ -60,7 +60,7 @@ class BillingView extends DataTableComponent
 
                         if(!auth()->user()->hasGroup('superadmin'))
                         {
-                            $cell .= '<br><form action="' . route("billings.process", $row->billing_invoice_uuid) . '" method="post">';
+                            $cell .= '<br><form action="' . route("billing.process", $row->billing_invoice_uuid) . '" method="post">';
                             $cell .= '<input type="hidden" name="_token" value="' . csrf_token() .'">';
                             $cell .= '<button type="submit" class="btn btn-success btn-sm">Settle</button>';
                             $cell .= '<input type="hidden" name="settled" value="1">';
@@ -74,7 +74,7 @@ class BillingView extends DataTableComponent
 
                         if(!auth()->user()->hasGroup('superadmin'))
                         {
-                            $cell .= '<br><form action="' . route("billings.process", $row->billing_invoice_uuid) . '" method="post">';
+                            $cell .= '<br><form action="' . route("billing.process", $row->billing_invoice_uuid) . '" method="post">';
                             $cell .= '<input type="hidden" name="_token" value="' . csrf_token() .'">';
                             $cell .= '<button type="submit" class="btn btn-danger btn-sm">Refund</button>';
                             $cell .= '<input type="hidden" name="settled" value="-1">';
