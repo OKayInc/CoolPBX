@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Requests\PermissionRequest;
 use Livewire\Component;
 use App\Repositories\PermissionRepository;
 use App\Models\Permission;
@@ -36,18 +37,9 @@ class PermissionForm extends Component
 
     public function rules()
     {
-        return [
-            'application_name' => 'required|string|max:255',
-            'permission_name' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:v_permissions,permission_name' . ($this->isEditing ? ',' . $this->permissionUuid . ',permission_uuid' : ''),
-            ],
-            'permission_description' => 'nullable|string|max:500',
-            'selectedGroups' => 'array',
-            'selectedGroups.*' => 'exists:v_groups,group_uuid',
-        ];
+        $request = new PermissionRequest();
+        $request->setEditingContext($this->isEditing, $this->permissionUuid);
+        return $request->rules();
     }
 
     public function mount($permissionUuid = null)
