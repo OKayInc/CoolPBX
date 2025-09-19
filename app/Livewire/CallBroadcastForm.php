@@ -28,7 +28,6 @@ class CallBroadcastForm extends Component
     public ?string $recording_uuid = null;
     public ?string $broadcast_caller_id_name = '';
     public ?string $broadcast_caller_id_number = '';
-    public ?string $broadcast_destination_type = '';
     public ?string $broadcast_destination_data = '';
     public ?string $broadcast_phone_numbers = '';
     public $broadcast_phone_numbers_file = null;
@@ -98,7 +97,6 @@ class CallBroadcastForm extends Component
         $this->recording_uuid = $this->callBroadcast->recording_uuid;
         $this->broadcast_caller_id_name = $this->callBroadcast->broadcast_caller_id_name ?? '';
         $this->broadcast_caller_id_number = $this->callBroadcast->broadcast_caller_id_number ?? '';
-        $this->broadcast_destination_type = $this->callBroadcast->broadcast_destination_type ?? '';
         $this->broadcast_destination_data = $this->callBroadcast->broadcast_destination_data ?? '';
         $this->broadcast_phone_numbers = $this->callBroadcast->broadcast_phone_numbers ?? '';
         $this->broadcast_avmd = $this->callBroadcast->broadcast_avmd ?? 'false';
@@ -116,7 +114,6 @@ class CallBroadcastForm extends Component
         $this->domain_uuid = $user->domain_uuid;
         $this->broadcast_avmd = 'false';
         
-        // Set default account code based on user permissions
         if ($user->hasGroup('superadmin')) {
             $this->broadcast_accountcode = '';
         } else {
@@ -209,7 +206,6 @@ class CallBroadcastForm extends Component
                 'recording_uuid' => $this->recording_uuid,
                 'broadcast_caller_id_name' => $this->broadcast_caller_id_name,
                 'broadcast_caller_id_number' => $this->broadcast_caller_id_number,
-                'broadcast_destination_type' => $this->broadcast_destination_type,
                 'broadcast_destination_data' => $this->broadcast_destination_data,
                 'broadcast_phone_numbers' => $this->broadcast_phone_numbers,
                 'broadcast_avmd' => $this->broadcast_avmd,

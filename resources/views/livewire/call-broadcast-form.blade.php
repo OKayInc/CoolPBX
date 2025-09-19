@@ -167,7 +167,7 @@
                                     <i class="bi bi-arrow-right-circle me-2"></i>Destination Settings
                                 </h5>
                             </div>
-
+                            
                             <div class="col-md-6 mb-3">
                                 <label for="broadcast_destination_type" class="form-label">Destination Type</label>
                                 <select wire:model="broadcast_destination_type" class="form-select" id="broadcast_destination_type">
