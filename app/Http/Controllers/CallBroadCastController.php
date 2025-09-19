@@ -10,4 +10,9 @@ class CallBroadCastController extends Controller
     {
         return view('pages.callBroadCast.index');
     }
+
+    public function create()
+    {
+        return view('pages.callBroadcast.form');
+    }
 }
