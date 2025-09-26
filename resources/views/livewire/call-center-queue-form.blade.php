@@ -27,7 +27,6 @@
                         </div>
 
                         <div class="card-body">
-                            <!-- Error Messages -->
                             @if ($showDuplicateError)
                                 <div class="alert alert-warning">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
@@ -36,7 +35,6 @@
                             @endif
 
                             <form wire:submit.prevent="save">
-                                <!-- General Information -->
                                 <div class="row mb-4">
                                     <div class="col-12">
                                         <h5 class="border-bottom pb-2 mb-3">
@@ -396,73 +394,200 @@
 
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <h5 class="border-bottom pb-2 mb-3">
-                                            <i class="bi bi-people me-2"></i>Queue Agents
+                                        <h5
+                                            class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+                                            <span><i class="bi bi-people me-2"></i>Queue Agents</span>
+                                            <button type="button" wire:click="addTier"
+                                                class="btn btn-success btn-sm">
+                                                <i class="bi bi-plus-lg me-1"></i>Add Tier
+                                            </button>
                                         </h5>
                                     </div>
 
                                     <div class="col-12">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Agent</th>
-                                                        <th>Level</th>
-                                                        <th>Position</th>
-                                                        <th width="100">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($tiers as $index => $tier)
-                                                        <tr>
-                                                            <td>
-                                                                <select
-                                                                    wire:model="tiers.{{ $index }}.call_center_agent_uuid"
-                                                                    class="form-select">
-                                                                    <option value="">Select Agent</option>
-                                                                    @foreach ($availableAgents as $agent)
-                                                                        <option
-                                                                            value="{{ $agent->call_center_agent_uuid }}">
-                                                                            {{ $agent->agent_name }}
-                                                                        </option>
+                                        @if (count($tierStructure) > 0)
+                                            <div class="hierarchy-container">
+                                                @foreach ($tierStructure as $level => $tierData)
+                                                    <div class="tier-group mb-3"
+                                                        data-tier-level="{{ $level }}">
+                                                        <div class="tier-header">
+                                                            <div
+                                                                class="d-flex align-items-center justify-content-between">
+                                                                <div class="d-flex align-items-center gap-3">
+                                                                    <div class="tier-badge">Tier {{ $level }}
+                                                                    </div>
+                                                                    <div class="tier-stats">
+                                                                        <small class="text-muted">
+                                                                            <i
+                                                                                class="bi bi-people-fill me-1"></i>{{ count($tierData['agents']) }}
+                                                                            Agent{{ count($tierData['agents']) !== 1 ? 's' : '' }}
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="tier-actions">
+                                                                    <button type="button"
+                                                                        wire:click="addAgentToTier({{ $level }})"
+                                                                        class="btn btn-primary btn-sm me-2">
+                                                                        <i class="bi bi-person-plus me-1"></i>Add Agent
+                                                                    </button>
+                                                                    <button type="button"
+                                                                        wire:click="deleteTierLevel({{ $level }})"
+                                                                        class="btn btn-outline-danger btn-sm"
+                                                                        onclick="return confirm('Are you sure you want to delete this entire tier and all its agents?')">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="agents-container mt-3"
+                                                            data-tier-level="{{ $level }}"
+                                                            ondragover="event.preventDefault()"
+                                                            ondrop="handleDrop(event, {{ $level }})">
+
+                                                            @if (count($tierData['agents']) > 0)
+                                                                <div class="agents-sortable"
+                                                                    id="agents-tier-{{ $level }}">
+                                                                    @foreach ($tierData['agents'] as $index => $agent)
+                                                                        @php
+                                                                            $agentInfo = collect(
+                                                                                $availableAgents,
+                                                                            )->firstWhere(
+                                                                                'call_center_agent_uuid',
+                                                                                $agent['call_center_agent_uuid'],
+                                                                            );
+                                                                        @endphp
+
+                                                                        <div class="agent-card draggable"
+                                                                            draggable="true"
+                                                                            data-agent-id="{{ $agent['call_center_tier_uuid'] ?? $agent['call_center_agent_uuid'] }}"
+                                                                            data-tier-level="{{ $level }}"
+                                                                            data-agent-index="{{ $index }}"
+                                                                            ondragstart="handleDragStart(event)"
+                                                                            ondragend="handleDragEnd(event)">
+
+                                                                            <div class="drag-handle">
+                                                                                <i class="bi bi-grip-vertical"></i>
+                                                                            </div>
+
+                                                                            <div class="agent-info">
+                                                                                <div class="agent-avatar">
+                                                                                    {{ $agentInfo ? strtoupper(substr($agentInfo->agent_name, 0, 2)) : 'AG' }}
+                                                                                </div>
+                                                                                <div class="flex-grow-1">
+                                                                                    <div class="fw-bold">
+                                                                                        {{ $agentInfo->agent_name ?? 'Unknown Agent' }}
+                                                                                    </div>
+                                                                                    <div class="text-muted small">
+                                                                                        Position:
+                                                                                        {{ $agent['tier_position'] }}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="agent-actions">
+                                                                                    <button type="button"
+                                                                                        wire:click="deleteAgentFromTier({{ $level }}, {{ $index }}, '{{ $agent['call_center_tier_uuid'] ?? '' }}')"
+                                                                                        class="btn btn-sm btn-outline-danger"
+                                                                                        onclick="return confirm('Are you sure you want to remove this agent from the tier?')"
+                                                                                        title="Remove">
+                                                                                        <i class="bi bi-trash"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     @endforeach
-                                                                </select>
-                                                            </td>
-                                                            <td>
-                                                                <input type="number"
-                                                                    wire:model="tiers.{{ $index }}.tier_level"
-                                                                    class="form-control" min="0"
-                                                                    placeholder="1">
-                                                            </td>
-                                                            <td>
-                                                                <input type="number"
-                                                                    wire:model="tiers.{{ $index }}.tier_position"
-                                                                    class="form-control" min="0"
-                                                                    placeholder="1">
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <button type="button"
-                                                                    wire:click="deleteTier({{ $index }}, '{{ $tier['call_center_tier_uuid'] ?? '' }}')"
-                                                                    class="btn btn-sm btn-outline-danger"
-                                                                    title="Remove Agent">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                                </div>
+                                                            @else
+                                                                <div class="empty-tier-message">
+                                                                    <div class="text-center py-4">
+                                                                        <div class="text-muted mb-2">
+                                                                            <i class="bi bi-person-plus"
+                                                                                style="font-size: 2rem;"></i>
+                                                                        </div>
+                                                                        <p class="text-muted small mb-2">No agents in
+                                                                            this tier</p>
+                                                                        <button type="button"
+                                                                            wire:click="addAgentToTier({{ $level }})"
+                                                                            class="btn btn-outline-primary btn-sm">
+                                                                            Add First Agent
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="text-center py-5">
+                                                <div class="text-muted mb-3">
+                                                    <i class="bi bi-layers" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <h6 class="text-muted">No tiers created</h6>
+                                                <p class="text-muted small">Click "Add Tier" to create your first agent
+                                                    tier</p>
+                                            </div>
+                                        @endif
 
                                         <div class="mt-3">
                                             <small class="text-muted">
                                                 <i class="bi bi-info-circle me-1"></i>
-                                                Level: Priority level for the agent (lower numbers = higher priority).
-                                                Position: Order within the same level.
+                                                <strong>Tiers:</strong> Lower numbered tiers have higher priority.
+                                                <strong>Drag & Drop:</strong> You can drag agents between tiers or
+                                                reorder within a tier.
                                             </small>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Agent Modal -->
+                                @if ($showAgentModal)
+                                    <div class="modal fade show d-block" tabindex="-1"
+                                        style="background-color: rgba(0,0,0,0.5);">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        Add Agent to Tier {{ $modalAgent['tier_level'] ?? 'N/A' }}
+                                                    </h5>
+                                                    <button type="button" class="btn-close"
+                                                        wire:click="closeAgentModal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label for="modalAgent.call_center_agent_uuid"
+                                                            class="form-label">Agent <span
+                                                                class="text-danger">*</span></label>
+                                                        <select wire:model="modalAgent.call_center_agent_uuid"
+                                                            class="form-select @error('modalAgent.call_center_agent_uuid') is-invalid @enderror">
+                                                            <option value="">Select an agent</option>
+                                                            @foreach ($availableAgents as $agent)
+                                                                <option value="{{ $agent->call_center_agent_uuid }}">
+                                                                    {{ $agent->agent_name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('modalAgent.call_center_agent_uuid')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+
+                                                    <div class="alert alert-info">
+                                                        <i class="bi bi-lightbulb me-2"></i>
+                                                        <strong>Tip:</strong> After adding the agent, you can drag and
+                                                        drop to reorder within the tier or move to other tiers.
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        wire:click="closeAgentModal">Cancel</button>
+                                                    <button type="button" class="btn btn-primary"
+                                                        wire:click="saveAgent">
+                                                        Add Agent to Tier
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <!-- Form Actions -->
                                 <div class="row">
@@ -492,4 +617,254 @@
                 </div>
             </div>
         </div>
+
+
+        <style>
+            .tier-group {
+                border: 2px solid #e1e8ed;
+                border-radius: 12px;
+                padding: 20px;
+                background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .tier-group:hover {
+                border-color: #667eea;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            }
+
+            .tier-group.drag-over {
+                border-color: #28a745;
+                background: linear-gradient(145deg, #f8fff9 0%, #e8f5e8 100%);
+            }
+
+            .tier-badge {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.9em;
+            }
+
+            .agents-container {
+                min-height: 60px;
+                padding: 10px;
+                border-radius: 8px;
+                transition: background-color 0.2s ease;
+            }
+
+            .agents-container.drag-over {
+                background-color: #e8f5e8;
+                border: 2px dashed #28a745;
+            }
+
+            .agent-card {
+                background: white;
+                border: 1px solid #e1e8ed;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 10px;
+                position: relative;
+                transition: all 0.2s ease;
+                cursor: grab;
+            }
+
+            .agent-card:active {
+                cursor: grabbing;
+            }
+
+            .agent-card.dragging {
+                opacity: 0.5;
+                transform: rotate(2deg);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+            }
+
+            .agent-card:hover {
+                border-color: #667eea;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .drag-handle {
+                position: absolute;
+                left: 5px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #6c757d;
+                cursor: grab;
+                padding: 5px;
+            }
+
+            .drag-handle:hover {
+                color: #495057;
+            }
+
+            .agent-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-left: 20px;
+            }
+
+            .agent-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 0.8em;
+            }
+
+
+            .agent-actions {
+                margin-left: auto;
+            }
+
+            .empty-tier-message {
+                border: 2px dashed #dee2e6;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+            }
+
+            .tier-actions {
+                display: flex;
+                align-items: center;
+            }
+
+            .modal.show {
+                display: block !important;
+            }
+
+            /* Sortable placeholder */
+            .sortable-placeholder {
+                background-color: #e9ecef;
+                border: 2px dashed #6c757d;
+                height: 80px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+
+            @media (max-width: 768px) {
+                .agent-info {
+                    flex-wrap: wrap;
+                    margin-left: 10px;
+                }
+
+                .agent-actions {
+                    margin-left: 0;
+                    margin-top: 8px;
+                }
+
+                .drag-handle {
+                    display: none;
+                }
+
+                .tier-header .d-flex {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+            }
+        </style>
+
+
+
+        <script>
+            let draggedElement = null;
+            let draggedFromTier = null;
+
+            function handleDragStart(event) {
+                draggedElement = event.target;
+                draggedFromTier = event.target.dataset.tierLevel;
+
+                event.target.classList.add('dragging');
+
+                event.dataTransfer.setData('text/plain', JSON.stringify({
+                    agentId: event.target.dataset.agentId,
+                    fromTier: event.target.dataset.tierLevel,
+                    agentIndex: event.target.dataset.agentIndex
+                }));
+
+                event.dataTransfer.effectAllowed = 'move';
+            }
+
+            function handleDragEnd(event) {
+                event.target.classList.remove('dragging');
+
+                document.querySelectorAll('.agents-container, .tier-group').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+            }
+
+            function handleDragOver(event) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+
+                const container = event.currentTarget;
+                container.classList.add('drag-over');
+            }
+
+            function handleDragLeave(event) {
+                const container = event.currentTarget;
+                container.classList.remove('drag-over');
+            }
+
+            function handleDrop(event, tierLevel) {
+                event.preventDefault();
+
+                const container = event.currentTarget;
+                container.classList.remove('drag-over');
+
+                try {
+                    const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
+                    const {
+                        agentId,
+                        fromTier,
+                        agentIndex
+                    } = dragData;
+
+                    if (parseInt(fromTier) === parseInt(tierLevel)) {
+                        const rect = container.getBoundingClientRect();
+                        const agents = container.querySelectorAll('.agent-card:not(.dragging)');
+                        let newPosition = agents.length; 
+
+                        for (let i = 0; i < agents.length; i++) {
+                            const agentRect = agents[i].getBoundingClientRect();
+                            if (event.clientY < agentRect.top + agentRect.height / 2) {
+                                newPosition = i;
+                                break;
+                            }
+                        }
+
+                        @this.call('moveAgent', agentId, parseInt(fromTier), parseInt(tierLevel), newPosition + 1);
+                    } else {
+                        @this.call('moveAgent', agentId, parseInt(fromTier), parseInt(tierLevel), 1);
+                    }
+
+                } catch (error) {
+                    console.error('Error handling drop:', error);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.agents-container').forEach(container => {
+                    container.addEventListener('dragover', handleDragOver);
+                    container.addEventListener('dragleave', handleDragLeave);
+                });
+            });
+
+            document.addEventListener('livewire:navigated', function() {
+                document.querySelectorAll('.agents-container').forEach(container => {
+                    container.addEventListener('dragover', handleDragOver);
+                    container.addEventListener('dragleave', handleDragLeave);
+                });
+            });
+        </script>
     </div>

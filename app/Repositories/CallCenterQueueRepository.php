@@ -99,7 +99,7 @@ class CallCenterQueueRepository
             }
 
             $data = $this->setDefaults($data);
-            
+
             $filteredData = $this->applyCallCenterQueuePermissions($data);
 
             $this->validateRequired($filteredData);
@@ -134,7 +134,7 @@ class CallCenterQueueRepository
             }
 
             $data = $this->setDefaults($data);
-            
+
             $filteredData = $this->applyCallCenterQueuePermissions($data, $queue);
 
             $this->validateRequired($filteredData);
@@ -501,5 +501,38 @@ class CallCenterQueueRepository
         } else {
             $this->createDialplan($queue, $queue->dialplan_uuid);
         }
+    }
+
+
+    public function deleteSingleTier(string $tierUuid): bool
+    {
+        if (!$this->userHasPermission('call_center_tier_delete')) {
+            return false;
+        }
+
+        return DB::table(CallCenterTier::getTableName())
+            ->where('call_center_tier_uuid', $tierUuid)
+            ->delete() > 0;
+    }
+
+
+    public function createSingleTier(string $queueUuid, string $domainUuid, array $tierData): bool
+    {
+        if (!$this->userHasPermission('call_center_tier_add')) {
+            return false;
+        }
+
+        $data = [
+            'call_center_tier_uuid' => $tierData['call_center_tier_uuid'] ?? Str::uuid()->toString(),
+            'domain_uuid' => $domainUuid,
+            'call_center_queue_uuid' => $queueUuid,
+            'call_center_agent_uuid' => $tierData['call_center_agent_uuid'],
+            'agent_name' => $tierData['agent_name'],
+            'queue_name' => $tierData['queue_name'],
+            'tier_level' => $tierData['tier_level'] ?? 1,
+            'tier_position' => $tierData['tier_position'] ?? 1,
+        ];
+
+        return DB::table(CallCenterTier::getTableName())->insert($data);
     }
 }

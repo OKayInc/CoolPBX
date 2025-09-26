@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
+use function PHPSTORM_META\map;
+
 class CallCenterQueueForm extends Component
 {
     public $call_center_queue_uuid;
@@ -53,7 +55,6 @@ class CallCenterQueueForm extends Component
     public $dialplan_uuid;
     public $queue_cid_prefix = '';
     public $queue_time_base_score_sec = 0;
-
     public $strategyOptions = [
         'longest-idle-agent' => 'Longest Idle Agent',
         'round-robin' => 'Round Robin',
@@ -75,6 +76,19 @@ class CallCenterQueueForm extends Component
         'bridge' => 'Bridge',
         'voicemail' => 'Voicemail'
     ];
+
+    public $showAgentModal = false;
+    public $agentModalMode = false;
+    public $editingTierIndex = null;
+    public $modalAgent = [
+        'call_center_agent_uuid' => '',
+        'tier_level' => 1,
+        'tier_position' => 1,
+        'queue_name' => '',
+        'agent_name' => ''
+    ];
+
+    public $tierStructure = [];
 
     protected CallCenterQueueRepository $repository;
     protected SoundsService $soundsService;
@@ -140,31 +154,58 @@ class CallCenterQueueForm extends Component
     {
         $existingTiers = $this->repository->getTiers($this->call_center_queue_uuid, $this->domain_uuid);
 
-        $this->tiers = $existingTiers->map(function ($tier) {
-            return [
+        $this->tierStructure = [];
+
+        foreach ($existingTiers as $tier) {
+            $tierLevel = $tier->tier_level;
+
+            if (!isset($this->tierStructure[$tierLevel])) {
+                $this->tierStructure[$tierLevel] = [
+                    'tier_level' => $tierLevel,
+                    'agents' => []
+                ];
+            }
+
+            $this->tierStructure[$tierLevel]['agents'][] = [
                 'call_center_tier_uuid' => $tier->call_center_tier_uuid,
                 'call_center_agent_uuid' => $tier->call_center_agent_uuid,
                 'tier_level' => $tier->tier_level,
                 'tier_position' => $tier->tier_position,
                 'agent_name' => $tier->agent_name
             ];
-        })->toArray();
+        }
 
-        $this->initializeEmptyTiers();
+        foreach ($this->tierStructure as $level => $tierData) {
+            usort($this->tierStructure[$level]['agents'], function ($a, $b) {
+                return $a['tier_position'] - $b['tier_position'];
+            });
+        }
+
+        ksort($this->tierStructure);
     }
 
-    public function initializeEmptyTiers()
+
+    public function updateAgentOrder($tierLevel, $agentOrders)
     {
-        for ($i = 0; $i < $this->tierRows; $i++) {
-            $this->tiers[] = [
-                'call_center_tier_uuid' => Str::uuid()->toString(),
-                'call_center_agent_uuid' => '',
-                'tier_level' => 0,
-                'tier_position' => 0,
-                'agent_name' => ''
-            ];
+        if (isset($this->tierStructure[$tierLevel])) {
+            $agents = $this->tierStructure[$tierLevel]['agents'];
+            $reorderedAgents = [];
+
+            foreach ($agentOrders as $index => $agentId) {
+                foreach ($agents as $agent) {
+                    if ($agent['call_center_tier_uuid'] === $agentId || $agent['call_center_agent_uuid'] === $agentId) {
+                        $agent['tier_position'] = $index + 1;
+                        $reorderedAgents[] = $agent;
+                        break;
+                    }
+                }
+            }
+
+            $this->tierStructure[$tierLevel]['agents'] = $reorderedAgents;
         }
     }
+
+    public function initializeEmptyTiers() {}
 
     public function deleteTier($index, $tierUuid = null)
     {
@@ -182,8 +223,279 @@ class CallCenterQueueForm extends Component
         $this->tiers = array_values($this->tiers);
     }
 
+    public function addTier()
+    {
+        $maxLevel = empty($this->tierStructure) ? 0 : max(array_keys($this->tierStructure));
+        $newLevel = $maxLevel + 1;
+
+        $this->tierStructure[$newLevel] = [
+            'tier_level' => $newLevel,
+            'agents' => []
+        ];
+
+        $this->reorderTierStructure();
+    }
 
 
+    public function deleteTierLevel($level)
+    {
+        if (isset($this->tierStructure[$level])) {
+            foreach ($this->tierStructure[$level]['agents'] as $agent) {
+                if (isset($agent['call_center_tier_uuid']) && $this->isEditing) {
+                    try {
+                        $this->repository->deleteSingleTier($agent['call_center_tier_uuid']);
+                    } catch (Exception $e) {
+                        session()->flash('error', 'Error removing agent: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            unset($this->tierStructure[$level]);
+            $this->reorderTierStructure();
+            session()->flash('success', 'Tier deleted successfully.');
+        }
+    }
+
+    public function addAgentToTier($tierLevel)
+    {
+        $this->agentModalMode = true;
+        $this->modalAgent = [
+            'call_center_agent_uuid' => '',
+            'tier_level' => $tierLevel,
+            'tier_position' => $this->getNextPositionForTier($tierLevel),
+            'queue_name' => '',
+            'agent_name' => ''
+        ];
+        $this->showAgentModal = true;
+    }
+
+    public function getNextPositionForTier($level)
+    {
+        if (!isset($this->tierStructure[$level]) || empty($this->tierStructure[$level]['agents'])) {
+            return 1;
+        }
+
+        $maxPosition = 0;
+        foreach ($this->tierStructure[$level]['agents'] as $agent) {
+            if ($agent['tier_position'] > $maxPosition) {
+                $maxPosition = $agent['tier_position'];
+            }
+        }
+        return $maxPosition + 1;
+    }
+
+
+    public function moveAgent($agentId, $fromTier, $toTier, $newPosition)
+    {
+        $agent = null;
+        $agentIndex = null;
+
+        if (isset($this->tierStructure[$fromTier]['agents'])) {
+            foreach ($this->tierStructure[$fromTier]['agents'] as $index => $a) {
+                if ($a['call_center_tier_uuid'] === $agentId || $a['call_center_agent_uuid'] === $agentId) {
+                    $agent = $a;
+                    $agentIndex = $index;
+                    break;
+                }
+            }
+        }
+
+        if ($agent) {
+            unset($this->tierStructure[$fromTier]['agents'][$agentIndex]);
+            $this->tierStructure[$fromTier]['agents'] = array_values($this->tierStructure[$fromTier]['agents']);
+
+            $agent['tier_level'] = $toTier;
+            $agent['tier_position'] = $newPosition;
+
+            if (!isset($this->tierStructure[$toTier])) {
+                $this->tierStructure[$toTier] = [
+                    'tier_level' => $toTier,
+                    'agents' => []
+                ];
+            }
+
+            $this->tierStructure[$toTier]['agents'][] = $agent;
+
+            $this->reorderTierPositions($toTier);
+            $this->reorderTierPositions($fromTier);
+        }
+    }
+
+
+    public function deleteAgentFromTier($tierLevel, $agentIndex, $tierUuid = null)
+    {
+        if ($tierUuid && $this->isEditing) {
+            try {
+                $deleted = $this->repository->deleteSingleTier($tierUuid);
+                if ($deleted) {
+                    session()->flash('success', 'Agent removed from queue successfully.');
+                } else {
+                    session()->flash('error', 'Could not remove agent from queue.');
+                    return;
+                }
+            } catch (Exception $e) {
+                session()->flash('error', 'Error removing agent: ' . $e->getMessage());
+                return;
+            }
+        }
+
+        if (isset($this->tierStructure[$tierLevel]['agents'][$agentIndex])) {
+            unset($this->tierStructure[$tierLevel]['agents'][$agentIndex]);
+            $this->tierStructure[$tierLevel]['agents'] = array_values($this->tierStructure[$tierLevel]['agents']);
+            $this->reorderTierPositions($tierLevel);
+        }
+    }
+
+
+    public function reorderTierPositions($tierLevel)
+    {
+        if (isset($this->tierStructure[$tierLevel]['agents'])) {
+            foreach ($this->tierStructure[$tierLevel]['agents'] as $index => $agent) {
+                $this->tierStructure[$tierLevel]['agents'][$index]['tier_position'] = $index + 1;
+            }
+        }
+    }
+
+
+    public function reorderTierStructure()
+    {
+        ksort($this->tierStructure);
+
+        $newStructure = [];
+        $newLevel = 1;
+
+        foreach ($this->tierStructure as $level => $tierData) {
+            $newStructure[$newLevel] = $tierData;
+            $newStructure[$newLevel]['tier_level'] = $newLevel;
+
+            foreach ($newStructure[$newLevel]['agents'] as $index => $agent) {
+                $newStructure[$newLevel]['agents'][$index]['tier_level'] = $newLevel;
+            }
+
+            $newLevel++;
+        }
+
+        $this->tierStructure = $newStructure;
+    }
+
+    public function addAgent()
+    {
+        $this->agentModalMode = true;
+        $this->modalAgent = [
+            'call_center_agent_uuid' => '',
+            'tier_level' => 1,
+            'tier_position' => $this->getNextPosition(1),
+            'queue_name' => '',
+            'agent_name' => ''
+        ];
+        $this->showAgentModal = true;
+    }
+
+    public function saveAgent()
+    {
+        $this->validate([
+            'modalAgent.call_center_agent_uuid' => 'required',
+            'modalAgent.tier_level' => 'required|integer|min:1',
+            'modalAgent.tier_position' => 'required|integer|min:1',
+            'modalAgent.queue_name' => 'nullable|string|max:255',
+            'modalAgent.agent_name' => 'nullable|string|max:255',
+        ]);
+
+        $tierLevel = $this->modalAgent['tier_level'];
+
+        if ($this->agentModalMode === true) {
+            $tierData = [
+                'call_center_tier_uuid' => Str::uuid()->toString(),
+                'call_center_agent_uuid' => $this->modalAgent['call_center_agent_uuid'],
+                'tier_level' => $tierLevel,
+                'tier_position' => $this->modalAgent['tier_position'],
+                'queue_name' => $this->modalAgent['queue_name'],
+                'agent_name' => $this->modalAgent['agent_name']
+            ];
+
+            if ($this->isEditing) {
+                try {
+                    $this->repository->createSingleTier($this->call_center_queue_uuid, $this->domain_uuid, $tierData);
+                } catch (Exception $e) {
+                    session()->flash('error', 'Error adding agent: ' . $e->getMessage());
+                    return;
+                }
+            }
+
+            $newAgent = $tierData + [
+                'agent_name' => $this->getAgentName($this->modalAgent['call_center_agent_uuid'])
+            ];
+
+            if (!isset($this->tierStructure[$tierLevel])) {
+                $this->tierStructure[$tierLevel] = [
+                    'tier_level' => $tierLevel,
+                    'agents' => []
+                ];
+            }
+
+            $this->tierStructure[$tierLevel]['agents'][] = $newAgent;
+            $this->reorderTierPositions($tierLevel);
+        }
+
+        $this->closeAgentModal();
+        $this->reorderTierStructure();
+
+        if ($this->isEditing) {
+            session()->flash('success', 'Agent added to queue successfully.');
+        }
+    }
+
+    public function closeAgentModal()
+    {
+        $this->showAgentModal = false;
+        $this->editingTierIndex = false;
+        $this->modalAgent = [
+            'call_center_agent_uuid' => '',
+            'tier_level' => 1,
+            'tier_position' => 1
+        ];
+    }
+
+
+    public function reorderTiers()
+    {
+        usort($this->tiers, function ($a, $b) {
+            if ($a['tier_level'] == $b['tier_level']) {
+                return $a['tier_position'] - $b['tier_position'];
+            }
+            return $a['tier_level'] - $b['tier_level'];
+        });
+
+        $this->tiers = array_values($this->tiers);
+    }
+
+
+    public function getNextPosition($level)
+    {
+        $maxPosition = 0;
+        foreach ($this->tiers as $tier) {
+            if ($tier['tier_level'] == $level && $tier['tier_position'] > $maxPosition) {
+                $maxPosition = $tier['tier_position'];
+            }
+        }
+        return $maxPosition + 1;
+    }
+
+
+    public function getAgentName($agentUuid)
+    {
+        foreach ($this->availableAgents as $agent) {
+            if ($agent->call_center_agent_uuid === $agentUuid) {
+                return $agent->agent_name;
+            }
+        }
+        return '';
+    }
+
+    public function updatedModalAgentTierLevel()
+    {
+        $this->modalAgent['tier_position'] = $this->getNextPosition($this->modalAgent['tier_level']);
+    }
 
     public function loadQueue()
     {
@@ -266,6 +578,13 @@ class CallCenterQueueForm extends Component
             return;
         }
 
+        $this->tiers = [];
+        foreach ($this->tierStructure as $tierData) {
+            foreach ($tierData['agents'] as $agent) {
+                $this->tiers[] = $agent;
+            }
+        }
+
         try {
             $data = [
                 'call_center_queue_uuid' => $this->call_center_queue_uuid,
@@ -307,7 +626,6 @@ class CallCenterQueueForm extends Component
             session()->flash('success', $this->isEditing ? 'Queue updated successfully.' : 'Queue created successfully.');
             return redirect()->route('call_center_queues.index');
         } catch (Exception $e) {
-            throw $e;
             session()->flash('error', 'Error saving queue: ' . $e->getMessage());
         }
     }
