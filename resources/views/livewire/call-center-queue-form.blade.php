@@ -392,7 +392,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row mb-4">
+                                {{-- <div class="row mb-4">
                                     <div class="col-12">
                                         <h5
                                             class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
@@ -537,6 +537,183 @@
                                             </small>
                                         </div>
                                     </div>
+                                </div> --}}
+
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h5
+                                            class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+                                            <span><i class="bi bi-people me-2"></i>Queue Agents</span>
+                                            <button type="button" wire:click="addTier"
+                                                class="btn btn-success btn-sm"
+                                                {{ count($tierStructure) >= 10 ? 'disabled' : '' }}>
+                                                <i class="bi bi-plus-lg me-1"></i>Add Tier
+                                                @if (count($tierStructure) >= 10)
+                                                    <span class="badge bg-warning ms-1">Max</span>
+                                                @endif
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div class="col-12">
+                                        @if (count($tierStructure) > 0)
+                                            <div class="tiers-grid-container">
+                                                @foreach (array_chunk($tierStructure, 3, true) as $tierChunk)
+                                                    <div class="row mb-4">
+                                                        @foreach ($tierChunk as $level => $tierData)
+                                                            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                                                                <div class="tier-group h-100"
+                                                                    data-tier-level="{{ $level }}">
+                                                                    <div class="tier-header">
+                                                                        <div
+                                                                            class="d-flex align-items-center justify-content-between mb-3">
+                                                                            <div
+                                                                                class="d-flex align-items-center gap-2">
+                                                                                <div class="tier-badge">Tier
+                                                                                    {{ $level }}</div>
+                                                                                <div class="tier-stats">
+                                                                                    <small class="text-muted">
+                                                                                        <i
+                                                                                            class="bi bi-people-fill me-1"></i>{{ count($tierData['agents']) }}
+                                                                                        Agent{{ count($tierData['agents']) !== 1 ? 's' : '' }}
+                                                                                    </small>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="dropdown">
+                                                                                <button
+                                                                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                                                    type="button"
+                                                                                    data-bs-toggle="dropdown">
+                                                                                    <i class="bi bi-three-dots"></i>
+                                                                                </button>
+                                                                                <ul class="dropdown-menu">
+                                                                                    <li>
+                                                                                        <button type="button"
+                                                                                            wire:click="addAgentToTier({{ $level }})"
+                                                                                            class="dropdown-item">
+                                                                                            <i
+                                                                                                class="bi bi-person-plus me-2"></i>Add
+                                                                                            Agent
+                                                                                        </button>
+                                                                                    </li>
+                                                                                    <li>
+                                                                                        <hr class="dropdown-divider">
+                                                                                    </li>
+                                                                                    <li>
+                                                                                        <button type="button"
+                                                                                            wire:click="deleteTierLevel({{ $level }})"
+                                                                                            class="dropdown-item text-danger"
+                                                                                            onclick="return confirm('Are you sure you want to delete this entire tier and all its agents?')">
+                                                                                            <i
+                                                                                                class="bi bi-trash me-2"></i>Delete
+                                                                                            Tier
+                                                                                        </button>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="agents-container"
+                                                                        data-tier-level="{{ $level }}"
+                                                                        ondragover="event.preventDefault()"
+                                                                        ondrop="handleDrop(event, {{ $level }})">
+
+                                                                        @if (count($tierData['agents']) > 0)
+                                                                            <div class="agents-list"
+                                                                                id="agents-tier-{{ $level }}">
+                                                                                @foreach ($tierData['agents'] as $index => $agent)
+                                                                                    @php
+                                                                                        $agentInfo = collect(
+                                                                                            $availableAgents,
+                                                                                        )->firstWhere(
+                                                                                            'call_center_agent_uuid',
+                                                                                            $agent[
+                                                                                                'call_center_agent_uuid'
+                                                                                            ],
+                                                                                        );
+                                                                                    @endphp
+
+                                                                                    <div class="agent-card-compact draggable"
+                                                                                        draggable="true"
+                                                                                        data-agent-id="{{ $agent['call_center_tier_uuid'] ?? $agent['call_center_agent_uuid'] }}"
+                                                                                        data-tier-level="{{ $level }}"
+                                                                                        data-agent-index="{{ $index }}"
+                                                                                        ondragstart="handleDragStart(event)"
+                                                                                        ondragend="handleDragEnd(event)">
+
+                                                                                        <div
+                                                                                            class="agent-compact-info">
+                                                                                            <div
+                                                                                                class="agent-avatar-small">
+                                                                                                {{ $agentInfo ? strtoupper(substr($agentInfo->agent_name, 0, 2)) : 'AG' }}
+                                                                                            </div>
+                                                                                            <div class="agent-details">
+                                                                                                <div
+                                                                                                    class="fw-bold small">
+                                                                                                    {{ $agentInfo->agent_name ?? 'Unknown Agent' }}
+                                                                                                </div>
+                                                                                                <div class="text-muted"
+                                                                                                    style="font-size: 0.75rem;">
+                                                                                                    Pos:
+                                                                                                    {{ $agent['tier_position'] }}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <button type="button"
+                                                                                                wire:click="deleteAgentFromTier({{ $level }}, {{ $index }}, '{{ $agent['call_center_tier_uuid'] ?? '' }}')"
+                                                                                                class="btn btn-sm btn-outline-danger btn-remove"
+                                                                                                onclick="return confirm('Are you sure?')"
+                                                                                                title="Remove">
+                                                                                                <i class="bi bi-x"></i>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                @endforeach
+                                                                            </div>
+                                                                        @else
+                                                                            <div class="empty-tier-message-compact">
+                                                                                <div class="text-center py-3">
+                                                                                    <div class="text-muted mb-2">
+                                                                                        <i class="bi bi-person-plus"
+                                                                                            style="font-size: 1.5rem;"></i>
+                                                                                    </div>
+                                                                                    <p class="text-muted small mb-2">No
+                                                                                        agents</p>
+                                                                                    <button type="button"
+                                                                                        wire:click="addAgentToTier({{ $level }})"
+                                                                                        class="btn btn-outline-primary btn-sm">
+                                                                                        Add Agent
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="text-center py-5">
+                                                <div class="text-muted mb-3">
+                                                    <i class="bi bi-layers" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <h6 class="text-muted">No tiers created</h6>
+                                                <p class="text-muted small">Click "Add Tier" to create your first agent
+                                                    tier (0-9)</p>
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-3">
+                                            <small class="text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Tiers:</strong> Lower numbered tiers (0-9) have higher priority.
+                                                <strong>Drag & Drop:</strong> You can drag agents between tiers or
+                                                reorder within a tier.
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Agent Modal -->
@@ -620,13 +797,18 @@
 
 
         <style>
+            .tiers-grid-container {
+                width: 100%;
+            }
+
             .tier-group {
                 border: 2px solid #e1e8ed;
                 border-radius: 12px;
-                padding: 20px;
+                padding: 15px;
                 background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
                 transition: all 0.3s ease;
                 position: relative;
+                min-height: 200px;
             }
 
             .tier-group:hover {
@@ -640,17 +822,17 @@
             }
 
             .tier-badge {
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: linear-gradient(135deg, #667eea, #20a7c9);
                 color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
+                padding: 6px 12px;
+                border-radius: 15px;
                 font-weight: 600;
-                font-size: 0.9em;
+                font-size: 0.8em;
             }
 
             .agents-container {
-                min-height: 60px;
-                padding: 10px;
+                min-height: 120px;
+                padding: 8px;
                 border-radius: 8px;
                 transition: background-color 0.2s ease;
             }
@@ -660,117 +842,110 @@
                 border: 2px dashed #28a745;
             }
 
-            .agent-card {
+            .agent-card-compact {
                 background: white;
                 border: 1px solid #e1e8ed;
-                border-radius: 8px;
-                padding: 15px;
-                margin-bottom: 10px;
+                border-radius: 6px;
+                padding: 8px;
+                margin-bottom: 8px;
                 position: relative;
                 transition: all 0.2s ease;
                 cursor: grab;
             }
 
-            .agent-card:active {
+            .agent-card-compact:active {
                 cursor: grabbing;
             }
 
-            .agent-card.dragging {
+            .agent-card-compact.dragging {
                 opacity: 0.5;
-                transform: rotate(2deg);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                transform: rotate(1deg);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 z-index: 1000;
             }
 
-            .agent-card:hover {
+            .agent-card-compact:hover {
                 border-color: #667eea;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
 
-            .drag-handle {
-                position: absolute;
-                left: 5px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #6c757d;
-                cursor: grab;
-                padding: 5px;
-            }
-
-            .drag-handle:hover {
-                color: #495057;
-            }
-
-            .agent-info {
+            .agent-compact-info {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                margin-left: 20px;
+                gap: 8px;
             }
 
-            .agent-avatar {
-                width: 40px;
-                height: 40px;
+            .agent-avatar-small {
+                width: 30px;
+                height: 30px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: linear-gradient(135deg, #667eea, #12a8ce);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 color: white;
                 font-weight: bold;
-                font-size: 0.8em;
+                font-size: 0.7em;
+                flex-shrink: 0;
             }
 
-
-            .agent-actions {
-                margin-left: auto;
+            .agent-details {
+                flex-grow: 1;
+                min-width: 0;
             }
 
-            .empty-tier-message {
+            .agent-details .fw-bold {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .btn-remove {
+                padding: 2px 6px;
+                font-size: 0.75rem;
+                flex-shrink: 0;
+            }
+
+            .empty-tier-message-compact {
                 border: 2px dashed #dee2e6;
                 border-radius: 8px;
                 background-color: #f8f9fa;
-            }
-
-            .tier-actions {
-                display: flex;
-                align-items: center;
             }
 
             .modal.show {
                 display: block !important;
             }
 
-            /* Sortable placeholder */
-            .sortable-placeholder {
-                background-color: #e9ecef;
-                border: 2px dashed #6c757d;
-                height: 80px;
-                border-radius: 8px;
-                margin-bottom: 10px;
+            @media (max-width: 992px) {
+                .col-lg-4 {
+                    margin-bottom: 1rem;
+                }
             }
 
             @media (max-width: 768px) {
-                .agent-info {
-                    flex-wrap: wrap;
-                    margin-left: 10px;
+                .tier-group {
+                    padding: 12px;
+                    min-height: 150px;
                 }
 
-                .agent-actions {
-                    margin-left: 0;
-                    margin-top: 8px;
+                .agent-compact-info {
+                    gap: 6px;
                 }
 
-                .drag-handle {
-                    display: none;
+                .agent-avatar-small {
+                    width: 25px;
+                    height: 25px;
+                    font-size: 0.6em;
                 }
+            }
 
-                .tier-header .d-flex {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 10px;
-                }
+            .dropdown-toggle::after {
+                display: none;
+            }
+
+            .tier-header .dropdown-menu {
+                min-width: 140px;
             }
         </style>
 
@@ -833,7 +1008,7 @@
                     if (parseInt(fromTier) === parseInt(tierLevel)) {
                         const rect = container.getBoundingClientRect();
                         const agents = container.querySelectorAll('.agent-card:not(.dragging)');
-                        let newPosition = agents.length; 
+                        let newPosition = agents.length;
 
                         for (let i = 0; i < agents.length; i++) {
                             const agentRect = agents[i].getBoundingClientRect();

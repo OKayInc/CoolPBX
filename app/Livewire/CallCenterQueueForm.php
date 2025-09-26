@@ -225,8 +225,13 @@ class CallCenterQueueForm extends Component
 
     public function addTier()
     {
-        $maxLevel = empty($this->tierStructure) ? 0 : max(array_keys($this->tierStructure));
+        $maxLevel = empty($this->tierStructure) ? -1 : max(array_keys($this->tierStructure));
         $newLevel = $maxLevel + 1;
+
+        if ($newLevel > 9) {
+            session()->flash('error', 'Maximum of 10 tiers allowed (0-9).');
+            return;
+        }
 
         $this->tierStructure[$newLevel] = [
             'tier_level' => $newLevel,
@@ -362,7 +367,7 @@ class CallCenterQueueForm extends Component
         ksort($this->tierStructure);
 
         $newStructure = [];
-        $newLevel = 1;
+        $newLevel = 0;
 
         foreach ($this->tierStructure as $level => $tierData) {
             $newStructure[$newLevel] = $tierData;
@@ -383,8 +388,8 @@ class CallCenterQueueForm extends Component
         $this->agentModalMode = true;
         $this->modalAgent = [
             'call_center_agent_uuid' => '',
-            'tier_level' => 1,
-            'tier_position' => $this->getNextPosition(1),
+            'tier_level' => 0,
+            'tier_position' => $this->getNextPosition(0),
             'queue_name' => '',
             'agent_name' => ''
         ];
@@ -395,8 +400,8 @@ class CallCenterQueueForm extends Component
     {
         $this->validate([
             'modalAgent.call_center_agent_uuid' => 'required',
-            'modalAgent.tier_level' => 'required|integer|min:1',
-            'modalAgent.tier_position' => 'required|integer|min:1',
+            'modalAgent.tier_level' => 'required|integer|min:0|max:9',
+            'modalAgent.tier_position' => 'required|integer|min:1|max:9',
             'modalAgent.queue_name' => 'nullable|string|max:255',
             'modalAgent.agent_name' => 'nullable|string|max:255',
         ]);
@@ -451,7 +456,7 @@ class CallCenterQueueForm extends Component
         $this->editingTierIndex = false;
         $this->modalAgent = [
             'call_center_agent_uuid' => '',
-            'tier_level' => 1,
+            'tier_level' => 0,
             'tier_position' => 1
         ];
     }
