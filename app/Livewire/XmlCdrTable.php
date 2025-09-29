@@ -19,6 +19,11 @@ class XmlCDRTable extends DataTableComponent
 
     public $filters = [];
 
+    public function editTags($xml_cdr_uuid)
+    {
+        $this->dispatch('open-edit-tags-modal', xml_cdr_uuid: $xml_cdr_uuid);
+    }
+
     public function mount($filters = [])
     {
         $this->filters = $filters;
@@ -239,6 +244,15 @@ class XmlCDRTable extends DataTableComponent
             ->sortable();
         }
 
+        if(auth()->user()->hasPermission('xml_cdr_tags'))
+        {
+            $columns[] = Column::make("Tags", "tags")
+            ->format(function ($value, $row) {
+                return '<button class="btn btn-sm btn-primary" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-pen-to-square"></i></button>';
+            })
+            ->html();
+        }
+
         return $columns;
     }
 
@@ -304,6 +318,7 @@ class XmlCDRTable extends DataTableComponent
                     };
                 })
                 ->when($this->filters['order_field'] ?? null, fn($q, $v) => $q->orderBy($this->filters['order_field'], $this->filters['order_sort'] ?? 'asc'))
+                ->when($this->filters['tags'] ?? null, fn($q, $v) => $q->where('tags', 'like', "%{$v}%"))
                 ->with("extension")
                 ->orderBy("start_epoch", "desc");
         	if(App::hasDebugModeEnabled()){
