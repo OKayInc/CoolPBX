@@ -243,6 +243,16 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label for="queue_time_base_score_sec" class="form-label">Time Base Score Seconds</label>
+                                        <input type="number" wire:model="queue_time_base_score_sec"
+                                            class="form-control @error('queue_time_base_score_sec') is-invalid @enderror"
+                                            id="queue_time_base_score_sec" min="0" placeholder="30">
+                                        @error('queue_time_base_score_sec')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="queue_timeout_action" class="form-label">Timeout Action</label>
                                         <x-switch-destinations name="queue_timeout_action" :selected="$queue_timeout_action ?? ''"
                                             extension-type="dialplan" ring-group-type="dialplan"
@@ -774,16 +784,10 @@
                                                 <button type="button" wire:click="cancel" class="btn btn-secondary">
                                                     <i class="bi bi-arrow-left me-1"></i>Back
                                                 </button>
-                                                @if (!$isEditing)
-                                                    <button type="button" wire:click="resetForm"
-                                                        class="btn btn-outline-secondary ms-2">
-                                                        <i class="bi bi-arrow-clockwise me-1"></i>Reset
-                                                    </button>
-                                                @endif
                                             </div>
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="bi bi-check-circle me-1"></i>
-                                                {{ $isEditing ? 'Update Queue' : 'Create Queue' }}
+                                                {{ $isEditing ? 'Update' : 'Create' }}
                                             </button>
                                         </div>
                                     </div>
@@ -812,8 +816,8 @@
             }
 
             .tier-group:hover {
-                border-color: #667eea;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+                border-color: #0d6efd;
+                box-shadow: 0 8px 25px rgba(45, 84, 255, 0.15);
             }
 
             .tier-group.drag-over {
@@ -822,7 +826,7 @@
             }
 
             .tier-badge {
-                background: linear-gradient(135deg, #667eea, #20a7c9);
+                background: linear-gradient(135deg, #667eea, #0d6efd);
                 color: white;
                 padding: 6px 12px;
                 border-radius: 15px;
@@ -880,7 +884,7 @@
                 width: 30px;
                 height: 30px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, #667eea, #12a8ce);
+                background: linear-gradient(135deg, #667eea, #0d6efd);
                 display: flex;
                 align-items: center;
                 justify-content: center;
