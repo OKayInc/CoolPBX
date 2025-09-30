@@ -246,9 +246,9 @@ class XmlCDRTable extends DataTableComponent
 
         if(auth()->user()->hasPermission('xml_cdr_tags'))
         {
-            $columns[] = Column::make("Tags", "tags")
+            $columns[] = Column::make("Actions", "xml_cdr_uuid")
             ->format(function ($value, $row) {
-                return '<button class="btn btn-sm btn-primary" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-pen-to-square"></i></button>';
+                return '<button class="btn btn-sm btn-primary" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
             })
             ->html();
         }

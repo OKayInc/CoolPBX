@@ -232,12 +232,14 @@
     </div>
 
     <div class="row g-2 gx-4">
+        @can('xml_cdr_search_tags')
         <div class="col-md-6">
             <div class="form-group mb-3">
                 <label>Tags</label>
                 <input type="text" class="form-control" wire:model.defer="filters.tags">
             </div>
         </div>
+        @endcan
     </div>
 
     <div class="row g-2 mb-5 justify-content-end">
@@ -261,8 +263,8 @@
                         <h5 class="modal-title">Edit Tags</h5>
                         <button type="button" class="btn-close" wire:click="$set('showModal', false)"></button>
                     </div>
-                    <div class="modal-body">
-                        <input type="text" class="form-control form-tags" wire:model.defer="tags">
+                    <div class="modal-body" wire:ignore>
+                        <input type="text" class="form-control form-tags" value="{{ $tags }}" wire:model="tags">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cancel</button>
