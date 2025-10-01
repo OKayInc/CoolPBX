@@ -483,4 +483,19 @@ class BillingController extends Controller
 			return back()->with("error", $e->getMessage());
 		}
 	}
+
+	public function paymentSuccess(Request $request, Billing $billing, string $paymentGateway)
+	{
+		return view("pages.billings.payments.success");
+	}
+
+	public function paymentCancel(Request $request, Billing $billing, string $paymentGateway)
+	{
+		return view("pages.billings.payments.cancel");
+	}
+
+	public function paymentNotification(Request $request, Billing $billing, string $paymentGateway)
+	{
+		dd("yeah");
+	}
 }

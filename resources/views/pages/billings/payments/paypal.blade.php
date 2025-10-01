@@ -9,10 +9,16 @@
             </h3>
         </div>
 
-        <form method="post" action="{{ route('billing.payment.store', [$billing, $paymentGateway]) }}">
+        <form method="post" action="{{ env('PAYMENT_PAYPAL_URL') }}" id="frm">
             @csrf
 
 			<div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id='dynamicInput'></div>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="col-md-6">
@@ -148,9 +154,9 @@
                             @endphp
 
 	                        @if($billing->credit_type == "postpaid" && $billing->balance < 0 && $billing->force_postpaid_full_payment == 'true')
-                                <input class='form-control' type='hidden' name='amount' value='{{ $billing->credit }}'>
+                                <input class='form-control' type='hidden' id='amount' name='amount' value='{{ $billing->credit }}'>
                             @elseif(is_array(Setting::getSetting('billing','payment_amount')))
-                                <select class='form-select' name='amount'>
+                                <select class='form-select' id='amount' name='amount'>
                                 @foreach(Setting::getSetting('billing','payment_amount') as $payment_amount_option)
                                     @if($payment_amount_option >= $billing->min_payment)
                                         <option value='{{ $payment_amount_option }}'>{{ $payment_amount_option }}</option>
@@ -158,7 +164,7 @@
                                 @endforeach
                                 </select>
                             @else
-                                <input type="number" class="form-control" name="amount" value="{{ $credit }}" step="{{ $currency_step }}" min="{{ $min_payment }}" required>
+                                <input type="number" class="form-control" id='amount' name="amount" value="{{ $credit }}" step="{{ $currency_step }}" min="{{ $min_payment }}" required>
                             @endif
 
                             <span><small>Tax NOT included (if any)</small></span>
@@ -185,6 +191,9 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label">Fixed charges</label>
+                            @php
+                            $total_tax = 0;
+                            @endphp
                             @if($billingFixedCharges->count())
                             <table>
                                 <tbody>
@@ -193,6 +202,9 @@
                                         <td>{{ $billingFixedCharge->description }}</td>
                                         <td>{{ $billingFixedCharge->value }}</td>
                                     </tr>
+                                    @php
+                                    $total_tax += $billingFixedCharge->value;
+                                    @endphp
                                     @endforeach
                                 </tbody>
                             </table>
@@ -224,8 +236,103 @@
 				</a>
 			</div>
 
+            <input type='text' name='cmd' id='cmd' value='_xclick'>
+            <input type='text' name='business' value='{{ env('PAYMENT_PAYPAL_SELLER_ID') }}'>
+            <input type='text' name='item_name' value='Phone bill{{ $type_value }}'>
+            <input type='text' name='currency_code' value='{{ $billing->currency }}'>
+            <input type='text' name='notify_url' value='{{ str_replace("#UUID", $billing->billing_uuid, env('PAYMENT_PAYPAL_NOTIFY_URL')) }}'>
+            <input type='text' name='return' value='{{ str_replace("#UUID", $billing->billing_uuid, env('PAYMENT_PAYPAL_RETURN_URL')) }}'>
+            <input type='text' name='cancel_return' value='{{ str_replace("#UUID", $billing->billing_uuid, env('PAYMENT_PAYPAL_CANCEL_URL')) }}'>
+            <input type='text' name='no_shipping' value='1'>
+            <input type='text' id='tax' name='tax' value='0'>
+
 		</form>
 
     </div>
 </div>
 @endsection
+
+@push("scripts")
+<script>
+function doTax(e)
+{
+    const tax = document.getElementById("tax");
+    const amount = document.getElementById("amount");
+    const total_tax = "{{ $total_tax }}";
+
+    tax.value = (amount.value * total_tax / 100);
+}
+
+function changeType()
+{
+	var radios = document.getElementsByName("recurrent");
+	var div = document.getElementById("dynamicInput");
+	var value = -1;
+
+	for(var i = 0, length = radios.length; i < length; i++)
+    {
+		if (radios[i].checked) { value = radios[i].value; }
+	}
+
+	if (value == 0){
+		var a3 = document.getElementById("a3");
+		a3.parentNode.removeChild(a3);
+
+		var p3 = document.getElementById("p3");
+		p3.parentNode.removeChild(p3);
+
+		var t3 = document.getElementById("t3");
+		t3.parentNode.removeChild(t3);
+
+		var src = document.getElementById("src");
+		src.parentNode.removeChild(t3);
+
+		var cmd = document.getElementById("cmd");
+		cmd.value = "_xclick";
+	}
+	else {
+		var amount = document.getElementById("amount");
+
+		var a3 = document.createElement("input");
+		a3.type = "hidden";
+		a3.name = "a3";
+		a3.id = "a3";
+		a3.value = amount.value
+
+		var p3 = document.createElement("input");
+		p3.type = "hidden";
+		p3.name = "p3";
+		p3.id = "p3";
+		p3.value = "1";
+
+		var t3 = document.createElement("input");
+		t3.type = "hidden";
+		t3.name = "t3";
+		t3.id = "t3";
+		t3.value = "M"
+
+
+		var src = document.createElement("input");
+		src.type = "hidden";
+		src.name = "src";
+		src.id = "src";
+		src.value = "1"
+
+		div.appendChild(a3);
+		div.appendChild(p3);
+		div.appendChild(t3);
+		div.appendChild(src);
+
+		var cmd = document.getElementById("cmd");
+		cmd.value = "_xclick-subscriptions";
+	}
+}
+
+document.addEventListener('DOMContentLoaded', function()
+{
+    const form = document.getElementById("frm");
+
+    form.addEventListener("submit", doTax);
+});
+</script>
+@endpush
