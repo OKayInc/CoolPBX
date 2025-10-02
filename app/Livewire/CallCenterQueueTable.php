@@ -9,6 +9,7 @@ use App\Models\CallCenterTier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class CallCenterQueueTable extends DataTableComponent
 {
@@ -28,7 +29,7 @@ class CallCenterQueueTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPaginationEnabled();
 
-        if( $canEdit ) {
+        if ($canEdit) {
             $tableConfig->setTableRowUrl(function ($row) use ($canEdit) {
                 return route('call_center_queues.edit', $row->call_center_queue_uuid);
             });
@@ -66,6 +67,24 @@ class CallCenterQueueTable extends DataTableComponent
             Column::make("Description", "queue_description")
                 ->sortable()
                 ->searchable(),
+
+            Column::make("Priority", "queue_time_base_score_sec")
+                ->sortable()
+                ->format(function ($value) {
+                    if (empty($value) || $value == 0) {
+                        return '<span class="badge bg-secondary">Default</span>';
+                    }
+
+                    $priority = match (true) {
+                        $value <= 60 => '<span class="badge bg-danger">Highest</span>',
+                        $value <= 120 => '<span class="badge bg-warning">High</span>',
+                        $value <= 300 => '<span class="badge bg-info">Medium</span>',
+                        $value > 300 => '<span class="badge bg-success">Normal</span>',
+                    };
+
+                    return $priority . ' <small class="text-muted">(' . $value . 's)</small>';
+                })
+                ->html(),
         ];
 
         if ($this->showAll) {
@@ -107,7 +126,7 @@ class CallCenterQueueTable extends DataTableComponent
         } catch (\Throwable $th) {
             throw $th;
         }
-    }
+    } 
 
     public function bulkCopy()
     {
@@ -117,11 +136,11 @@ class CallCenterQueueTable extends DataTableComponent
             DB::beginTransaction();
 
             $queues = CallCenterQueue::whereIn('call_center_queue_uuid', $selectRows)
-                ->with('callcenteragents') // eager load
+                ->with('callcenteragents') 
                 ->get();
 
 
-            
+
             foreach ($queues as $queue) {
                 $newQueue = $queue->replicate();
                 $newQueue->call_center_queue_uuid = Str::uuid()->toString();
@@ -129,7 +148,7 @@ class CallCenterQueueTable extends DataTableComponent
                 $newQueue->save();
 
                 foreach ($queue->callcenteragents as $agent) {
-                    $pivot = $agent->pivot; 
+                    $pivot = $agent->pivot;
 
                     $newTier = $pivot->replicate();
                     $newTier->call_center_tier_uuid = Str::uuid()->toString();
@@ -147,6 +166,40 @@ class CallCenterQueueTable extends DataTableComponent
             DB::rollBack();
             throw $th;
         }
+    }
+
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Priority Level')
+                ->options([
+                    '' => 'All',
+                    'highest' => 'Highest',
+                    'high' => 'High',
+                    'medium' => 'Medium',
+                    'normal' => 'Normal',
+                    'not_set' => 'Not Set',
+                ])
+                ->filter(function (Builder $query, $value) {
+                    if ($value === 'not_set') {
+                        $query->where(function ($q) {
+                            $q->whereNull('queue_time_base_score_sec')
+                                ->orWhere('queue_time_base_score_sec', 0);
+                        });
+                    } else {
+                        $ranges = [
+                            'highest' => [1, 60],
+                            'high' => [61, 120],
+                            'medium' => [121, 300],
+                            'normal' => [301, PHP_INT_MAX],
+                        ];
+
+                        if (isset($ranges[$value])) {
+                            $query->whereBetween('queue_time_base_score_sec', $ranges[$value]);
+                        }
+                    }
+                }),
+        ];
     }
 
     public function builder(): Builder
