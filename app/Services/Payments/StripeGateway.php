@@ -77,7 +77,7 @@ class StripeGateway implements PaymentGatewayInterface
 
             $increment *= $dynamic_comission;
 
-            if(($paymentGatewayConfig['fixed_comission'] > 0) && (strlen($paymentGatewayConfig['fixed_comission_currency'])== 3))
+            if(($paymentGatewayConfig['fixed_comission'] > 0) && (strlen($paymentGatewayConfig['fixed_comission_currency']) == 3))
             {
                 $static_comission = currency_convert($paymentGatewayConfig['fixed_comission'], $billing->currency, $paymentGatewayConfig['fixed_comission_currency']);
 

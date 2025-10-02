@@ -73,7 +73,6 @@ Route::middleware(['auth','permission'])->group(function () {
     // BILLING
     Route::get('/billing/{billing}/{paymentGateway}/success', [BillingController::class, 'paymentSuccess'])->name('billing.success', 'billing.success');
     Route::get('/billing/{billing}/{paymentGateway}/cancel', [BillingController::class, 'paymentCancel'])->name('billing.cancel', 'billing.cancel');
-    Route::get('/billing/{billing}/{paymentGateway}/notification', [BillingController::class, 'paymentNotification'])->name('billing.notification', 'billing.notification');
     Route::match(['get', 'post'], '/billing/analysis', [BillingController::class, 'analysis'])->name('billing.analysis', 'billing.analysis');
     Route::get('/billing/pricing', [BillingController::class, 'pricing'])->name('billing.pricing', 'billing.pricing');
     Route::resource('/billing/deals', BillingDealController::class)->names('billing.deals')->parameters(["deals" => "billingDeal"]);

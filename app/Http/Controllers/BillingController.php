@@ -496,6 +496,8 @@ class BillingController extends Controller
 
 	public function paymentNotification(Request $request, Billing $billing, string $paymentGateway)
 	{
-		dd("yeah");
+		$PaymentGatewayFactory = PaymentGatewayFactory::make($paymentGateway);
+
+		$PaymentGatewayFactory->createPayment($billing, $request->toArray());
 	}
 }
