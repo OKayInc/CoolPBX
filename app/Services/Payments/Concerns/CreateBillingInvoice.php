@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Auth;
 
 trait CreateBillingInvoice
 {
-    public function calculateTotalTaxPercentage(Billing $billing): float
+    public function calculateTotalTaxPercentage(Billing $billing, $initial_tax = 0): float
     {
         $billingFixedCharges = $billing->billingFixedCharges()
             ->where("currency", "%")
             ->where("times", ">", 0)
             ->get();
 
-        $total_tax = 0;
+        $total_tax = $initial_tax;
 
         foreach($billingFixedCharges as $billingFixedCharge)
         {
@@ -24,8 +24,10 @@ trait CreateBillingInvoice
         return $total_tax;
     }
 
-    public function createBillingInvoice(Billing $billing, string $pluginUsed, int $settled, float $amount): void
+    public function createBillingInvoice(Billing $billing, string $pluginUsed, int $settled, array $data): void
 	{
+        $amount = (float)$data["amount"];
+
         $total_tax = $this->calculateTotalTaxPercentage($billing);
 
         $tax = $amount * ($total_tax / 100);
@@ -40,6 +42,7 @@ trait CreateBillingInvoice
             "plugin_used" => $pluginUsed,
             "domain_uuid" => $billing->domain_uuid,
             "tax" => $tax,
+            "post_payload" => json_encode($data),
         ];
 
         $this->billingInvoiceRepository->create($billingInvoiceData);

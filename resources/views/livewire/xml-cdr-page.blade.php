@@ -231,6 +231,17 @@
         @endcan
     </div>
 
+    <div class="row g-2 gx-4">
+        @can('xml_cdr_search_tags')
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label>Tags</label>
+                <input type="text" class="form-control" wire:model.defer="filters.tags">
+            </div>
+        </div>
+        @endcan
+    </div>
+
     <div class="row g-2 mb-5 justify-content-end">
         <div class="col-auto">
             <button wire:click="applyFilters" class="btn btn-primary">Apply</button>
@@ -242,4 +253,26 @@
 
     {{-- Table --}}
     <livewire:xml-cdr-table :filters="$filters" :key="json_encode($filters)"/>
+
+    {{-- Modal --}}
+    @if($showModal)
+        <div class="modal show d-block" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Tags</h5>
+                        <button type="button" class="btn-close" wire:click="$set('showModal', false)"></button>
+                    </div>
+                    <div class="modal-body" wire:ignore>
+                        <input type="text" class="form-control form-tags" value="{{ $tags }}" wire:model="tags">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cancel</button>
+                        <button type="button" class="btn btn-primary" wire:click="saveTags">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

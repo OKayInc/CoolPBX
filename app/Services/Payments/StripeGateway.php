@@ -69,7 +69,7 @@ class StripeGateway implements PaymentGatewayInterface
 
         if($charge->paid)
         {
-            $this->createBillingInvoice($billing, ucfirst($this->name), 1, $data["amount"]);
+            $this->createBillingInvoice($billing, ucfirst($this->name), 1, $data);
 
             $dynamic_comission = ($paymentGatewayConfig['percentage_comission'] > 0) ? (1 - ($paymentGatewayConfig['percentage_comission'] / 100)) : 1;
 
@@ -77,7 +77,7 @@ class StripeGateway implements PaymentGatewayInterface
 
             $increment *= $dynamic_comission;
 
-            if(($paymentGatewayConfig['fixed_comission'] > 0) && (strlen($paymentGatewayConfig['fixed_comission_currency'])== 3))
+            if(($paymentGatewayConfig['fixed_comission'] > 0) && (strlen($paymentGatewayConfig['fixed_comission_currency']) == 3))
             {
                 $static_comission = currency_convert($paymentGatewayConfig['fixed_comission'], $billing->currency, $paymentGatewayConfig['fixed_comission_currency']);
 
