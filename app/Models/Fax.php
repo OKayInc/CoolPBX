@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -51,6 +52,7 @@ class Fax extends Model
         'fax_caller_id_name',
         'fax_caller_id_number',
         'fax_toll_allow',
+        'fax_send_channels',
         'fax_forward_number',
         'fax_send_greeting',
         'fax_description',

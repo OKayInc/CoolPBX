@@ -23,6 +23,7 @@ use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
+use App\Http\Controllers\FaxController;
 use App\Http\Controllers\LcrController;
 use App\Http\Controllers\UserGroupController;
 use App\Http\Controllers\ModFormatCDRController;
@@ -108,6 +109,9 @@ Route::middleware(['auth','permission'])->group(function () {
         return redirect('/dashboard');
     });
     Route::get('/domains/switch/{domain}', [DomainController::class, 'switchByUuid'])->name('domain.switchuuid');
+
+    // FAX
+    Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
 
     // GROUP
     Route::resource('/groups', GroupController::class)->name('groups', 'groups');
