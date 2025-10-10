@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Fax;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class FaxRepository
 {
@@ -26,6 +28,13 @@ class FaxRepository
 
     public function create(array $data): Fax
     {
+        $data["domain_uuid"] = Session::get("domain_uuid");
+
+        if(!isset($data['dialplan_uuid']))
+        {
+            $data['dialplan_uuid'] = Str::uuid();
+        }
+
         return $this->model->create($data);
     }
 

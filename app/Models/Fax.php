@@ -47,7 +47,7 @@ class Fax extends Model
         'fax_email_connection_mailbox',
         'fax_email_inbound_subject_tag',
         'fax_email_outbound_subject_tag',
-        'fax_email_outbout_authorized_senders',
+        'fax_email_outbound_authorized_senders',
         'fax_pin_number',
         'fax_caller_id_name',
         'fax_caller_id_number',
