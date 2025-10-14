@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services\FreeSwitch;
+namespace App\Services;
 
 use App\Facades\FreeSwitch;
+use App\Services\FreeSwitch\FreeSwitchService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 

@@ -2,16 +2,17 @@
 
 namespace App\Repositories;
 
+use App\Facades\FreeSwitch;
 use App\Facades\Setting;
 use App\Models\Extension;
 use App\Models\FollowMe;
 use App\Models\FollowMeDestination;
-use App\Services\FreeSwitch\FeatureEventNotifyService;
-use App\Services\FreeSwitchService;
+use App\Services\FeatureEventNotifyService;
+use App\Services\FreeSwitch\FreeSwitchPresenceService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class CallForwardRepository
 {
@@ -19,23 +20,27 @@ class CallForwardRepository
     protected $followMe;
     protected $followMeDestination;
     protected $freeSwitchService;
-    protected FeatureEventNotifyService $featureEventNotifyService;
+    protected FeatureEventNotifyService $featureNotifyService;
+    protected FreeSwitchPresenceService $freeSwitchPresenceService;
+    protected ExtensionXmlRepository $xmlRepository;
 
     public function __construct(
         Extension $extension,
         FollowMe $followMe,
         FollowMeDestination $followMeDestination,
-        FeatureEventNotifyService $featureEventNotifyService
+        FeatureEventNotifyService $featureNotifyService,
+        FreeSwitchPresenceService $freeSwitchPresenceService,
+        ExtensionXmlRepository $xmlRepository
     ) {
         $this->extension = $extension;
         $this->followMe = $followMe;
         $this->followMeDestination = $followMeDestination;
-        $this->freeSwitchService = $featureEventNotifyService;
+        $this->featureNotifyService = $featureNotifyService;
+        $this->freeSwitchPresenceService = $freeSwitchPresenceService;
+        $this->xmlRepository = $xmlRepository;
+
     }
 
-    /**
-     * Get extension with all call forward related data
-     */
     public function findExtensionWithCallForwardData(string $extensionUuid): ?Extension
     {
         return $this->extension
@@ -46,9 +51,6 @@ class CallForwardRepository
             ->first();
     }
 
-    /**
-     * Get extensions for current user/domain
-     */
     public function getExtensionsForUser(?string $domainUuid = null): array
     {
         $user = auth()->user();
@@ -198,7 +200,7 @@ class CallForwardRepository
                 ->where('follow_me_uuid', $followMeUuid)
                 ->delete();
         }
-
+ 
         if ($extension->follow_me_enabled !== $followMeEnabled) {
             $extension->follow_me_enabled = $followMeEnabled;
             $extension->save();
@@ -278,7 +280,6 @@ class CallForwardRepository
 
         $this->synchronizeExtensionXml($extension);
 
-        $this->clearExtensionCache($extension);
     }
 
 
@@ -287,72 +288,56 @@ class CallForwardRepository
         $callTimeout = $extension->call_timeout ?? 30;
         $ringCount = ceil($callTimeout / 6);
 
-        $notifyData = [
+        $notifyParams = [
             'extension' => $extension->extension,
             'domain_name' => $extension->domain->domain_name,
             'do_not_disturb' => $data['do_not_disturb'] ?? 'false',
             'ring_count' => $ringCount,
             'forward_all_enabled' => $data['forward_all_enabled'] ?? 'false',
-            'forward_all_destination' => $data['forward_all_destination'] ?: '0',
+            'forward_all_destination' => empty($data['forward_all_destination']) ? '0' : $data['forward_all_destination'],
             'forward_busy_enabled' => $data['forward_busy_enabled'] ?? 'false',
-            'forward_busy_destination' => $data['forward_busy_destination'] ?: '0',
+            'forward_busy_destination' => empty($data['forward_busy_destination']) ? '0' : $data['forward_busy_destination'],
             'forward_no_answer_enabled' => $data['forward_no_answer_enabled'] ?? 'false',
-            'forward_no_answer_destination' => $data['forward_no_answer_destination'] ?: '0',
+            'forward_no_answer_destination' => empty($data['forward_no_answer_destination']) ? '0' : $data['forward_no_answer_destination'],
         ];
 
-        // $this->freeSwitchService->sendFeatureEventNotify($notifyData);
+        try {
+            $result = $this->featureNotifyService->sendNotification($notifyParams);
+
+            if (!$result['success']) {
+                Log::error('Failed to send feature event notification', $result);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error sending feature notification: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Send presence event to FreeSWITCH
-     */
     private function sendPresenceEvent(Extension $extension, string $dndEnabled): void
     {
-        $status = $dndEnabled === 'true' ? 'Active (1 waiting)' : 'Active (1 waiting)';
-        $answerState = $dndEnabled === 'true' ? 'confirmed' : 'terminated';
-
-        $eventData = [
-            'proto' => 'sip',
-            'login' => $extension->extension . '@' . $extension->domain->domain_name,
-            'from' => $extension->extension . '@' . $extension->domain->domain_name,
-            'status' => $status,
-            'rpid' => 'unknown',
-            'event_type' => 'presence',
-            'alt_event_type' => 'dialog',
-            'event_count' => 1,
-            'unique_id' => Str::uuid()->toString(),
-            'presence_call_direction' => 'outbound',
-            'answer_state' => $answerState,
-        ];
-
-        // $this->freeSwitchService->sendPresenceEvent($eventData);
+        $this->freeSwitchPresenceService->updateDndStatus(
+            $extension->extension,
+            $extension->domain->domain_name,
+            $dndEnabled === 'true'
+        );
     }
 
 
     private function synchronizeExtensionXml(Extension $extension): void
     {
-        // Check if XML synchronization is enabled
         $extensionsDir = config('freeswitch.extensions_dir');
 
         if ($extensionsDir && is_readable($extensionsDir)) {
-            // $this->freeSwitchService->synchronizeExtensionXml($extension);
+            $this->xmlRepository->synchronizeAll(
+                $extension->domain_uuid,
+                $extension->domain->domain_name
+            );
+
+            if (config('freeswitch.auto_reload_xml', true)) {
+                FreeSwitch::execute('reloadxml');
+            }
         }
     }
 
-    private function clearExtensionCache(Extension $extension): void
-    {
-        $cacheKeys = [
-            "directory:{$extension->extension}@{$extension->domain->domain_name}",
-        ];
-
-        if ($extension->number_alias) {
-            $cacheKeys[] = "directory:{$extension->number_alias}@{$extension->domain->domain_name}";
-        }
-
-        foreach ($cacheKeys as $key) {
-            Cache::forget($key);
-        }
-    }
 
     private function sanitizeDestination(?string $destination): ?string
     {
@@ -401,17 +386,14 @@ class CallForwardRepository
         try {
             DB::beginTransaction();
 
-            // Delete destinations first
             $this->followMeDestination
                 ->where('follow_me_uuid', $followMeUuid)
                 ->delete();
 
-            // Delete Follow Me record
             $this->followMe
                 ->where('follow_me_uuid', $followMeUuid)
                 ->delete();
 
-            // Update extension
             $this->extension
                 ->where('follow_me_uuid', $followMeUuid)
                 ->update([
