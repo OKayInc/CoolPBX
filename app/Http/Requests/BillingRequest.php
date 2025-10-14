@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidPricingList;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use app\Rules\ValidPricingList;
 
 class BillingRequest extends FormRequest
 {
