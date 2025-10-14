@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use app\Rules\ValidPricingList;
 
 class BillingRequest extends FormRequest
 {
@@ -28,7 +29,7 @@ class BillingRequest extends FormRequest
 			'balance' => 'bail|nullable|numeric',
 			'auto_topup_charge' => 'bail|nullable|integer|min:0',
 			'auto_topup_minimum_balance' => 'bail|nullable|integer|min:0',
-			'lcr_profile' => 'bail|nullable|string',
+			'lcr_profile' => ['bail','nullable','string', new ValidPricingList(config('freeswitch.SELLING_PRICING_LIST'))],
 			'max_rate' => 'bail|nullable|numeric|min:0',
 			'referred_by_uuid' => 'bail|nullable|uuid|exists:App\Models\Contact,contact_uuid',
 			'referred_depth' => 'bail|nullable|numeric|min:0',
