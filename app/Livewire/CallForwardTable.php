@@ -52,7 +52,7 @@ class CallForwardTable extends DataTableComponent
 
             Column::make('Call Forward', 'forward_all_destination')
                 ->format(function ($value, $row) {
-                    if ($row->forward_all_enabled === 'true' || $row->forward_all_enabled === true) {
+                    if ($row->forward_all_enabled === 'true') {
                         return $value ? format_phone($value) : '<span class="text-muted">(Invalid)</span>';
                     }
                     return '<span class="text-muted">Disabled</span>';
@@ -62,7 +62,7 @@ class CallForwardTable extends DataTableComponent
 
             Column::make("Follow Me", "follow_me_enabled")
                 ->format(function ($value, $row) {
-                    if ($row->follow_me_enabled === 'true' || $row->follow_me_enabled === true) {
+                    if ($row->follow_me_enabled === 'true') {
                         $count = $row->followMe?->destinations?->count() ?? 0;
                         if ($count > 0) {
                             return "Enabled ({$count})";
@@ -76,7 +76,7 @@ class CallForwardTable extends DataTableComponent
 
             Column::make("Do not Disturb", "do_not_disturb")
                 ->format(function ($value) {
-                    return ($value === 'true' || $value === true) ? 'Enabled' : '&nbsp;';
+                    return ($value === 'true') ? 'Enabled' : '&nbsp;';
                 })
                 ->html()
                 ->sortable(),
@@ -160,8 +160,6 @@ class CallForwardTable extends DataTableComponent
                 $extension->update($updateData);
                 $updatedCount++;
 
-                // TODO: Implementar notificaciones a teléfonos si es necesario
-                // $this->sendFeatureEventNotify($extension);
             }
 
             DB::commit();
@@ -238,8 +236,6 @@ class CallForwardTable extends DataTableComponent
 
                 $updatedCount++;
 
-                // TODO::Implementar notificaciones a teléfonos si es necesario se debe crear un service
-                // $this->sendFeatureEventNotify($extension);
 
 
             }
@@ -308,11 +304,6 @@ class CallForwardTable extends DataTableComponent
 
                 $extension->update($updateData);
                 $updatedCount++;
-
-                // TODO: Implementar notificaciones a teléfonos si es necesario
-                // $this->sendFeatureEventNotify($extension);
-
-
             }
 
             DB::commit();

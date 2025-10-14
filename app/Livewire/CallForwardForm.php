@@ -5,10 +5,7 @@ namespace App\Livewire;
 use App\Http\Requests\CallForwardRequest;
 use Livewire\Component;
 use App\Repositories\CallForwardRepository;
-use App\Models\Extension;
 use App\Facades\Setting;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
 
 class CallForwardForm extends Component
 {
@@ -167,9 +164,6 @@ class CallForwardForm extends Component
         }
     }
 
-    /**
-     * When follow_me_enabled changes
-     */
     public function updatedFollowMeEnabled()
     {
         if ($this->follow_me_enabled === 'true') {
@@ -311,9 +305,6 @@ class CallForwardForm extends Component
         session()->flash('info', 'Settings reset to defaults. Click Save to apply changes.');
     }
 
-    /**
-     * Get autocomplete extensions list
-     */
     public function getAutocompleteExtensions()
     {
         return collect($this->extensionsList)->map(function ($ext) {

@@ -40,7 +40,6 @@
                                     </h5>
                                 </div>
 
-                                {{-- Forward All --}}
                                 <div class="col-12 mb-3">
                                     <div class="card">
                                         <div class="card-body">
@@ -94,7 +93,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Forward Busy --}}
                                 <div class="col-12 mb-3">
                                     <div class="card">
                                         <div class="card-body">
@@ -148,7 +146,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Forward No Answer --}}
                                 <div class="col-12 mb-3">
                                     <div class="card">
                                         <div class="card-body">
@@ -202,7 +199,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Forward Not Registered --}}
                                 <div class="col-12 mb-3">
                                     <div class="card">
                                         <div class="card-body">
@@ -258,7 +254,6 @@
                             </div>
                         @endif
 
-                        {{-- FOLLOW ME SECTION --}}
                         @if(auth()->user()->hasPermission('follow_me'))
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -311,7 +306,6 @@
                                 </div>
                             </div>
 
-                            {{-- Follow Me Settings (Show/Hide based on status) --}}
                             @if($showFollowMeSettings)
                                 <div class="row mb-4" id="follow-me-settings">
                                     <div class="col-12">
@@ -324,7 +318,6 @@
                                             </div>
                                             <div class="card-body">
                                                 
-                                                {{-- Destinations Table --}}
                                                 <div class="mb-4">
                                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                                         <h6 class="mb-0">
@@ -436,7 +429,6 @@
                                                     </div>
                                                 </div>
 
-                                                {{-- Advanced Options --}}
                                                 <div class="row">
                                                     @if(auth()->user()->hasPermission('follow_me_ignore_busy'))
                                                         <div class="col-md-6 mb-3">
@@ -522,7 +514,6 @@
                             @endif
                         @endif
 
-                        {{-- DO NOT DISTURB SECTION --}}
                         @if(auth()->user()->hasPermission('do_not_disturb'))
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -576,7 +567,6 @@
                             </div>
                         @endif
 
-                        {{-- Action Buttons --}}
                         <div class="row">
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -615,7 +605,6 @@
             </div>
         </div>
     </div>
-  {{-- Datalist for autocomplete --}}
     <datalist id="extensions-list-all">
         @foreach($autocompleteExtensions as $ext)
             <option value="{{ $ext }}">
@@ -647,7 +636,6 @@
     </datalist>
 
 <style>
-    /* Smooth transitions */
     #follow-me-settings {
         animation: slideDown 0.3s ease-out;
     }
