@@ -22,7 +22,7 @@ class DialplanForm extends Component
     public bool $dialplan_destination = true;
     public bool $dialplan_continue = true;
     public ?int $dialplan_order = 0;
-    public bool $dialplan_enabled = true;
+    public bool $dialplan_enabled = false;
     public ?string $dialplan_description = '';
     public ?string $from_user = null;
     public ?string $from_domain = null;

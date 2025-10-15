@@ -322,15 +322,18 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="referred_percentage" class="form-label">Referred percentage</label>
+			    <div class="d-flex">
                             <input
-                                type="number"
+                                type="range"
                                 class="form-control @error('referred_percentage') is-invalid @enderror"
                                 id="referred_percentage"
                                 name="referred_percentage"
                                 min="0"
                                 max="100"
                                 value="{{ old('referred_percentage', $billing->referred_percentage ?? '') }}"
-                            >
+                                oninput="this.nextElementSibling.value = this.value"
+	  		    >&nbsp<output>{{ old('referred_percentage', $billing->referred_percentage ?? '') }}</output>%
+			    </div>
                             @error('referred_percentage')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
