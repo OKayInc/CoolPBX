@@ -17,11 +17,6 @@ class DeviceVendorRepository
     protected $deviceVendorFunctionGroup;
     protected $group;
 
-    protected $deviceVendorsTable = 'v_device_vendors';
-    protected $deviceVendorFunctionsTable = 'v_device_vendor_functions';
-    protected $deviceVendorFunctionGroupsTable = 'v_device_vendor_function_groups';
-    protected $groupsTable = 'v_groups';
-
     public function __construct(
         DeviceVendor $deviceVendor,
         DeviceVendorFunction $deviceVendorFunction,
@@ -219,8 +214,11 @@ class DeviceVendorRepository
 
     public function getFunctionGroups(string $deviceVendorFunctionUuid, string $deviceVendorUuid): array
     {
-        return DB::table($this->deviceVendorFunctionGroupsTable . ' as fg')
-            ->join($this->groupsTable . ' as g', 'fg.group_uuid', '=', 'g.group_uuid')
+        $deviceVendorFunctionGroupsTable = DeviceVendorFunctionGroup::getTable();
+        $groupsTable = Group::getTable();
+
+        return DB::table($deviceVendorFunctionGroupsTable . ' as fg')
+            ->join($groupsTable . ' as g', 'fg.group_uuid', '=', 'g.group_uuid')
             ->where('fg.device_vendor_uuid', $deviceVendorUuid)
             ->where('fg.device_vendor_function_uuid', $deviceVendorFunctionUuid)
             ->select('fg.*', 'g.domain_uuid as group_domain_uuid', 'g.group_name')
