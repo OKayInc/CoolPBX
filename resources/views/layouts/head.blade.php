@@ -3,3 +3,5 @@
 
 <meta name="author" content="{{ $author ?? config('app.author', 'Your Company Name') }}">
 <meta name="keywords" content="{{ $keywords ?? 'admin, dashboard, backoffice, management, panel' }}">
+<meta name="api-token" content="{{ auth()->user()->api_key ?? '' }}">
+<meta name="csrf-token" content="{{ csrf_token() }}">
