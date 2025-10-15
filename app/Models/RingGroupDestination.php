@@ -2,25 +2,26 @@
 
 namespace App\Models;
 
-use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class RingGroupDestination extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasFactory, HasUniqueIdentifier, GetTableName, HandlesStringBooleans;
 	protected $table = 'v_ring_group_destinations';
 	protected $primaryKey = 'ring_group_destination_uuid';
 	public $incrementing = false;
 	protected $keyType = 'string';	// TODO, check if UUID is valid
 	const CREATED_AT = 'insert_date';
 	const UPDATED_AT = 'update_date';
+    
+    protected $stringBooleanFields = [
+        'destination_enabled'
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +29,7 @@ class RingGroupDestination extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'ring_group_destination_uuid',
         'domain_uuid',
         'ring_group_uuid',
         'destination_number',

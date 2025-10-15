@@ -19,6 +19,9 @@ class LcrRequest extends FormRequest
 
         $lcrUuid = $lcr instanceof \App\Models\Lcr ? $lcr->lcr_uuid : null;
 
+        $dateStart = $this->input('date_start');
+        $dateEnd = $this->input('date_end');
+
         return [
             'origination_digits' => 'bail|nullable|string|max:255',
             'lcr_direction'      => 'bail|required|in:inbound,outbound,local',
@@ -33,8 +36,8 @@ class LcrRequest extends FormRequest
             'prefix'             => 'bail|nullable|string|max:255',
             'suffix'             => 'bail|nullable|string|max:255',
             'lcr_profile'        => 'bail|nullable|string|max:255',
-            'date_start'         => 'bail|nullable|date',
-            'date_end'           => 'bail|nullable|date|after_or_equal:date_start',
+            'date_start'         => 'bail|required|date',
+            'date_end'           => 'bail|required|date|after_or_equal:date_start',
             'quality'            => 'bail|nullable|numeric|min:0',
             'reliability'        => 'bail|nullable|numeric|min:0',
             'cid'                => 'bail|nullable|string|max:255',
@@ -46,7 +49,7 @@ class LcrRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                new UniqueLcrDigitsDateRange($lcrUuid),
+                new UniqueLcrDigitsDateRange($lcrUuid, $dateStart, $dateEnd),
             ],
             'currency' => [
                 'bail',
@@ -55,5 +58,13 @@ class LcrRequest extends FormRequest
                 Rule::in(array_merge(config('currencies'), ['%']))
             ],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'date_start' => $this->input('date_start') ?: now()->toDateString(),
+            'date_end' => $this->input('date_end') ?: now()->addYears(10)->toDateString(),
+        ]);
     }
 }

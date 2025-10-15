@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\DomainAPIController;
 use App\Http\Controllers\API\ExtensionAPIController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EmailQueueController;
 use App\Http\Controllers\UserActivationController;
@@ -31,6 +32,8 @@ Route::post('/activate-user', [UserActivationController::class, 'activateUser'])
 Route::get('/contacts/search', [ContactController::class, 'search']);
 
 Route::post('/authenticate', [AuthController::class, 'apiLogin']);
+
+Route::post('/billing/{billing}/{paymentGateway}/notification', [BillingController::class, 'paymentNotification'])->name('billing.notification', 'billing.notification');
 
 Route::middleware(VerifyAuthenticationKey::class)->group(function () {
     Route::get('/my/domains', [DomainAPIController::class, 'mine']);

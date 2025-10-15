@@ -9,7 +9,7 @@
             </h3>
         </div>
 
-        <form method="post" action="{{ route('billings.payment.store', [$billing, $paymentGateway]) }}">
+        <form id="payment-form" method="post" action="{{ route('billing.payment.store', [$billing, $paymentGateway]) }}">
             @csrf
 
 			<div class="card-body">
@@ -122,9 +122,10 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">Credit card</label>
-                            <input type="number" class="form-control" name="card-number">
+                            <label class="form-label">Debit/Credit Card</label>
+                            <input class="form-control" id="card-number" type='number' data-stripe='number'>
                         </div>
+                        <div id='payment-errors' class="invalid-feedback d-block"></div>
                     </div>
                 </div>
 
@@ -132,19 +133,21 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label class="form-label">CVC</label>
-                            <input type="number" class="form-control" name="cvc" max="999">
+                            <input class="form-control" id="card-cvc" type="number" data-stripe="cvc">
                         </div>
                     </div>
+
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label class="form-label">Expiration month</label>
-                            <input type="number" class="form-control" name="exp-month" min="1" max="12">
+                            <label class="form-label">Exp. month</label>
+                            <input class="form-control" id="card-expiry-month" type="number" min="1" max="12" data-stripe="exp-month">
                         </div>
                     </div>
+
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label class="form-label">Expiration year</label>
-                            <input type="number" class="form-control" name="exp-year" min="2014" max="2026">
+                            <label class="form-label">Exp. year</label>
+		                    <input class="form-control" id="card-expiry-year" type="number" min="2014" max="2026" data-stripe="exp-year">
                         </div>
                     </div>
                 </div>
@@ -155,7 +158,7 @@
                             <label class="form-label">Amount</label>
 
                             @php
-                                $credit = $defaultCharge;
+                                $credit = $paymentGatewayConfig["default_charge"];
 
                                 if($billing->credit_type === 'postpaid' && $billing->balance < 0)
                                 {
@@ -178,9 +181,9 @@
                             @endphp
 
 	                        @if($billing->credit_type == "postpaid" && $billing->balance < 0 && $billing->force_postpaid_full_payment == 'true')
-                                <input class='form-control' type='hidden' name='amount' value='{{ $billing->credit }}'>
+                                <input class='form-control' type='hidden' name='amount' id='amount' value='{{ $billing->credit }}'>
                             @elseif(is_array(Setting::getSetting('billing','payment_amount')))
-                                <select class='form-select' name='amount'>
+                                <select class='form-select' name='amount' id='amount'>
                                 @foreach(Setting::getSetting('billing','payment_amount') as $payment_amount_option)
                                     @if($payment_amount_option >= $billing->min_payment)
                                         <option value='{{ $payment_amount_option }}'>{{ $payment_amount_option }}</option>
@@ -188,7 +191,7 @@
                                 @endforeach
                                 </select>
                             @else
-                                <input type="number" class="form-control" name="amount" value="{{ $credit }}" step="{{ $currency_step }}" min="{{ $min_payment }}" required>
+                                <input type="number" class="form-control" name="amount" id='amount' value="{{ $credit }}" step="{{ $currency_step }}" min="{{ $min_payment }}" required>
                             @endif
 
                             <span><small>Plus taxes</small></span>
@@ -246,10 +249,10 @@
             </div>
 
 			<div class="card-footer">
-				<button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
+				<button type="submit" id="btn-submit" class="btn btn-primary px-4 py-2" style="border-radius: 4px;">
 					{{ 'Save' }}
 				</button>
-				<a href="{{ route('billings.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+				<a href="{{ route('billing.index') }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
 					Cancel
 				</a>
 			</div>
@@ -259,3 +262,66 @@
     </div>
 </div>
 @endsection
+
+@push("scripts")
+<script src="https://js.stripe.com/v1/"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function ()
+{
+    const stripe = Stripe.setPublishableKey("{{ env('PAYMENT_STRIPE_KEY') }}");
+    const form = document.getElementById('payment-form');
+    const errorDiv = document.getElementById('payment-errors');
+
+    form.addEventListener('submit', async function (event)
+    {
+        event.preventDefault();
+
+        document.getElementById('btn-submit').disabled = true;
+
+        var chargeAmount = 100 * form.querySelector('#amount').value;
+
+        // createToken returns immediately - the supplied callback submits the form if there are no errors
+        Stripe.createToken({
+                number: form.querySelector('#card-number').value,
+                cvc: form.querySelector('#card-cvc').value,
+                exp_month: form.querySelector('#card-expiry-month').value,
+                exp_year: form.querySelector('#card-expiry-year').value,
+            }, chargeAmount, function(status, response)
+            {
+                if(status == 200)
+                {
+                    const hiddenInputToken = document.createElement('input');
+                    const hiddenInputCard = document.createElement('input');
+
+                    hiddenInputToken.setAttribute('type', 'hidden');
+                    hiddenInputToken.setAttribute('name', 'stripeToken');
+                    hiddenInputToken.setAttribute('value', response.id);
+
+                    hiddenInputCard.setAttribute('type', 'hidden');
+                    hiddenInputCard.setAttribute('name', 'stripeCard');
+                    hiddenInputCard.setAttribute('value', response.card.id);
+
+                    form.appendChild(hiddenInputToken);
+                    form.appendChild(hiddenInputCard);
+
+                    form.submit();
+                }
+                else
+                {
+                    if(response.error)
+                    {
+                        const paymentError = document.getElementById("payment-errors");
+
+                        paymentError.innerHTML = response.error.message;
+                    }
+                }
+
+                document.getElementById('btn-submit').disabled = false;
+            }
+        );
+
+        return false;
+    });
+});
+</script>
+@endpush

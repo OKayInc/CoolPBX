@@ -9,6 +9,7 @@ import { TempusDominus } from '@eonasdan/tempus-dominus';
 import '@eonasdan/tempus-dominus/dist/css/tempus-dominus.min.css'
 import UseBootstrapTag from 'use-bootstrap-tag'
 import 'use-bootstrap-tag/dist/use-bootstrap-tag.css'
+import './dashboard-charts.js';
 
 const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
 const Default = {
@@ -16,6 +17,37 @@ const Default = {
     scrollbarAutoHide: 'leave',
     scrollbarClickScroll: true,
 };
+
+function initTags(scope = document)
+{
+    const formTags = scope.querySelectorAll(".form-tags");
+
+    formTags.forEach(function(element)
+    {
+        if(!element.dataset.tag && element.tagName.toLowerCase() === 'input')
+        {
+            UseBootstrapTag(element);
+
+            element.dataset.tag = true;
+
+            element.addEventListener("change", function()
+            {
+                const wrapper = element.closest("[wire\\:id]");
+
+                if(wrapper)
+                {
+                    const livewireComponent = Livewire.find(wrapper.getAttribute("wire:id"));
+
+                    if(livewireComponent)
+                    {
+                        livewireComponent.set(element.getAttribute("wire:model"), element.value);
+                    }
+                }
+            });
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
     // if (sidebarWrapper && typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== 'undefined') {
@@ -127,25 +159,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const formTags = document.querySelectorAll(".form-tags");
-
-    formTags.forEach(function(element)
-    {
-        UseBootstrapTag(element);
-
-        element.addEventListener("change", function()
-        {
-            const wrapper = element.closest("[wire\\:id]");
-
-            if(wrapper)
-            {
-                const livewireComponent = Livewire.find(wrapper.getAttribute("wire:id"));
-
-                if(livewireComponent)
-                {
-                    livewireComponent.set(element.getAttribute("wire:model"), element.value);
-                }
-            }
-        });
-    });
+    initTags();
 });
+
+
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.added', ({ el }) => initTags(el));
+    Livewire.hook('morph.updated', ({ el }) => initTags(el));
+});
+

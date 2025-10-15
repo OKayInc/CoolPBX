@@ -51,4 +51,6 @@ class Phrase extends Model
 		return $this->hasMany(PhraseDetail::class, 'phrase_uuid', 'phrase_uuid')
 			->orderBy('phrase_detail_order', 'asc');
 	}
+
+	
 }

@@ -30,6 +30,7 @@ class Dialplan extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+			'dialplan_uuid',
 	        'domain_uuid',
 	        'app_uuid',
 	        'hostname',

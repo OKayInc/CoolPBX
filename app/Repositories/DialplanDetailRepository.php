@@ -61,4 +61,9 @@ class DialplanDetailRepository
 	{
 		return $this->model->whereIn('dialplan_detail_uuid', $dialplanDetails)->delete();
 	}
+
+	public function deleteByDialplan(Dialplan $dialplan): bool
+	{
+		return $this->model->where('dialplan_uuid', $dialplan->dialplan_uuid)->delete();
+	}
 }

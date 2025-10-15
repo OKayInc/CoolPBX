@@ -19,7 +19,7 @@ class OfflineGateway implements PaymentGatewayInterface
 
     public function createPayment(Billing $billing, array $data)
     {
-        $this->createBillingInvoice($billing, "Offline", 0, $data["amount"]);
+        $this->createBillingInvoice($billing, "Offline", 0, $data);
 
         //TODO send email
     }

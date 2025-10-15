@@ -24,6 +24,8 @@ class DialplanForm extends Component
     public ?int $dialplan_order = 0;
     public bool $dialplan_enabled = true;
     public ?string $dialplan_description = '';
+    public ?string $from_user = null;
+    public ?string $from_domain = null;
 
     public ?array $dialplanDetails = [];
 

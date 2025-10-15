@@ -9,26 +9,28 @@ use Illuminate\Support\Facades\DB;
 class UniqueLcrDigitsDateRange implements ValidationRule
 {
     protected ?string $currentUuid;
+    protected string $dateStart;
+    protected string $dateEnd;
 
-    public function __construct(?string $currentUuid = null)
+    public function __construct(?string $currentUuid = null, ?string $dateStart = null, ?string $dateEnd = null)
     {
         $this->currentUuid = $currentUuid;
+        $this->dateStart = $dateStart;
+        $this->dateEnd = $dateEnd;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $digits = $value;
-        $dateStart = request('date_start');
-        $dateEnd = request('date_end');
 
         $conflict = Lcr::where('digits', $digits)
             ->when($this->currentUuid, function ($query) {
                 $query->where('lcr_uuid', '!=', $this->currentUuid);
             })
-            ->where(function ($query) use ($dateStart, $dateEnd) {
-                $query->where(function ($q) use ($dateStart, $dateEnd) {
-                    $q->where('date_start', '<=', $dateEnd)
-                      ->where('date_end', '>=', $dateStart);
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->where('date_start', '<=', $this->dateEnd)
+                      ->where('date_end', '>=', $this->dateStart);
                 });
             })
             ->exists();

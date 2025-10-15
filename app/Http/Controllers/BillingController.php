@@ -49,7 +49,7 @@ class BillingController extends Controller
 
 		$billing = $this->billingRepository->create($data);
 
-		return redirect()->route("billings.edit", $billing->billing_uuid);
+		return redirect()->route("billing.edit", $billing->billing_uuid);
 	}
 
     public function show(Billing $billing)
@@ -69,14 +69,14 @@ class BillingController extends Controller
 	{
 		$this->billingRepository->update($billing, $request->validated());
 
-        return redirect()->route("billings.edit", $billing->billing_uuid);
+        return redirect()->route("billing.edit", $billing->billing_uuid);
 	}
 
     public function destroy(Billing $billing)
     {
         $this->billingRepository->delete($billing);
 
-        return redirect()->route('billings.index');
+        return redirect()->route('billing.index');
     }
 
     public function analysis(Request $request)
@@ -458,26 +458,46 @@ class BillingController extends Controller
 
 	public function paymentCreate(Billing $billing, string $paymentGateway)
 	{
-		$paymentGateways = config('paymentgateways');
-
-		$paymentgatewayConfig = $paymentGateways[$paymentGateway];
-
-		$defaultCharge = $paymentgatewayConfig['default_charge'];
+		$paymentGatewayConfig = getPaymentGatewayConfig($paymentGateway);
 
         $billingFixedCharges = $billing->billingFixedCharges()
             ->where("currency", "%")
             ->where("times", ">", 0)
             ->get();
 
-		return view("pages.billings.payments.{$paymentGateway}", compact("billing", "paymentGateway", "defaultCharge", "billingFixedCharges"));
+		return view("pages.billings.payments.{$paymentGateway}", compact("billing", "paymentGateway", "paymentGatewayConfig", "billingFixedCharges"));
 	}
 
 	public function paymentStore(BillingPaymentRequest $request, Billing $billing, string $paymentGateway)
 	{
+		try
+		{
+			$PaymentGatewayFactory = PaymentGatewayFactory::make($paymentGateway);
+
+			$PaymentGatewayFactory->createPayment($billing, $request->validated());
+
+			return redirect()->route("billing.payment", $billing)->with("success", "Payment created successfully");
+		}
+		catch(\Exception $e)
+		{
+			return back()->with("error", $e->getMessage());
+		}
+	}
+
+	public function paymentSuccess(Request $request, Billing $billing, string $paymentGateway)
+	{
+		return view("pages.billings.payments.success");
+	}
+
+	public function paymentCancel(Request $request, Billing $billing, string $paymentGateway)
+	{
+		return view("pages.billings.payments.cancel");
+	}
+
+	public function paymentNotification(Request $request, Billing $billing, string $paymentGateway)
+	{
 		$PaymentGatewayFactory = PaymentGatewayFactory::make($paymentGateway);
 
-		$PaymentGatewayFactory->createPayment($billing, $request->validated());
-
-		return redirect()->route("billings.payment", $billing);
+		$PaymentGatewayFactory->createPayment($billing, $request->toArray());
 	}
 }

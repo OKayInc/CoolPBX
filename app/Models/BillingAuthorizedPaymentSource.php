@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class BillingAuthorizedPaymentSource extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_billing_authorized_payment_sources';
 	protected $primaryKey = 'billing_authorized_payment_source_uuid';
 	public $incrementing = false;
@@ -28,6 +29,8 @@ class BillingAuthorizedPaymentSource extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+		'billing_uuid',
+		'domain_uuid',
 		'billing_authorized_payment_source_plugin_used',
 		'billing_authorized_payment_source_token',
 		'verified'
@@ -47,6 +50,10 @@ class BillingAuthorizedPaymentSource extends Model
      * @var array<string, string>
      */
 	protected $casts = [
+	];
+
+	protected static $stringBooleanFields = [
+		'verified',
 	];
 
 	public function domain(): BelongsTo {

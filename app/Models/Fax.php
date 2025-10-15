@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -46,11 +47,12 @@ class Fax extends Model
         'fax_email_connection_mailbox',
         'fax_email_inbound_subject_tag',
         'fax_email_outbound_subject_tag',
-        'fax_email_outbout_authorized_senders',
+        'fax_email_outbound_authorized_senders',
         'fax_pin_number',
         'fax_caller_id_name',
         'fax_caller_id_number',
         'fax_toll_allow',
+        'fax_send_channels',
         'fax_forward_number',
         'fax_send_greeting',
         'fax_description',
@@ -82,8 +84,7 @@ class Fax extends Model
 	}
 
 	public function users(): BelongsToMany {
-		return $this->belongsToMany(User::class, 'v_fax_users', 'fax_user', 'user_uuid')->withTimestamps();
-//		$this->belongsToMany(Group::class)->using(UserGroup::class);
+        return $this->belongsToMany(User::class, 'v_fax_users', 'fax_uuid', 'user_uuid')->withTimestamps();
 	}
 
     public function files(): HasMany {

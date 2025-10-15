@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use DB;
 
 class Destination extends Model
 {
-	use HasFactory, HasUniqueIdentifier, GetTableName;
+	use HasFactory, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_destinations';
 	protected $primaryKey = 'destination_uuid';
 	public $incrementing = false;
@@ -37,6 +38,7 @@ class Destination extends Model
         'group_uuid',
         'destination_type',
         'destination_number',
+        'destination_prefix',
         'destination_trunk_prefix',
         'destination_area_code',
         'destination_condition_field',
@@ -67,6 +69,10 @@ class Destination extends Model
         'destination_buy',
         'carrier_uuid',
         'currency_buy',
+	];
+
+	protected static $stringBooleanFields = [
+		'destination_enabled'
 	];
 
 	public function user(): HasOne {
