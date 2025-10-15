@@ -85,7 +85,6 @@ class ContactPhoneForm extends Component
     public function save()
     {
         $this->validate();
-        dd($this->validate());
         try {
             ContactPhone::where('contact_uuid', $this->contactUuid)->delete();
 
@@ -111,7 +110,6 @@ class ContactPhoneForm extends Component
             $this->dispatch('addressesSaved')->to(ContactAddressForm::class);
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw $e;
             session()->flash('message', 'Error: ' . $e->getMessage());
             
         }

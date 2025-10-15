@@ -7,21 +7,22 @@
                     <h3 class="card-title mb-0">{{ isset($contact->contact_uuid) ? 'Edit Contact' : 'New Contact' }}</h3>
 
                     @if (isset($contact->contact_uuid))
-                    <div class="card-tools">
-                        @can('contact_edit')
-                        <div class="d-flex gap-2 " role="contact" aria-label="contact actions">
-                            <a href="{{ route('contacts.vcard', $contact->contact_uuid) }}"  class="btn btn-primary btn-sm">
-                                <i class="fa fa-id-card" aria-hidden="true"></i> {{ __('V Card') }}
-                            </a>
-                            <a class="btn btn-primary btn-sm">
-                                <i class="fa fa-qrcode" aria-hidden="true"></i> {{ __('QR Code') }}
-                            </a>
-                            <a href= ""  class="btn btn-primary btn-sm">
-                                <i class="fas fa-users mr-1"></i> {{ __('Users') }}
-                            </a>
+                        <div class="card-tools">
+                            @can('contact_edit')
+                                <div class="d-flex gap-2 " role="contact" aria-label="contact actions">
+                                    <a href="{{ route('contacts.vcard', $contact->contact_uuid) }}"
+                                        class="btn btn-primary btn-sm">
+                                        <i class="fa fa-id-card" aria-hidden="true"></i> {{ __('V Card') }}
+                                    </a>
+                                    <a class="btn btn-primary btn-sm">
+                                        <i class="fa fa-qrcode" aria-hidden="true"></i> {{ __('QR Code') }}
+                                    </a>
+                                    <a href= "" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-users mr-1"></i> {{ __('Users') }}
+                                    </a>
+                                </div>
+                            @endcan
                         </div>
-                        @endcan
-                    </div>
                     @endif
                 </div>
                 <div class="card-body">
@@ -42,8 +43,20 @@
                     @livewire('contact-attachment-form', ['contactUuid' => $contactUuid])
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('contacts.index') }}" class="btn btn-secondary">Cancel</a>
-                        <button type="button" class="btn btn-primary"
-                            wire:click.prevent="saveTest">{{ isset($contact->contact_uuid) ? 'Update' : 'Create' }}</button>
+
+                        <button type="button" class="btn btn-primary position-relative" wire:click.prevent="saveTest"
+                            wire:loading.attr="disabled" wire:target="saveTest">
+
+                            <span wire:loading.remove wire:target="saveTest">
+                                <i class="fas fa-save"></i>
+                                {{ isset($contact->contact_uuid) ? 'Update' : 'Create' }}
+                            </span>
+
+                            <span wire:loading wire:target="saveTest">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Saving...
+                            </span>
+                        </button>
                     </div>
 
                 </div>
