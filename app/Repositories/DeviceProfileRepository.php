@@ -385,7 +385,6 @@ class DeviceProfileRepository
                 'device_profile_key_uuid' => '',
                 'profile_key_category' => '',
                 'profile_key_id' => '',
-                'profile_key_vendor' => '',
                 'profile_key_type' => '',
                 'profile_key_subtype' => '',
                 'profile_key_line' => '',
