@@ -230,6 +230,49 @@
 						</div>
 					</div>
 
+					@can("fax_user_view")
+						@if(isset($fax))
+							<div class="row mt-3">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="form-label">User List</label>
+
+										@foreach($faxUsers as $index => $faxUser)
+											<input type="hidden" wire:model="faxUsers.{{ $index }}.user_uuid">
+											<div class="input-group mb-2">
+												<input
+													type="text"
+													readonly="readonly"
+													class="form-control @error('fax_user.' . $index) is-invalid @enderror"
+													wire:model="faxUsers.{{ $index }}.username"
+												>
+												<button type="button" class="btn btn-outline-danger" wire:click="removeFaxUser({{ $index }})" title="Remove email"><i class="fas fa-trash"></i></button>
+											</div>
+										@endforeach
+
+										@if(!$availableUsers->isEmpty())
+											<div class="row g-2 align-items-center mb-2">
+												<div class="col-auto">
+													<select name="available_user" class="form-select" wire:model="availableUser">
+														<option value="">-- Select User --</option>
+														@foreach ($availableUsers as $available_user)
+															<option value="{{ $available_user->user_uuid }}">{{ $available_user->username }}</option>
+														@endforeach
+													</select>
+												</div>
+												<div class="col-auto">
+													<button type="button" class="btn btn-sm btn-success" wire:click="addFaxUser"><i class="fas fa-plus"></i> Add fax user</button>
+												</div>
+											</div>
+
+											<small class="text-muted">Add a user to this fax account.</small>
+										@endif
+									</div>
+								</div>
+							</div>
+						@endif
+					@endcan
+
 					<div class="row mt-3" >
 						<div class="col-md-6">
 							<div class="form-group">

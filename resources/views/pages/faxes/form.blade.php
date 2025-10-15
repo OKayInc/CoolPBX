@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<livewire:fax-form :fax="$fax ?? null" />
+<livewire:fax-form :fax="$fax ?? null" :fax_users="$fax_users" :available_users="$available_users"/>
 @endsection
 
 @push("scripts")

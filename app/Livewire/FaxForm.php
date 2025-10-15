@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Http\Requests\FaxRequest;
 use App\Repositories\FaxRepository;
+use App\Repositories\FaxUserRepository;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\View\View;
@@ -44,10 +45,16 @@ class FaxForm extends Component
 	public ?array $faxEmailOutboundSenders = [];
 
     protected $faxRepository;
+    protected $faxUserRepository;
 
-    public function boot(FaxRepository $faxRepository)
+    public $faxUsers = [];
+    public $availableUsers = [];
+    public $availableUser = '';
+
+    public function boot(FaxRepository $faxRepository, FaxUserRepository $faxUserRepository)
     {
         $this->faxRepository = $faxRepository;
+        $this->faxUserRepository = $faxUserRepository;
     }
 
     public function rules()
@@ -57,7 +64,7 @@ class FaxForm extends Component
         return $request->rules();
     }
 
-    public function mount($fax = null): void
+    public function mount($fax = null, $fax_users = [], $available_users = []): void
     {
         if($fax)
         {
@@ -91,6 +98,17 @@ class FaxForm extends Component
 
 			$this->faxEmails = $fax->fax_email ? explode(',', $fax->fax_email) : [];
 			$this->faxEmailOutboundSenders = $fax->fax_email_outbound_authorized_senders ? explode(',', $fax->fax_email_outbound_authorized_senders) : [];
+
+            $this->faxUsers = [];
+
+            foreach($fax_users as $fax_user)
+            {
+                $this->faxUsers[] = [
+                    'user_uuid' => $fax_user->user_uuid,
+                    'username' => $fax_user->username,
+                ];
+            }
+
         }
 		else
 		{
@@ -120,6 +138,31 @@ class FaxForm extends Component
 		unset($this->faxEmailOutboundSenders[$index]);
 
 		$this->faxEmailOutboundSenders = array_values($this->faxEmailOutboundSenders);
+	}
+
+    public function addFaxUser(): void
+	{
+        $availableUser = collect($this->availableUsers)->firstWhere('user_uuid', $this->availableUser);
+
+        if(collect($this->faxUsers)->contains('user_uuid', $availableUser->user_uuid))
+        {
+            return;
+        }
+
+        if($availableUser)
+        {
+            $this->faxUsers[] = [
+                'user_uuid' => $availableUser->user_uuid,
+                'username' => $availableUser->username,
+            ];
+        }
+	}
+
+	public function removeFaxUser(int $index): void
+	{
+		unset($this->faxUsers[$index]);
+
+		$this->faxUsers = array_values($this->faxUsers);
 	}
 
     public function save(): void
@@ -171,6 +214,10 @@ class FaxForm extends Component
 
             session()->flash('message', 'Fax created successfully.');
         }
+
+        $this->faxUserRepository->deleteAll($this->fax);
+
+        $this->faxUserRepository->create($this->fax, $this->faxUsers);
 
         redirect()->route('faxes.edit', $this->fax->fax_uuid);
     }

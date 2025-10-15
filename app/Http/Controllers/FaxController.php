@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FaxRequest;
 use App\Models\Fax;
+use App\Models\User;
 use App\Repositories\FaxRepository;
 
 class FaxController extends Controller
@@ -20,7 +21,11 @@ class FaxController extends Controller
 
 	public function create()
 	{
-		return view("pages.faxes.form");
+		$fax_users = [];
+
+		$available_users = User::all();
+
+		return view("pages.faxes.form", compact("fax_users", "available_users"));
 	}
 
 	public function store(FaxRequest $request)
@@ -37,7 +42,11 @@ class FaxController extends Controller
 
 	public function edit(Fax $fax)
 	{
-		return view("pages.faxes.form", compact("fax"));
+		$fax_users = $fax->users;
+
+		$available_users = User::whereNotIn('user_uuid', $fax_users->pluck('user_uuid'))->get();
+
+		return view("pages.faxes.form", compact("fax", "fax_users", "available_users"));
 	}
 
 	public function update(FaxRequest $request, Fax $fax)

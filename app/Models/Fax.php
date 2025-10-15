@@ -84,8 +84,7 @@ class Fax extends Model
 	}
 
 	public function users(): BelongsToMany {
-		return $this->belongsToMany(User::class, 'v_fax_users', 'fax_user', 'user_uuid')->withTimestamps();
-//		$this->belongsToMany(Group::class)->using(UserGroup::class);
+        return $this->belongsToMany(User::class, 'v_fax_users', 'fax_uuid', 'user_uuid')->withTimestamps();
 	}
 
     public function files(): HasMany {
