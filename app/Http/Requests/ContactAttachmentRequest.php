@@ -23,10 +23,9 @@ class ContactAttachmentRequest extends FormRequest
     {
         return [
             'attachments' => 'required|array|min:1',
-            'attachments.*.file' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,txt,xls,xlsx',
+            'attachments.*.file' => 'nullable|file',
             'attachments.*.attachment_description' => 'nullable|string|max:500',
             'attachments.*.attachment_primary' => 'nullable|boolean',
-            'attachments.*.attachment_filename' => 'nullable|string|max:255',
             'attachments.*.contact_attachment_uuid' => 'nullable|string|uuid',
             'attachments.*.attachment_uploaded_date' => 'nullable|date',
             'attachments.*.attachment_uploaded_user_uuid' => 'nullable|string|uuid',

@@ -38,6 +38,7 @@ class ContactRelationForm extends Component
         $relations = ContactRelation::where('contact_uuid', $this->contactUuid)
             ->get();
 
+
         if ($relations->count() > 0) {
             $this->relations = $relations->map(function($relation) {
                 $relatedContact = Contact::where('contact_uuid', $relation->relation_contact_uuid)->first();

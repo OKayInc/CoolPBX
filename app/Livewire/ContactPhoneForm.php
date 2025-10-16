@@ -73,6 +73,7 @@ class ContactPhoneForm extends Component
             'phone_description' => '',
 
         ];
+
     }
 
     public function removePhone($index)
@@ -89,7 +90,7 @@ class ContactPhoneForm extends Component
 
             foreach ($this->phones as $phone) {
                 if (!empty($phone['phone_number'])) {
-                    ContactPhone::create([
+                    $phone = ContactPhone::create([
                         'contact_uuid' => $this->contactUuid,
                         'domain_uuid' => Session::get('domain_uuid'),
                         'phone_number' => $phone['phone_number'] ?? '',
@@ -110,7 +111,7 @@ class ContactPhoneForm extends Component
         } catch (\Throwable $e) {
             DB::rollBack();
             session()->flash('message', 'Error: ' . $e->getMessage());
-            throw $e;
+            
         }
     }
 
