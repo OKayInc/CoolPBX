@@ -33,6 +33,7 @@ use App\Http\Controllers\ModXMLCURLController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationsController;
 use App\Http\Controllers\MusicOnHoldController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
 use App\Http\Controllers\XmlCDRController;
@@ -121,6 +122,7 @@ Route::middleware(['auth','permission'])->group(function () {
     // PERMISSION
     //Route::resource('/permissions', PermissionController::class)->name('permissions', 'permissions');
     #Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.all');
     Route::get('/groups/{groupUuid}/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
     //Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
     //Route::get('/permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
@@ -130,6 +132,9 @@ Route::middleware(['auth','permission'])->group(function () {
     #Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     //Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
     //Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+
+    Route::get('/permissions/create', [GroupPermissionController::class, 'create'])->name('permissions.create');
+    Route::get('/permissions/{permissionUuid}/edit', [GroupPermissionController::class, 'edit'])->name('permissions.edit');
 
     // GATEWAY
     Route::resource('/gateways', GateWayController::class)->name('gateways', 'gateways');
