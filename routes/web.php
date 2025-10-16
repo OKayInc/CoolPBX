@@ -15,6 +15,8 @@ use App\Http\Controllers\BillingDealController;
 use App\Http\Controllers\BillingInvoiceController;
 use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
+use App\Http\Controllers\CallCenterAgentController;
+use App\Http\Controllers\CallCenterQueueController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -222,6 +224,11 @@ Route::middleware(['auth','permission'])->group(function () {
 
     Route::resource('/email-queues', EmailQueueController::class);
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
+    Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
+    Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
+    Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+
+
 
 });
 

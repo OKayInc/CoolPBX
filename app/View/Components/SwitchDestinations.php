@@ -12,6 +12,7 @@ use App\Models\IVRMenu;
 use App\Models\RingGroup;
 use App\Models\Variable;
 use App\Models\Voicemail;
+use App\Repositories\GatewayRepository;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\Component;
@@ -22,14 +23,15 @@ class SwitchDestinations extends Component
     public $name;
     public $selected;
     public $options;
+    protected GatewayRepository $gatewayRepository;
 
-    public function __construct($name = "", $selected = null, $bridgeType = null, $callCenterType = null, $conferenceCenterType = null, $extensionType = null, $ivrMenuType = null, $switchType = null, $timeConditionType = null, $toneType = null, $ringGroupType = null, $voiceMailType = null)
+    public function __construct($name = "", $selected = null, $bridgeType = null, $callCenterType = null, $conferenceCenterType = null, $extensionType = null, $ivrMenuType = null, $switchType = null, $timeConditionType = null, $toneType = null, $ringGroupType = null, $voiceMailType = null, $gatewayType = null)
     {
         $this->name = $name;
         $this->selected = $selected;
+        $this->gatewayRepository = new GatewayRepository();
 
-        if(!empty($bridgeType))
-        {
+        if (!empty($bridgeType)) {
             $bridges = Bridge::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("bridge_enabled", "true")
                 ->orderBy("bridge_name")
@@ -37,12 +39,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($bridges as $bridge)
-            {
+            foreach ($bridges as $bridge) {
                 $id = "";
 
-                switch($bridgeType)
-                {
+                switch ($bridgeType) {
                     case "user_contact":
                         $id = $bridge->bridge_destination;
                         break;
@@ -63,20 +63,17 @@ class SwitchDestinations extends Component
             $this->setOptions("Bridges", $values);
         }
 
-        if(!empty($callCenterType))
-        {
+        if (!empty($callCenterType)) {
             $callCenterQueues = CallCenterQueue::where("domain_uuid", Session::get("domain_uuid"))
                 ->orderBy("queue_name")
                 ->get();
 
             $values = [];
 
-            foreach($callCenterQueues as $callCenterQueue)
-            {
+            foreach ($callCenterQueues as $callCenterQueue) {
                 $id = "";
 
-                switch($callCenterType)
-                {
+                switch ($callCenterType) {
                     case "dialplan":
                         $id = "transfer:{$callCenterQueue->queue_extension} XML " . Session::get("domain_name");
                         break;
@@ -97,8 +94,7 @@ class SwitchDestinations extends Component
             $this->setOptions("Call Center", $values);
         }
 
-        if(!empty($conferenceCenterType))
-        {
+        if (!empty($conferenceCenterType)) {
             $conferenceCenters = ConferenceCenter::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("conference_center_enabled", "true")
                 ->orderBy("conference_center_name")
@@ -106,12 +102,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($conferenceCenters as $conferenceCenter)
-            {
+            foreach ($conferenceCenters as $conferenceCenter) {
                 $id = "";
 
-                switch($conferenceCenterType)
-                {
+                switch ($conferenceCenterType) {
                     case "dialplan":
                         $id = "transfer:{$conferenceCenter->conference_center_extension} XML " . Session::get("domain_name");
                         break;
@@ -132,8 +126,7 @@ class SwitchDestinations extends Component
             $this->setOptions("Conference Centers", $values);
         }
 
-        if(!empty($extensionType))
-        {
+        if (!empty($extensionType)) {
             $extensions = Extension::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("enabled", "true")
                 ->orderBy("number_alias")
@@ -142,12 +135,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($extensions as $extension)
-            {
+            foreach ($extensions as $extension) {
                 $id = "";
 
-                switch($extensionType)
-                {
+                switch ($extensionType) {
                     case "user_contact":
                         $id = "user/{$extension->extension}@" . Session::get("domain_name");
                         break;
@@ -171,8 +162,7 @@ class SwitchDestinations extends Component
             $this->setOptions("Extensions", $values);
         }
 
-        if(!empty($ivrMenuType))
-        {
+        if (!empty($ivrMenuType)) {
             $ivrs = IVRMenu::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("ivr_menu_enabled", "true")
                 ->orderBy("ivr_menu_extension")
@@ -180,12 +170,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($ivrs as $ivr)
-            {
+            foreach ($ivrs as $ivr) {
                 $id = "";
 
-                switch($ivrMenuType)
-                {
+                switch ($ivrMenuType) {
                     case "dialplan":
                         $id = "transfer:{$ivr->ivr_menu_extension} XML {$ivr->ivr_menu_context}";
                         break;
@@ -206,14 +194,12 @@ class SwitchDestinations extends Component
             $this->setOptions("IVR Menus", $values);
         }
 
-        if(!empty($switchType))
-        {
+        if (!empty($switchType)) {
             $values = [];
 
             $switchSoundDir = Setting::getSetting("switch", "sounds", "dir");
 
-            $languages = array_filter(glob($switchSoundDir . "/*/*/*"), function ($dir) use ($switchSoundDir)
-            {
+            $languages = array_filter(glob($switchSoundDir . "/*/*/*"), function ($dir) use ($switchSoundDir) {
                 $relative = str_replace($switchSoundDir . "/", "", $dir);
 
                 $parts = explode("/", $relative);
@@ -221,14 +207,12 @@ class SwitchDestinations extends Component
                 return count($parts) === 3 && preg_match('/^[a-z]{2}$/i', $parts[0]) && preg_match('/^[a-z]{2}$/i', $parts[1]) && is_dir($dir);
             });
 
-            foreach($languages as $key => $path)
-            {
+            foreach ($languages as $key => $path) {
                 $path = str_replace($switchSoundDir . "/", "", $path);
 
                 list($language, $dialect, $voice) = explode("/", $path);
 
-                switch($switchType)
-                {
+                switch ($switchType) {
                     case "dialplan":
                         $id = 'multiset:^^,sound_prefix=$${sounds_dir}' . "/{$language}/{$dialect}/{$voice},default_language={$language},default_dialect={$dialect},default_voice={$voice}";
                         break;
@@ -246,23 +230,20 @@ class SwitchDestinations extends Component
             $this->setOptions("Languages", $values);
         }
 
-        if(!empty($timeConditionType))
-        {
+        if (!empty($timeConditionType)) {
             $dialplans = Dialplan::where(function ($query) {
-                    $query->where('domain_uuid', Session::get('domain_uuid'))->orWhereNull('domain_uuid');
-                })
+                $query->where('domain_uuid', Session::get('domain_uuid'))->orWhereNull('domain_uuid');
+            })
                 ->where("app_uuid", "4b821450-926b-175a-af93-a03c441818b1")
                 ->orderBy("dialplan_number")
                 ->get();
 
             $values = [];
 
-            foreach($dialplans as $dialplan)
-            {
+            foreach ($dialplans as $dialplan) {
                 $id = "";
 
-                switch($timeConditionType)
-                {
+                switch ($timeConditionType) {
                     case "dialplan":
                         $id = "transfer:{$dialplan->dialplan_number} XML {$dialplan->dialplan_context}";
                         break;
@@ -283,20 +264,17 @@ class SwitchDestinations extends Component
             $this->setOptions("Time Conditions", $values);
         }
 
-        if(!empty($toneType))
-        {
+        if (!empty($toneType)) {
             $vars = Variable::where("var_category", "Tones")
                 ->orderBy("var_name")
                 ->get();
 
             $values = [];
 
-            foreach($vars as $var)
-            {
+            foreach ($vars as $var) {
                 $id = "";
 
-                switch($toneType)
-                {
+                switch ($toneType) {
                     case "dialplan":
                         $id = "playback:tone_stream://{$var->var_filename}";
                         break;
@@ -314,8 +292,7 @@ class SwitchDestinations extends Component
             $this->setOptions("Tones", $values);
         }
 
-        if(!empty($ringGroupType))
-        {
+        if (!empty($ringGroupType)) {
             $ringGroups = RingGroup::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("ring_group_enabled", "true")
                 ->orderBy("ring_group_extension")
@@ -323,12 +300,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($ringGroups as $ringGroup)
-            {
+            foreach ($ringGroups as $ringGroup) {
                 $id = "";
 
-                switch($ringGroupType)
-                {
+                switch ($ringGroupType) {
                     case "dialplan":
                         $id = "transfer:{$ringGroup->ring_group_extension} XML {$ringGroup->ring_group_context}";
                         break;
@@ -349,8 +324,7 @@ class SwitchDestinations extends Component
             $this->setOptions("Ring Groups", $values);
         }
 
-        if(!empty($voiceMailType))
-        {
+        if (!empty($voiceMailType)) {
             $voiceMails = Voicemail::where("domain_uuid", Session::get("domain_uuid"))
                 ->where("voicemail_enabled", "true")
                 ->orderBy("voicemail_id")
@@ -358,12 +332,10 @@ class SwitchDestinations extends Component
 
             $values = [];
 
-            foreach($voiceMails as $voiceMail)
-            {
+            foreach ($voiceMails as $voiceMail) {
                 $id = "";
 
-                switch($voiceMailType)
-                {
+                switch ($voiceMailType) {
                     case "dialplan":
                         $id = "transfer:*99{$voiceMail->voicemail_id} XML " . Session::get("domain_name");
                         break;
@@ -384,7 +356,39 @@ class SwitchDestinations extends Component
             $this->setOptions("Voicemails", $values);
         }
 
-        //Other
+        if (!empty($gatewayType)) {
+            $domainUuid = Session::get("domain_uuid");
+
+            $gateways = $this->gatewayRepository->getDestinationsByDomain($domainUuid);
+
+            $values = [];
+
+            foreach ($gateways as $gateway) {
+                $id = "";
+
+                switch ($gatewayType) {
+                    case "user_contact":
+                        $id = $gateway['value'];
+                        break;
+                    case "dialplan":
+                        $id = "bridge:{$gateway['value']}";
+                        break;
+                    case "ivr":
+                        $id = "menu-exec-app:bridge {$gateway['value']}";
+                        break;
+                    default:
+                        $id = $gateway['value'];
+                }
+
+                $values[] = [
+                    "id" => $id,
+                    "name" => $gateway['label']
+                ];
+            }
+
+            $this->setOptions("Gateways", $values);
+        }
+
         $values = [];
 
         $values[] = [
