@@ -345,8 +345,8 @@ class DialplanRepository
     }
 
 
-    public function getDefaultContext(?string $appId = null, ?string $domainName = null): string
+    public function getDefaultContext(?string $appUuid = null, ?string $domainName = null): string
     {
-        return ($appId == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : $domainName;
+        return ($appUuid == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : $domainName;
     }
 }
