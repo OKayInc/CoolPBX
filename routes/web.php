@@ -8,6 +8,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupPermissionController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MenuItemController;
+use App\Http\Controllers\TimeConditionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccessControlController;
 use App\Http\Controllers\BillingController;
@@ -222,11 +223,13 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/import', [DeviceController::class, 'import'])->name('devices.import');
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
-    Route::resource('/email-queues', EmailQueueController::class);
+    Route::resource('/email_queues', EmailQueueController::class);
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
     Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+
+    route::resource('/time_conditions',TimeConditionController::class)->name('time_conditions', 'time_conditions');
 
 
 
