@@ -169,7 +169,8 @@
                                                                 {{-- @php
                                                                     dd($presetConditions);
                                                                 @endphp --}}
-                                                                {{ ucfirst($var) }}: {{ is_array($val) ? json_encode($val) : $val }}
+                                                                {{ ucfirst($var) }}:
+                                                                {{ is_array($val) ? json_encode($val) : $val }}
                                                                 @if (!$loop->last)
                                                                     ,
                                                                 @endif
@@ -251,16 +252,30 @@
                                 </p>
 
                                 @if (count($customConditions) > 0)
-                                    <div class="accordion" id="accordionConditions">
+                                    <div class="accordion" id="accordionConditions" x-data="{
+                                        openGroups: [0],
+                                        toggleGroup(index) {
+                                            if (this.openGroups.includes(index)) {
+                                                this.openGroups = this.openGroups.filter(i => i !== index);
+                                            } else {
+                                                this.openGroups.push(index);
+                                            }
+                                        },
+                                        isOpen(index) {
+                                            return this.openGroups.includes(index);
+                                        }
+                                    }">
+
                                         @foreach ($customConditions as $groupIndex => $group)
-                                            <div class="accordion-item mb-3 border rounded">
-                                                <h2 class="accordion-header" id="heading{{ $groupIndex }}">
-                                                    <button
-                                                        class="accordion-button {{ $groupIndex !== 0 ? 'collapsed' : '' }}"
-                                                        type="button" data-bs-toggle="collapse"
-                                                        data-bs-target="#collapse{{ $groupIndex }}"
-                                                        aria-expanded="{{ $groupIndex === 0 ? 'true' : 'false' }}"
-                                                        aria-controls="collapse{{ $groupIndex }}">
+                                            <div class="accordion-item mb-3 border rounded"
+                                                wire:key="condition-group-{{ $groupIndex }}"
+                                                x-data="{ groupIndex: {{ $groupIndex }} }">
+
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button" type="button"
+                                                        @click="toggleGroup(groupIndex)"
+                                                        :class="{ 'collapsed': !isOpen(groupIndex) }"
+                                                        :aria-expanded="isOpen(groupIndex)">
                                                         <i class="bi bi-grip-vertical me-2 text-muted"></i>
                                                         <strong>Condition Group #{{ $groupIndex + 1 }}</strong>
                                                         <span class="badge bg-info ms-2">
@@ -269,10 +284,16 @@
                                                         </span>
                                                     </button>
                                                 </h2>
-                                                <div id="collapse{{ $groupIndex }}"
-                                                    class="accordion-collapse collapse {{ $groupIndex === 0 ? 'show' : '' }}"
-                                                    aria-labelledby="heading{{ $groupIndex }}"
-                                                    data-bs-parent="#accordionConditions">
+
+                                                <div class="accordion-collapse collapse" x-show="isOpen(groupIndex)"
+                                                    x-transition:enter="transition ease-out duration-200"
+                                                    x-transition:enter-start="opacity-0 transform scale-95"
+                                                    x-transition:enter-end="opacity-100 transform scale-100"
+                                                    x-transition:leave="transition ease-in duration-150"
+                                                    x-transition:leave-start="opacity-100 transform scale-100"
+                                                    x-transition:leave-end="opacity-0 transform scale-95"
+                                                    :class="{ 'show': isOpen(groupIndex) }">
+
                                                     <div class="accordion-body">
                                                         {{-- Conditions Table --}}
                                                         <div class="table-responsive mb-3">
@@ -289,10 +310,13 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach ($group['conditions'] as $condIndex => $condition)
-                                                                        <tr>
+                                                                        <tr wire:key="condition-{{ $groupIndex }}-{{ $condIndex }}"
+                                                                            x-data="{ selectedVar: '{{ $condition['variable'] ?? '' }}' }">
+
+                                                                            {{-- Condition Type --}}
                                                                             <td>
-                                                                                <select
-                                                                                    wire:model="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.variable"
+                                                                                <select x-model="selectedVar"
+                                                                                    wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.variable"
                                                                                     class="form-select form-select-sm">
                                                                                     <option value="">Select...
                                                                                     </option>
@@ -304,63 +328,44 @@
                                                                                     @endforeach
                                                                                 </select>
                                                                             </td>
+
+                                                                            {{-- Value (Start) --}}
+                                                                            <template
+                                                                                x-if="selectedVar !== '' && selectedVar !== 'date-time'">
+                                                                                <select
+                                                                                    wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                    class="form-select form-select-sm">
+                                                                                    <option value="">Select...
+                                                                                    </option>
+                                                                                    @foreach ($this->getOptionsForVariable($groupIndex, $condIndex) as $option)
+                                                                                        <option
+                                                                                            value="{{ $option['value'] }}">
+                                                                                            {{ $option['label'] }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </template>
+
+                                                                            {{-- Value (End) --}}
                                                                             <td>
-                                                                                @if (!empty($condition['variable']))
-                                                                                    @if (in_array($condition['variable'], ['date-time']))
-                                                                                        <input type="text"
-                                                                                            wire:model="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
-                                                                                            class="form-control form-control-sm"
-                                                                                            placeholder="YYYY-MM-DD HH:MM">
-                                                                                    @else
-                                                                                        <select
-                                                                                            wire:model="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
-                                                                                            class="form-select form-select-sm">
-                                                                                            <option value="">
-                                                                                                Select...
+                                                                                <template
+                                                                                    x-if="selectedVar !== '' && selectedVar !== 'date-time'">
+                                                                                    <select
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
+                                                                                        class="form-select form-select-sm">
+                                                                                        <option value="">No range
+                                                                                        </option>
+                                                                                        @foreach ($this->getOptionsForVariable($groupIndex, $condIndex) as $option)
+                                                                                            <option
+                                                                                                value="{{ $option['value'] }}">
+                                                                                                {{ $option['label'] }}
                                                                                             </option>
-                                                                                            @foreach ($this->getTimeVariableOptions($condition['variable']) as $option)
-                                                                                                <option
-                                                                                                    value="{{ $option['value'] }}">
-                                                                                                    {{ $option['label'] }}
-                                                                                                </option>
-                                                                                            @endforeach
-                                                                                        </select>
-                                                                                    @endif
-                                                                                @else
-                                                                                    <input type="text"
-                                                                                        class="form-control form-control-sm"
-                                                                                        disabled
-                                                                                        placeholder="Select type first">
-                                                                                @endif
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </template>
                                                                             </td>
-                                                                            <td>
-                                                                                @if (!empty($condition['variable']))
-                                                                                    @if (in_array($condition['variable'], ['date-time']))
-                                                                                        <input type="text"
-                                                                                            wire:model="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
-                                                                                            class="form-control form-control-sm"
-                                                                                            placeholder="YYYY-MM-DD HH:MM">
-                                                                                    @else
-                                                                                        <select
-                                                                                            wire:model="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
-                                                                                            class="form-select form-select-sm">
-                                                                                            <option value="">No
-                                                                                                range
-                                                                                            </option>
-                                                                                            @foreach ($this->getTimeVariableOptions($condition['variable']) as $option)
-                                                                                                <option
-                                                                                                    value="{{ $option['value'] }}">
-                                                                                                    {{ $option['label'] }}
-                                                                                                </option>
-                                                                                            @endforeach
-                                                                                        </select>
-                                                                                    @endif
-                                                                                @else
-                                                                                    <input type="text"
-                                                                                        class="form-control form-control-sm"
-                                                                                        disabled>
-                                                                                @endif
-                                                                            </td>
+
+                                                                            {{-- Range Indicator --}}
                                                                             <td class="text-center">
                                                                                 @if (!empty($condition['value_stop']))
                                                                                     <span
@@ -370,6 +375,8 @@
                                                                                         class="badge bg-secondary">No</span>
                                                                                 @endif
                                                                             </td>
+
+                                                                            {{-- Actions --}}
                                                                             <td>
                                                                                 <button type="button"
                                                                                     wire:click="removeConditionFromGroup({{ $groupIndex }}, {{ $condIndex }})"
@@ -483,7 +490,7 @@
                                     </a>
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="bi bi-check-circle me-1"></i>
-                                        {{ $isEditing ? 'Update Time Condition' : 'Create Time Condition' }}
+                                        {{ $isEditing ? 'Update' : 'Create' }}
                                     </button>
                                 </div>
                             </div>
@@ -518,7 +525,15 @@
             .badge {
                 font-weight: 500;
             }
+
+            /* Transiciones suaves para Alpine.js */
+            [x-cloak] {
+                display: none !important;
+            }
+
+            .accordion-collapse {
+                overflow: hidden;
+            }
         </style>
     @endpush
-
 </div>

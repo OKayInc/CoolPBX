@@ -13,8 +13,6 @@ class TimeConditionForm extends Component
     public ?string $dialplanUuid = null;
     public $dialplan;
     public bool $isEditing = false;
-
-    // Main dialplan properties
     public ?string $domain_uuid = null;
     public string $dialplan_name = '';
     public string $dialplan_number = '';
@@ -27,7 +25,7 @@ class TimeConditionForm extends Component
     public ?string $default_preset_action = null;
 
     public array $customConditions = [];
-    
+
     public array $selectedPresets = [];
 
     public array $availablePresets = [];
@@ -37,6 +35,8 @@ class TimeConditionForm extends Component
 
     public bool $showAdvanced = false;
     public bool $showPresetDefaultAction = false;
+
+    public array $presetGroups = [];
 
     protected TimeConditionRepository $timeConditionRepository;
 
@@ -56,13 +56,13 @@ class TimeConditionForm extends Component
             'dialplan_description' => 'nullable|string|max:255',
             'dialplan_anti_action' => 'nullable|string',
             'default_preset_action' => 'nullable|string',
-            
+
             'customConditions.*.conditions' => 'required|array|min:1',
             'customConditions.*.conditions.*.variable' => 'required|string',
             'customConditions.*.conditions.*.value_start' => 'required',
             'customConditions.*.conditions.*.value_stop' => 'nullable',
             'customConditions.*.action' => 'required|string',
-            
+
             'selectedPresets.*.name' => 'required|string',
             'selectedPresets.*.action' => 'nullable|string',
         ];
@@ -102,7 +102,6 @@ class TimeConditionForm extends Component
             return redirect()->route('time_conditions.index');
         }
 
-        // Load main properties
         $this->domain_uuid = $this->dialplan->domain_uuid;
         $this->dialplan_name = $this->dialplan->dialplan_name;
         $this->dialplan_number = $this->dialplan->dialplan_number;
@@ -111,14 +110,12 @@ class TimeConditionForm extends Component
         $this->dialplan_enabled = $this->dialplan->dialplan_enabled === 'true';
         $this->dialplan_description = $this->dialplan->dialplan_description;
 
-        // Parse details to extract conditions, presets and actions
         $parsed = $this->timeConditionRepository->parseDetails($this->dialplan);
-        
+
         $this->customConditions = $parsed['custom_groups'] ?? [];
         $this->selectedPresets = $parsed['presets'] ?? [];
         $this->dialplan_anti_action = $parsed['anti_action'] ?? null;
 
-        // Convert array keys to sequential for easier manipulation
         $this->customConditions = array_values($this->customConditions);
         $this->selectedPresets = array_values($this->selectedPresets);
     }
@@ -141,7 +138,7 @@ class TimeConditionForm extends Component
 
         $this->availablePresets = $this->timeConditionRepository->getAvailablePresets();
         // dd($this->availablePresets);
-        
+
         $this->timeVariables = $this->timeConditionRepository->getTimeVariables();
 
         $this->destinations = $this->getDestinations();
@@ -149,12 +146,12 @@ class TimeConditionForm extends Component
         // Load available domains (for superadmin)
         if ($user->hasPermission('time_condition_domain')) {
             // $this->availableDomains = $this->timeConditionRepository->getAllForDomain(Session::get('domain_uuid'));
-            
+
         }
     }
 
-    
-    //todo: modificar por el componente
+
+    //todo: modificar por el componente 
     protected function getDestinations(): array
     {
         return [
@@ -167,13 +164,17 @@ class TimeConditionForm extends Component
 
     public function addCustomConditionGroup()
     {
+        $newIndex = count($this->customConditions);
+
         $this->customConditions[] = [
-            'group_id' => count($this->customConditions) + 500,
+            'group_id' => $newIndex + 500,
             'conditions' => [
                 $this->createEmptyCondition()
             ],
             'action' => '',
         ];
+
+        $this->dispatch('openNewAccordion', groupIndex: $newIndex);
     }
 
     public function removeCustomConditionGroup($index)
@@ -189,6 +190,8 @@ class TimeConditionForm extends Component
         if (isset($this->customConditions[$groupIndex])) {
             $this->customConditions[$groupIndex]['conditions'][] = $this->createEmptyCondition();
         }
+
+        $this->dispatch('keepAccordionOpen', groupIndex: $groupIndex);
     }
 
     public function removeConditionFromGroup($groupIndex, $conditionIndex)
@@ -214,20 +217,64 @@ class TimeConditionForm extends Component
         ];
     }
 
-    public function togglePreset($presetName)
-    {
-        $index = $this->findPresetIndex($presetName);
+//     public function togglePreset($presetName)
+//     {
+//         if (isset($this->presetGroups[$presetName])) {
+//             $groupIndex = $this->presetGroups[$presetName];
+//             $this->removeCustomConditionGroup($groupIndex);
+//             unset($this->presetGroups[$presetName]);
 
-        if ($index !== false) {
-            unset($this->selectedPresets[$index]);
-            $this->selectedPresets = array_values($this->selectedPresets);
-        } else {
-            $this->selectedPresets[] = [
-                'name' => $presetName,
-                'action' => '',
-            ];
-        }
-    }
+//             $this->reindexPresetGroups();
+//         } else {
+//             $presetConditions = $this->availablePresets[$presetName] ?? [];
+
+//             if (!empty($presetConditions)) {
+//                 $groupIndex = count($this->customConditions);
+
+//                 $conditions = [];
+//                 foreach ($presetConditions as $variable => $value) {
+//                     if (strpos($value, '-') !== false) {
+//                         [$start, $stop] = explode('-', $value, 2);
+//                     } else {
+//                         $start = $value;
+//                         $stop = '';
+//                     }
+
+//                     $conditions[] = [
+//                         'variable' => $variable,
+//                         'value_start' => $start,
+//                         'value_stop' => $stop,
+//                     ];
+//                 }
+
+//                 $this->customConditions[] = [
+//                     'group_id' => ($groupIndex * 5) + 100,
+//                     'is_preset' => true,
+//                     'preset_name' => $presetName,
+//                     'conditions' => $conditions,
+//                     'action' => '',
+//                 ];
+
+//                 $this->presetGroups[$presetName] = $groupIndex;
+
+//                 $this->dispatch('openNewAccordion', groupIndex: $groupIndex);
+//             }
+//         }
+//     }
+
+//     protected function reindexPresetGroups()
+// {
+//     $newPresetGroups = [];
+//     foreach ($this->presetGroups as $presetName => $oldIndex) {
+//         foreach ($this->customConditions as $newIndex => $group) {
+//             if (isset($group['preset_name']) && $group['preset_name'] === $presetName) {
+//                 $newPresetGroups[$presetName] = $newIndex;
+//                 break;
+//             }
+//         }
+//     }
+//     $this->presetGroups = $newPresetGroups;
+// }
 
     public function isPresetSelected($presetName): bool
     {
@@ -279,7 +326,6 @@ class TimeConditionForm extends Component
     protected function validateAlternateDestination()
     {
         $needsAlternate = false;
-        
         foreach ($this->selectedPresets as $preset) {
             if (empty($preset['action']) && empty($this->default_preset_action)) {
                 $needsAlternate = true;
@@ -353,7 +399,6 @@ class TimeConditionForm extends Component
             }
 
             return redirect()->route('time_conditions.edit', $dialplan->dialplan_uuid);
-
         } catch (\Exception $e) {
             session()->flash('error', 'Error saving time condition: ' . $e->getMessage());
             throw $e;
@@ -368,7 +413,7 @@ class TimeConditionForm extends Component
 
         try {
             $copiedDialplan = $this->timeConditionRepository->copy($this->dialplanUuid);
-            
+
             session()->flash('success', 'Time Condition copied successfully.');
             return redirect()->route('time_conditions.edit', $copiedDialplan->dialplan_uuid);
         } catch (\Exception $e) {
@@ -385,7 +430,7 @@ class TimeConditionForm extends Component
         try {
             $this->timeConditionRepository->toggle($this->dialplanUuid);
             $this->dialplan_enabled = !$this->dialplan_enabled;
-            
+
             session()->flash('success', 'Time Condition toggled successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Error toggling time condition: ' . $e->getMessage());
@@ -421,6 +466,8 @@ class TimeConditionForm extends Component
         return $labels[$presetName] ?? ucwords(str_replace(['-', '_'], ' ', $presetName));
     }
 
+
+    //TODO: preguntar si podemos usar carbon para esto
     public function getTimeVariableOptions($variable): array
     {
         switch ($variable) {
@@ -494,10 +541,7 @@ class TimeConditionForm extends Component
                 for ($h = 0; $h <= 23; $h++) {
                     for ($m = 0; $m < 60; $m += 15) {
                         $time = sprintf('%02d:%02d', $h, $m);
-                        $label = $h == 0 ? '12:' . sprintf('%02d', $m) . ' AM' : 
-                                ($h < 12 ? $h . ':' . sprintf('%02d', $m) . ' AM' : 
-                                ($h == 12 ? '12:' . sprintf('%02d', $m) . ' PM' : 
-                                ($h - 12) . ':' . sprintf('%02d', $m) . ' PM'));
+                        $label = $h == 0 ? '12:' . sprintf('%02d', $m) . ' AM' : ($h < 12 ? $h . ':' . sprintf('%02d', $m) . ' AM' : ($h == 12 ? '12:' . sprintf('%02d', $m) . ' PM' : ($h - 12) . ':' . sprintf('%02d', $m) . ' PM'));
                         $options[] = ['value' => $time, 'label' => $label];
                     }
                 }
@@ -506,6 +550,12 @@ class TimeConditionForm extends Component
             default:
                 return [];
         }
+    }
+
+    public function getOptionsForVariable($groupIndex, $condIndex)
+    {
+        $variable = $this->customConditions[$groupIndex]['conditions'][$condIndex]['variable'] ?? '';
+        return $this->getTimeVariableOptions($variable);
     }
 
     public function render()
