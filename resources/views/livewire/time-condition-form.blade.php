@@ -9,7 +9,7 @@
                             <i class="bi bi-clock-history me-2"></i>
                             {{ $isEditing ? 'Edit Time Condition' : 'New Time Condition' }}
                         </h4>
-                        @if ($isEditing)
+                        {{-- @if ($isEditing)
                             <div class="card-tools">
                                 <button type="button" wire:click="copy" class="btn btn-primary btn-sm">
                                     <i class="fa fa-clone" aria-hidden="true"></i> {{ __('Copy') }}
@@ -24,7 +24,7 @@
                                     <i class="fa fa-trash" aria-hidden="true"></i> {{ __('Delete') }}
                                 </button>
                             </div>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
 
@@ -163,12 +163,8 @@
                                                             </label>
                                                         </div>
 
-                                                        {{-- Show conditions for this preset --}}
                                                         <small class="text-muted d-block mt-1">
                                                             @foreach ($presetConditions as $var => $val)
-                                                                {{-- @php
-                                                                    dd($presetConditions);
-                                                                @endphp --}}
                                                                 {{ ucfirst($var) }}:
                                                                 {{ is_array($val) ? json_encode($val) : $val }}
                                                                 @if (!$loop->last)
@@ -277,7 +273,15 @@
                                                         :class="{ 'collapsed': !isOpen(groupIndex) }"
                                                         :aria-expanded="isOpen(groupIndex)">
                                                         <i class="bi bi-grip-vertical me-2 text-muted"></i>
-                                                        <strong>Condition Group #{{ $groupIndex + 1 }}</strong>
+
+                                                        @if (isset($group['is_preset']) && $group['is_preset'])
+                                                            <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                                            <strong>{{ $this->getPresetLabel($group['preset_name']) }}</strong>
+                                                            <span class="badge bg-primary ms-2">Preset</span>
+                                                        @else
+                                                            <strong>Condition Group #{{ $groupIndex + 1 }}</strong>
+                                                        @endif
+
                                                         <span class="badge bg-info ms-2">
                                                             {{ count($group['conditions']) }}
                                                             condition{{ count($group['conditions']) > 1 ? 's' : '' }}

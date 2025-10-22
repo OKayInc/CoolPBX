@@ -112,12 +112,15 @@ class TimeConditionForm extends Component
 
         $parsed = $this->timeConditionRepository->parseDetails($this->dialplan);
 
-        $this->customConditions = $parsed['custom_groups'] ?? [];
-        $this->selectedPresets = $parsed['presets'] ?? [];
-        $this->dialplan_anti_action = $parsed['anti_action'] ?? null;
+        $this->customConditions = array_values($parsed['custom_groups'] ?? []);
 
-        $this->customConditions = array_values($this->customConditions);
-        $this->selectedPresets = array_values($this->selectedPresets);
+        foreach ($this->customConditions as $index => $group) {
+            if (isset($group['is_preset']) && $group['is_preset'] && isset($group['preset_name'])) {
+                $this->presetGroups[$group['preset_name']] = $index;
+            }
+        }
+
+        $this->dialplan_anti_action = $parsed['anti_action'] ?? null;
     }
 
     protected function initializeDefaults()
@@ -180,8 +183,19 @@ class TimeConditionForm extends Component
     public function removeCustomConditionGroup($index)
     {
         if (isset($this->customConditions[$index])) {
+            if (
+                isset($this->customConditions[$index]['is_preset']) &&
+                $this->customConditions[$index]['is_preset']
+            ) {
+                $presetName = $this->customConditions[$index]['preset_name'];
+                unset($this->presetGroups[$presetName]);
+            }
+
             unset($this->customConditions[$index]);
             $this->customConditions = array_values($this->customConditions);
+
+            // Reindexar presets
+            $this->reindexPresetGroups();
         }
     }
 
@@ -217,64 +231,64 @@ class TimeConditionForm extends Component
         ];
     }
 
-//     public function togglePreset($presetName)
-//     {
-//         if (isset($this->presetGroups[$presetName])) {
-//             $groupIndex = $this->presetGroups[$presetName];
-//             $this->removeCustomConditionGroup($groupIndex);
-//             unset($this->presetGroups[$presetName]);
+    public function togglePreset($presetName)
+    {
+        if (isset($this->presetGroups[$presetName])) {
+            $groupIndex = $this->presetGroups[$presetName];
+            $this->removeCustomConditionGroup($groupIndex);
+            unset($this->presetGroups[$presetName]);
 
-//             $this->reindexPresetGroups();
-//         } else {
-//             $presetConditions = $this->availablePresets[$presetName] ?? [];
+            $this->reindexPresetGroups();
+        } else {
+            $presetConditions = $this->availablePresets[$presetName] ?? [];
 
-//             if (!empty($presetConditions)) {
-//                 $groupIndex = count($this->customConditions);
+            if (!empty($presetConditions)) {
+                $groupIndex = count($this->customConditions);
 
-//                 $conditions = [];
-//                 foreach ($presetConditions as $variable => $value) {
-//                     if (strpos($value, '-') !== false) {
-//                         [$start, $stop] = explode('-', $value, 2);
-//                     } else {
-//                         $start = $value;
-//                         $stop = '';
-//                     }
+                $conditions = [];
+                foreach ($presetConditions as $variable => $value) {
+                    if (strpos($value, '-') !== false) {
+                        [$start, $stop] = explode('-', $value, 2);
+                    } else {
+                        $start = $value;
+                        $stop = '';
+                    }
 
-//                     $conditions[] = [
-//                         'variable' => $variable,
-//                         'value_start' => $start,
-//                         'value_stop' => $stop,
-//                     ];
-//                 }
+                    $conditions[] = [
+                        'variable' => $variable,
+                        'value_start' => $start,
+                        'value_stop' => $stop,
+                    ];
+                }
 
-//                 $this->customConditions[] = [
-//                     'group_id' => ($groupIndex * 5) + 100,
-//                     'is_preset' => true,
-//                     'preset_name' => $presetName,
-//                     'conditions' => $conditions,
-//                     'action' => '',
-//                 ];
+                $this->customConditions[] = [
+                    'group_id' => ($groupIndex * 5) + 100,
+                    'is_preset' => true,
+                    'preset_name' => $presetName,
+                    'conditions' => $conditions,
+                    'action' => '',
+                ];
 
-//                 $this->presetGroups[$presetName] = $groupIndex;
+                $this->presetGroups[$presetName] = $groupIndex;
 
-//                 $this->dispatch('openNewAccordion', groupIndex: $groupIndex);
-//             }
-//         }
-//     }
+                $this->dispatch('openNewAccordion', groupIndex: $groupIndex);
+            }
+        }
+    }
 
-//     protected function reindexPresetGroups()
-// {
-//     $newPresetGroups = [];
-//     foreach ($this->presetGroups as $presetName => $oldIndex) {
-//         foreach ($this->customConditions as $newIndex => $group) {
-//             if (isset($group['preset_name']) && $group['preset_name'] === $presetName) {
-//                 $newPresetGroups[$presetName] = $newIndex;
-//                 break;
-//             }
-//         }
-//     }
-//     $this->presetGroups = $newPresetGroups;
-// }
+    protected function reindexPresetGroups()
+    {
+        $newPresetGroups = [];
+        foreach ($this->presetGroups as $presetName => $oldIndex) {
+            foreach ($this->customConditions as $newIndex => $group) {
+                if (isset($group['preset_name']) && $group['preset_name'] === $presetName) {
+                    $newPresetGroups[$presetName] = $newIndex;
+                    break;
+                }
+            }
+        }
+        $this->presetGroups = $newPresetGroups;
+    }
 
     public function isPresetSelected($presetName): bool
     {
@@ -371,12 +385,9 @@ class TimeConditionForm extends Component
                 $customConditions[$groupId] = [
                     'conditions' => $group['conditions'],
                     'action' => $group['action'],
+                    'is_preset' => $group['is_preset'] ?? false,
+                    'preset_name' => $group['preset_name'] ?? null,
                 ];
-            }
-
-            $presets = [];
-            foreach ($this->selectedPresets as $index => $preset) {
-                $presets[$index] = $preset;
             }
 
             if ($this->isEditing) {
@@ -384,7 +395,7 @@ class TimeConditionForm extends Component
                     $this->dialplanUuid,
                     $data,
                     $customConditions,
-                    $presets,
+                    [], // Todo: ya no usamos borrar del repositorio
                     $this->default_preset_action
                 );
                 session()->flash('success', 'Time Condition updated successfully.');
@@ -392,7 +403,7 @@ class TimeConditionForm extends Component
                 $dialplan = $this->timeConditionRepository->create(
                     $data,
                     $customConditions,
-                    $presets,
+                    [], // Todo: ya no usamos borrar del repositorio
                     $this->default_preset_action
                 );
                 session()->flash('success', 'Time Condition created successfully.');
@@ -404,7 +415,6 @@ class TimeConditionForm extends Component
             throw $e;
         }
     }
-
     public function copy()
     {
         if (!$this->isEditing) {

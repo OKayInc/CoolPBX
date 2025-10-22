@@ -224,90 +224,18 @@ class TimeConditionRepository
         ]);
     }
 
+    // En TimeConditionRepository.php
+
     protected function buildDialplanDetails(
         string $dialplanUuid,
         ?string $domainUuid,
         string $dialplanNumber,
         array $customConditions,
-        array $presets,
+        ?array $presets,
         ?string $defaultPresetAction,
         ?string $antiAction
     ): array {
         $details = [];
-        $availablePresets = $this->getAvailablePresets();
-
-        if (!empty($presets)) {
-            foreach ($presets as $presetNumber => $presetConfig) {
-                $presetName = $presetConfig['name'] ?? null;
-                $presetAction = $presetConfig['action'] ?? null;
-
-                if (!$presetName || !isset($availablePresets[$presetName])) {
-                    continue;
-                }
-
-                $presetConditions = $availablePresets[$presetName];
-                $detailGroup = ($presetNumber * 5) + 100;
-                $detailOrder = 0;
-
-                $detailOrder += 10;
-                $details[] = [
-                    'dialplan_detail_tag' => 'condition',
-                    'dialplan_detail_type' => 'destination_number',
-                    'dialplan_detail_data' => '^' . $dialplanNumber . '$',
-                    'dialplan_detail_break' => null,
-                    'dialplan_detail_inline' => null,
-                    'dialplan_detail_group' => $detailGroup,
-                    'dialplan_detail_order' => $detailOrder,
-                ];
-                foreach ($presetConditions as $condVar => $condValue) {
-                    $detailOrder += 10;
-                    $details[] = [
-                        'dialplan_detail_tag' => 'condition',
-                        'dialplan_detail_type' => $condVar,
-                        'dialplan_detail_data' => $condValue,
-                        'dialplan_detail_break' => 'never',
-                        'dialplan_detail_inline' => null,
-                        'dialplan_detail_group' => $detailGroup,
-                        'dialplan_detail_order' => $detailOrder,
-                    ];
-                }
-
-                $detailOrder += 10;
-                $details[] = [
-                    'dialplan_detail_tag' => 'action',
-                    'dialplan_detail_type' => 'set',
-                    'dialplan_detail_data' => 'preset=' . $presetName,
-                    'dialplan_detail_break' => null,
-                    'dialplan_detail_inline' => 'true',
-                    'dialplan_detail_group' => $detailGroup,
-                    'dialplan_detail_order' => $detailOrder,
-                ];
-
-                $actionToUse = null;
-                if (!empty($presetAction)) {
-                    $actionToUse = $presetAction;
-                } elseif (!empty($defaultPresetAction)) {
-                    $actionToUse = $defaultPresetAction;
-                } elseif (!empty($antiAction)) {
-                    $actionToUse = $antiAction;
-                }
-
-                if ($actionToUse) {
-                    [$actionApp, $actionData] = $this->parseAction($actionToUse);
-
-                    $detailOrder += 10;
-                    $details[] = [
-                        'dialplan_detail_tag' => 'action',
-                        'dialplan_detail_type' => $actionApp,
-                        'dialplan_detail_data' => $actionData ?? '',
-                        'dialplan_detail_break' => null,
-                        'dialplan_detail_inline' => null,
-                        'dialplan_detail_group' => $detailGroup,
-                        'dialplan_detail_order' => $detailOrder,
-                    ];
-                }
-            }
-        }
 
         if (!empty($customConditions)) {
             foreach ($customConditions as $groupId => $group) {
@@ -317,6 +245,9 @@ class TimeConditionRepository
 
                 $detailGroup = is_numeric($groupId) ? $groupId : 500;
                 $detailOrder = 0;
+
+                $isPreset = $group['is_preset'] ?? false;
+                $presetName = $group['preset_name'] ?? null;
 
                 $detailOrder += 10;
                 $details[] = [
@@ -358,6 +289,19 @@ class TimeConditionRepository
                         'dialplan_detail_data' => $conditionValue,
                         'dialplan_detail_break' => 'never',
                         'dialplan_detail_inline' => null,
+                        'dialplan_detail_group' => $detailGroup,
+                        'dialplan_detail_order' => $detailOrder,
+                    ];
+                }
+
+                if ($isPreset && $presetName) {
+                    $detailOrder += 10;
+                    $details[] = [
+                        'dialplan_detail_tag' => 'action',
+                        'dialplan_detail_type' => 'set',
+                        'dialplan_detail_data' => 'preset=' . $presetName,
+                        'dialplan_detail_break' => null,
+                        'dialplan_detail_inline' => 'true',
                         'dialplan_detail_group' => $detailGroup,
                         'dialplan_detail_order' => $detailOrder,
                     ];
@@ -437,11 +381,9 @@ class TimeConditionRepository
     public function parseDetails(Dialplan $dialplan): array
     {
         $customGroups = [];
-        $presets = [];
         $antiAction = null;
         $availablePresets = $this->getAvailablePresets();
-
-        $currentPresetGroup = null;
+        $currentPresetName = null;
 
         foreach ($dialplan->dialplanDetails as $detail) {
             $group = $detail->dialplan_detail_group;
@@ -462,13 +404,16 @@ class TimeConditionRepository
 
                 $presetName = str_replace('preset=', '', $detail->dialplan_detail_data);
 
-                if (isset($availablePresets[$presetName])) {
-                    $currentPresetGroup = $group;
-                    $presets[$group] = [
-                        'name' => $presetName,
+                if (!isset($customGroups[$group])) {
+                    $customGroups[$group] = [
+                        'conditions' => [],
                         'action' => null,
+                        'is_preset' => false,
+                        'preset_name' => null,
                     ];
                 }
+                $customGroups[$group]['is_preset'] = true;
+                $customGroups[$group]['preset_name'] = $presetName;
                 continue;
             }
 
@@ -476,43 +421,44 @@ class TimeConditionRepository
                 continue;
             }
 
-            if (isset($presets[$group])) {
-                if ($detail->dialplan_detail_tag === 'action') {
-                    $presets[$group]['action'] = $detail->dialplan_detail_type .
-                        ($detail->dialplan_detail_data ? ':' . $detail->dialplan_detail_data : '');
-                }
-            } else {
-                if ($detail->dialplan_detail_tag === 'condition') {
-                    $conditionVar = $detail->dialplan_detail_type;
-                    $conditionValue = $detail->dialplan_detail_data;
+            if (!isset($customGroups[$group])) {
+                $customGroups[$group] = [
+                    'conditions' => [],
+                    'action' => null,
+                    'is_preset' => false,
+                    'preset_name' => null,
+                ];
+            }
 
-                    if ($conditionVar === 'minute-of-day') {
-                        $conditionVar = 'time-of-day';
-                        $parts = explode('-', $conditionValue);
-                        $valueStart = $this->minutesToTime((int)$parts[0]);
-                        $valueStop = isset($parts[1]) ? $this->minutesToTime((int)$parts[1]) : null;
-                    } else {
-                        $rangeIndicator = ($conditionVar === 'date-time') ? '~' : '-';
-                        $parts = explode($rangeIndicator, $conditionValue);
-                        $valueStart = $parts[0];
-                        $valueStop = $parts[1] ?? null;
-                    }
+            if ($detail->dialplan_detail_tag === 'condition') {
+                $conditionVar = $detail->dialplan_detail_type;
+                $conditionValue = $detail->dialplan_detail_data;
 
-                    $customGroups[$group]['conditions'][] = [
-                        'variable' => $conditionVar,
-                        'value_start' => $valueStart,
-                        'value_stop' => $valueStop,
-                    ];
-                } else if ($detail->dialplan_detail_tag === 'action') {
-                    $customGroups[$group]['action'] = $detail->dialplan_detail_type .
-                        ($detail->dialplan_detail_data ? ':' . $detail->dialplan_detail_data : '');
+                if ($conditionVar === 'minute-of-day') {
+                    $conditionVar = 'time-of-day';
+                    $parts = explode('-', $conditionValue);
+                    $valueStart = $this->minutesToTime((int)$parts[0]);
+                    $valueStop = isset($parts[1]) ? $this->minutesToTime((int)$parts[1]) : null;
+                } else {
+                    $rangeIndicator = ($conditionVar === 'date-time') ? '~' : '-';
+                    $parts = explode($rangeIndicator, $conditionValue);
+                    $valueStart = $parts[0];
+                    $valueStop = $parts[1] ?? null;
                 }
+
+                $customGroups[$group]['conditions'][] = [
+                    'variable' => $conditionVar,
+                    'value_start' => $valueStart,
+                    'value_stop' => $valueStop,
+                ];
+            } else if ($detail->dialplan_detail_tag === 'action') {
+                $customGroups[$group]['action'] = $detail->dialplan_detail_type .
+                    ($detail->dialplan_detail_data ? ':' . $detail->dialplan_detail_data : '');
             }
         }
 
         return [
             'custom_groups' => $customGroups,
-            'presets' => $presets,
             'anti_action' => $antiAction,
         ];
     }
