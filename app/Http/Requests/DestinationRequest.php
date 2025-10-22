@@ -32,7 +32,7 @@ class DestinationRequest extends FormRequest
 			"carrier_uuid" => "bail|nullable|uuid|exists:App\Models\Carrier,carrier_uuid",
 			"user_uuid" => "bail|nullable|uuid|exists:App\Models\User,user_uuid",
 			"group_uuid" => "bail|nullable|uuid|exists:App\Models\Group,group_uuid",
-			"destination_cid_name_prefix" => "bail|required|string|max:255",
+			"destination_cid_name_prefix" => "bail|nullable|string|max:255",
 			"destination_record" => "bail|nullable|in:true,false",
 			"destination_hold_music" => "bail|nullable|string|max:100",
 			"destination_distinctive_ring" => "bail|nullable|string|max:100",

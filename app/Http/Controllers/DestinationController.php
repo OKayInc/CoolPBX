@@ -124,7 +124,7 @@ class DestinationController extends Controller
 			$data["dialplan_name"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
 			$data["dialplan_number"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
 			$data["dialplan_order"] = $data["destination_order"];
-			$data["dialplan_enabled"] = $data["destination_enabled"];
+			$data["dialplan_enabled"] = $data["destination_enabled"] ?? "false";
 			$data["dialplan_description"] = $data["destination_description"];
 			$data["condition_field_1"] = $data["destination_conditions"];
 			$data["condition_expression_1"] = $data["condition_expressions"];

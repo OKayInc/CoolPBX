@@ -28,7 +28,7 @@ class DialplanService
 	{
 		$dialplanData = [
             "domain_uuid" => Session::get("domain_uuid"),
-            "app_uuid" => $data["app_uuid"],
+            "app_uuid" => $data["app_uuid"] ?? 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4',
             "dialplan_name" => $data["dialplan_name"],
             "dialplan_number" => isset($destination) ? $destination->destination_number : null,
             "dialplan_order" => $data["dialplan_order"],
