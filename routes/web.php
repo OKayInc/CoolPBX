@@ -116,6 +116,7 @@ Route::middleware(['auth','permission'])->group(function () {
 
     // FAX
     Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
+    Route::get('/faxes/{fax}/send', [FaxController::class, 'send'])->name('faxes.send');
 
     // GROUP
     Route::resource('/groups', GroupController::class)->name('groups', 'groups');

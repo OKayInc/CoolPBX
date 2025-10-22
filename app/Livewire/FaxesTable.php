@@ -145,7 +145,7 @@ class FaxesTable extends DataTableComponent
 
                     if(auth()->user()->hasPermission('fax_send'))
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-paper-plane"></i></a>';
+                        $buttons .= '<a href="' . route("faxes.send", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-paper-plane"></i></a>';
                     }
 
                     if(auth()->user()->hasPermission('fax_inbox_view'))
