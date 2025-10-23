@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Dialplan;
 use App\Models\DialplanDetail;
 use App\Models\DefaultSetting;
+use App\Services\DialplanXmlGenerator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -14,16 +15,35 @@ class TimeConditionRepository
 {
     const TIME_CONDITION_APP_UUID = '4b821450-926b-175a-af93-a03c441818b1';
 
-    protected $dialplanRepository;
-    protected $dialplanDetailRepository;
+    protected DialplanRepository $dialplanRepository;
+    protected DialplanDetailRepository $dialplanDetailRepository;
+    protected DialplanXmlGenerator $dialplanXmlGenerator;
 
     public function __construct(
         DialplanRepository $dialplanRepository,
-        DialplanDetailRepository $dialplanDetailRepository
+        DialplanDetailRepository $dialplanDetailRepository,
+        DialplanXmlGenerator $dialplanXmlGenerator
     ) {
         $this->dialplanRepository = $dialplanRepository;
         $this->dialplanDetailRepository = $dialplanDetailRepository;
+        $this->dialplanXmlGenerator = $dialplanXmlGenerator;
     }
+
+    public function getAllDomains(): array
+    {
+        return DB::table('v_domains')
+            ->where('domain_enabled', 'true')
+            ->orderBy('domain_name')
+            ->get()
+            ->map(function ($domain) {
+                return [
+                    'domain_uuid' => $domain->domain_uuid,
+                    'domain_name' => $domain->domain_name,
+                ];
+            })
+            ->toArray();
+    }
+
     public function getAllForDomain(string $domainUuid)
     {
         return Dialplan::where('app_uuid', self::TIME_CONDITION_APP_UUID)
@@ -85,7 +105,6 @@ class TimeConditionRepository
         try {
             DB::beginTransaction();
 
-            // Prepare dialplan data
             $dialplanData = [
                 'dialplan_uuid' => $data['dialplan_uuid'] ?? Str::uuid(),
                 'domain_uuid' => $data['domain_uuid'] ?? Session::get('domain_uuid'),
@@ -114,6 +133,8 @@ class TimeConditionRepository
             if (!empty($details)) {
                 $this->dialplanDetailRepository->create($dialplan, $details);
             }
+
+            $this->dialplanXmlGenerator->regenerateAndSave($dialplan->dialplan_uuid);
 
             DB::commit();
             return $dialplan->fresh(['dialplanDetails']);
@@ -169,6 +190,8 @@ class TimeConditionRepository
                 $this->dialplanDetailRepository->create($dialplan, $details);
             }
 
+            $this->dialplanXmlGenerator->regenerateAndSave($dialplan->dialplan_uuid);
+
             DB::commit();
             return $dialplan->fresh(['dialplanDetails']);
         } catch (Exception $e) {
@@ -203,6 +226,8 @@ class TimeConditionRepository
                 $newDetail->save();
             }
 
+            $this->dialplanXmlGenerator->regenerateAndSave($newDialplan->dialplan_uuid);
+
             DB::commit();
             return $newDialplan->fresh(['dialplanDetails']);
         } catch (Exception $e) {
@@ -222,8 +247,6 @@ class TimeConditionRepository
             'dialplan_enabled' => $dialplan->dialplan_enabled === 'true' ? 'false' : 'true'
         ]);
     }
-
-    // En TimeConditionRepository.php
 
     protected function buildDialplanDetails(
         string $dialplanUuid,

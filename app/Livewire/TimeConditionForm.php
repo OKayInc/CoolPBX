@@ -139,15 +139,12 @@ class TimeConditionForm extends Component
         $user = auth()->user();
 
         $this->availablePresets = $this->timeConditionRepository->getAvailablePresets();
-        // dd($this->availablePresets);
 
         $this->timeVariables = $this->timeConditionRepository->getTimeVariables();
 
-        // $this->destinations = $this->getDestinations();
 
-        // Load available domains (for superadmin)
         if ($user->hasPermission('time_condition_domain')) {
-            // $this->availableDomains = $this->timeConditionRepository->getAllForDomain(Session::get('domain_uuid'));
+            $this->availableDomains = $this->timeConditionRepository->getAllDomains();
 
         }
     }
@@ -183,7 +180,6 @@ class TimeConditionForm extends Component
             unset($this->customConditions[$index]);
             $this->customConditions = array_values($this->customConditions);
 
-            // Reindexar presets
             $this->reindexPresetGroups();
         }
     }
