@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Requests\TimeConditionRequest;
 use Livewire\Component;
 use App\Repositories\TimeConditionRepository;
 use App\Models\Dialplan;
@@ -47,36 +48,8 @@ class TimeConditionForm extends Component
 
     public function rules()
     {
-        return [
-            'dialplan_name' => 'required|string|max:255',
-            'dialplan_number' => 'required|string|max:255',
-            'dialplan_context' => 'required|string|max:255',
-            'dialplan_order' => 'required|integer|min:0|max:999',
-            'dialplan_enabled' => 'boolean',
-            'dialplan_description' => 'nullable|string|max:255',
-            'dialplan_anti_action' => 'nullable|string',
-            'default_preset_action' => 'nullable|string',
-
-            'customConditions.*.conditions' => 'required|array|min:1',
-            'customConditions.*.conditions.*.variable' => 'required|string',
-            'customConditions.*.conditions.*.value_start' => 'required',
-            'customConditions.*.conditions.*.value_stop' => 'nullable',
-            'customConditions.*.action' => 'required|string',
-
-            'selectedPresets.*.name' => 'required|string',
-            'selectedPresets.*.action' => 'nullable|string',
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'dialplan_name.required' => 'Name is required.',
-            'dialplan_number.required' => 'Extension is required.',
-            'dialplan_context.required' => 'Context is required.',
-            'customConditions.*.conditions.required' => 'At least one condition is required.',
-            'customConditions.*.action.required' => 'Action is required for this condition group.',
-        ];
+        $request = new TimeConditionRequest();
+        return $request->rules();
     }
 
     public function mount($dialplanUuid = null): void

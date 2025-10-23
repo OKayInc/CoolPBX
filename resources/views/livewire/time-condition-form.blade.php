@@ -47,9 +47,26 @@
                                     routing</small>
                             </div>
 
+                            @if (auth()->user()->hasPermission('time_condition_domain'))
+                                <div class="col-md-4 mb-3">
+                                    <label for="domain_uuid" class="form-label">
+                                        Domain
+                                    </label>
+                                    <select wire:model.live="domain_uuid" class="form-select" id="domain_uuid">
+                                        <option value="">Global</option>
+                                        @foreach ($availableDomains as $domain)
+                                            <option value="{{ $domain['domain_uuid'] }}">
+                                                {{ $domain['domain_name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">Select the domain</small>
+                                </div>
+                            @endif
+
                             <div class="col-md-4 mb-3">
                                 <label for="dialplan_context" class="form-label">
-                                    Context <span class="text-danger">*</span>
+                                    Context
                                 </label>
                                 <input type="text" wire:model="dialplan_context"
                                     class="form-control @error('dialplan_context') is-invalid @enderror"
