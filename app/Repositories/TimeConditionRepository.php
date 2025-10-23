@@ -138,7 +138,6 @@ class TimeConditionRepository
                 throw new Exception("Time condition not found");
             }
 
-            // Update main dialplan entry
             $dialplanData = [
                 'dialplan_name' => str_replace('/', '', $data['dialplan_name']),
                 'dialplan_number' => $data['dialplan_number'],

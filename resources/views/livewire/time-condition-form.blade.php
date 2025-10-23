@@ -2,35 +2,17 @@
     <div class="container-fluid">
         <div class="card card-primary mt-3 card-outline">
             <div class="card shadow-sm">
-                {{-- Header --}}
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
                             <i class="bi bi-clock-history me-2"></i>
                             {{ $isEditing ? 'Edit Time Condition' : 'New Time Condition' }}
                         </h4>
-                        {{-- @if ($isEditing)
-                            <div class="card-tools">
-                                <button type="button" wire:click="copy" class="btn btn-primary btn-sm">
-                                    <i class="fa fa-clone" aria-hidden="true"></i> {{ __('Copy') }}
-                                </button>
-                                <button type="button" wire:click="toggle" class="btn btn-warning btn-sm">
-                                    <i class="fa fa-power-off" aria-hidden="true"></i>
-                                    {{ $dialplan_enabled ? __('Disable') : __('Enable') }}
-                                </button>
-                                <button type="button" wire:click="delete"
-                                    wire:confirm="Are you sure you want to delete this time condition?"
-                                    class="btn btn-danger btn-sm">
-                                    <i class="fa fa-trash" aria-hidden="true"></i> {{ __('Delete') }}
-                                </button>
-                            </div>
-                        @endif --}}
                     </div>
                 </div>
 
                 <div class="card-body">
                     <form wire:submit.prevent="save">
-                        {{-- Basic Information --}}
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="border-bottom pb-2 mb-3">
@@ -109,7 +91,6 @@
                             </div>
                         </div>
 
-                        {{-- Visual Flow Indicator --}}
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="alert alert-info">
@@ -130,7 +111,6 @@
                             </div>
                         </div>
 
-                        {{-- Presets Section (if available) --}}
                         @if (count($availablePresets) > 0)
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -173,7 +153,6 @@
                                                             @endforeach
                                                         </small>
 
-                                                        {{-- Action selector if preset is selected --}}
                                                         @if ($this->isPresetSelected($presetName))
                                                             <div class="mt-2">
                                                                 <select
@@ -194,7 +173,6 @@
                                         @endforeach
                                     </div>
 
-                                    {{-- Advanced: Default Preset Action --}}
                                     <div class="mt-3">
                                         <button type="button" wire:click="toggleAdvanced"
                                             class="btn btn-sm btn-outline-secondary">
@@ -206,13 +184,14 @@
                                             <div class="card mt-2 border-warning">
                                                 <div class="card-body">
                                                     <label class="form-label">Default Preset Action</label>
-                                                    <select wire:model="default_preset_action" class="form-select">
-                                                        <option value="">Select action...</option>
-                                                        @foreach ($destinations as $dest)
-                                                            <option value="{{ $dest['value'] }}">{{ $dest['label'] }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
+                                                    <x-switch-destinations name="default_preset_action"
+                                                        :selected="$default_preset_action ?? ''" bridge-type="dialplan"
+                                                        call-center-type="dialplan" conference-center-type="dialplan"
+                                                        extension-type="dialplan" ivr-menu-type="dialplan"
+                                                        time-condition-type="dialplan" ring-group-type="dialplan"
+                                                        voice-mail-type="dialplan" gateway-type="dialplan"
+                                                        wire:model="default_preset_action" />
+
                                                     <small class="form-text text-muted">
                                                         This action will be used for all selected presets that don't
                                                         have a
@@ -226,7 +205,6 @@
                             </div>
                         @endif
 
-                        {{-- Custom Conditions Section --}}
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -299,7 +277,6 @@
                                                     :class="{ 'show': isOpen(groupIndex) }">
 
                                                     <div class="accordion-body">
-                                                        {{-- Conditions Table --}}
                                                         <div class="table-responsive mb-3">
                                                             <table class="table table-sm table-bordered">
                                                                 <thead class="table-light">
@@ -317,7 +294,6 @@
                                                                         <tr wire:key="condition-{{ $groupIndex }}-{{ $condIndex }}"
                                                                             x-data="{ selectedVar: '{{ $condition['variable'] ?? '' }}' }">
 
-                                                                            {{-- Condition Type --}}
                                                                             <td>
                                                                                 <select x-model="selectedVar"
                                                                                     wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.variable"
@@ -333,7 +309,6 @@
                                                                                 </select>
                                                                             </td>
 
-                                                                            {{-- Value (Start) --}}
                                                                             <template
                                                                                 x-if="selectedVar !== '' && selectedVar !== 'date-time'">
                                                                                 <select
@@ -350,7 +325,6 @@
                                                                                 </select>
                                                                             </template>
 
-                                                                            {{-- Value (End) --}}
                                                                             <td>
                                                                                 <template
                                                                                     x-if="selectedVar !== '' && selectedVar !== 'date-time'">
@@ -369,7 +343,6 @@
                                                                                 </template>
                                                                             </td>
 
-                                                                            {{-- Range Indicator --}}
                                                                             <td class="text-center">
                                                                                 @if (!empty($condition['value_stop']))
                                                                                     <span
@@ -380,7 +353,6 @@
                                                                                 @endif
                                                                             </td>
 
-                                                                            {{-- Actions --}}
                                                                             <td>
                                                                                 <button type="button"
                                                                                     wire:click="removeConditionFromGroup({{ $groupIndex }}, {{ $condIndex }})"
@@ -400,23 +372,23 @@
                                                             <i class="bi bi-plus me-1"></i>Add Condition to this Group
                                                         </button>
 
-                                                        {{-- Action for this group --}}
                                                         <div class="card bg-light">
                                                             <div class="card-body p-3">
-                                                                <label class="form-label fw-bold">
-                                                                    <i class="bi bi-arrow-right-circle me-1"></i>
-                                                                    Then Route To:
-                                                                </label>
-                                                                <select
-                                                                    wire:model="customConditions.{{ $groupIndex }}.action"
-                                                                    class="form-select @error('customConditions.' . $groupIndex . '.action') is-invalid @enderror">
-                                                                    <option value="">Select destination...
-                                                                    </option>
-                                                                    @foreach ($destinations as $dest)
-                                                                        <option value="{{ $dest['value'] }}">
-                                                                            {{ $dest['label'] }}</option>
-                                                                    @endforeach
-                                                                </select>
+                                                                <div class="col-12 mt-3">
+                                                                    <label class="form-label">Then route to:</label>
+                                                                    <x-switch-destinations
+                                                                        name="customConditions[{{ $groupIndex }}][action]"
+                                                                        :selected="$group['action'] ?? ''" bridge-type="dialplan"
+                                                                        call-center-type="dialplan"
+                                                                        conference-center-type="dialplan"
+                                                                        extension-type="dialplan"
+                                                                        ivr-menu-type="dialplan"
+                                                                        time-condition-type="dialplan"
+                                                                        ring-group-type="dialplan"
+                                                                        voice-mail-type="dialplan"
+                                                                        gateway-type="dialplan"
+                                                                        wire:model="customConditions.{{ $groupIndex }}.action" />
+                                                                </div>
                                                                 @error('customConditions.' . $groupIndex . '.action')
                                                                     <div class="invalid-feedback">{{ $message }}
                                                                     </div>
@@ -424,7 +396,6 @@
                                                             </div>
                                                         </div>
 
-                                                        {{-- Remove group button --}}
                                                         <div class="text-end mt-3">
                                                             <button type="button"
                                                                 wire:click="removeCustomConditionGroup({{ $groupIndex }})"
@@ -465,16 +436,17 @@
                                 <div class="card border-warning">
                                     <div class="card-body">
                                         <label class="form-label fw-bold">Default Route To:</label>
-                                        <select wire:model="dialplan_anti_action"
-                                            class="form-select @error('dialplan_anti_action') is-invalid @enderror">
-                                            <option value="">Select default destination...</option>
-                                            @foreach ($destinations as $dest)
-                                                <option value="{{ $dest['value'] }}">{{ $dest['label'] }}</option>
-                                            @endforeach
-                                        </select>
+                                        <x-switch-destinations name="dialplan_anti_action" :selected="$dialplan_anti_action ?? ''"
+                                            bridge-type="dialplan" call-center-type="dialplan"
+                                            conference-center-type="dialplan" extension-type="dialplan"
+                                            ivr-menu-type="dialplan" time-condition-type="dialplan"
+                                            ring-group-type="dialplan" voice-mail-type="dialplan"
+                                            gateway-type="dialplan" wire:model="dialplan_anti_action" />
+
                                         @error('dialplan_anti_action')
-                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
+
                                         <small class="form-text text-muted">
                                             <i class="bi bi-info-circle me-1"></i>
                                             This will be used when no time conditions match (e.g., outside business

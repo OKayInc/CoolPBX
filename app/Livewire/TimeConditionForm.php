@@ -131,7 +131,6 @@ class TimeConditionForm extends Component
         $this->dialplan_enabled = true;
         $this->dialplan_order = 330;
 
-        // Add one empty custom condition group by default
         $this->addCustomConditionGroup();
     }
 
@@ -144,7 +143,7 @@ class TimeConditionForm extends Component
 
         $this->timeVariables = $this->timeConditionRepository->getTimeVariables();
 
-        $this->destinations = $this->getDestinations();
+        // $this->destinations = $this->getDestinations();
 
         // Load available domains (for superadmin)
         if ($user->hasPermission('time_condition_domain')) {
@@ -153,16 +152,6 @@ class TimeConditionForm extends Component
         }
     }
 
-
-    //todo: modificar por el componente 
-    protected function getDestinations(): array
-    {
-        return [
-            ['value' => 'transfer:1000 XML default', 'label' => 'Extension 1000'],
-            ['value' => 'voicemail:default ${domain_name} 1001', 'label' => 'Voicemail 1001'],
-            ['value' => 'hangup:', 'label' => 'Hangup'],
-        ];
-    }
 
 
     public function addCustomConditionGroup()
