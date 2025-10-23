@@ -178,9 +178,7 @@ class DialplanService
 
 		$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
 
-		$xml = $this->dialplanRepository->buildXML($dialplan);
-
-		$this->dialplanRepository->update($dialplan->dialplan_uuid, ["dialplan_xml" => $xml]);
+		$this->dialplanRepository->buildXML($dialplan);
 
 		return $dialplan;
 	}
@@ -616,9 +614,7 @@ class DialplanService
 
 				$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
 
-				$xml = $this->dialplanRepository->buildXML($dialplan);
-
-				$this->dialplanRepository->update($dialplan->dialplan_uuid, ["dialplan_xml" => $xml]);
+				$this->dialplanRepository->buildXML($dialplan);
 
 				//outbound route
 				$dialplanData = [
@@ -728,9 +724,7 @@ class DialplanService
 
 				$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
 
-				$xml = $this->dialplanRepository->buildXML($dialplan);
-
-				$this->dialplanRepository->update($dialplan->dialplan_uuid, ["dialplan_xml" => $xml]);
+				$this->dialplanRepository->buildXML($dialplan);
 			}
 		}
 

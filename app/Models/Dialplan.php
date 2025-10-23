@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Dialplan extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_dialplans';
 	protected $primaryKey = 'dialplan_uuid';
 	public $incrementing = false;
@@ -59,6 +60,12 @@ class Dialplan extends Model
      * @var array<string, string>
      */
 	protected $casts = [
+	];
+
+	protected static $stringBooleanFields = [
+		'dialplan_continue',
+		'dialplan_destination',
+		'dialplan_enabled',
 	];
 
 	public function domain(): BelongsTo {

@@ -174,7 +174,7 @@ class DialplanForm extends Component
 
         $dialplanData = [
             'domain_uuid' => $this->domain_uuid,
-            'app_uuid' => $this->app_uuid,
+            'app_uuid' => $this->app_uuid ?? '90b0e24e-8014-4424-a606-06ea2f5e60c1',
             'hostname' => $this->hostname,
             'dialplan_context' => $this->dialplan_context,
             'dialplan_name' => $this->dialplan_name,
@@ -204,27 +204,22 @@ class DialplanForm extends Component
             }
 
             $this->dialplan = $this->dialplanRepository->findByUuidWithDetails($this->dialplan->dialplan_uuid);
-            $xml = $this->dialplanRepository->buildXML($this->dialplan);
-            $this->dialplan->update([
-                'app_uuid' => $this->app_uuid ?? '90b0e24e-8014-4424-a606-06ea2f5e60c1',
-                'dialplan_xml' => $xml,
-            ]);
+
+            $this->dialplanRepository->buildXML($this->dialplan);
 
             session()->flash('message', 'Dialplan updated successfully.');
         }
         else
         {
             $dialplanData['dialplan_uuid'] = Str::uuid();
+
             $this->dialplan = $this->dialplanRepository->create($dialplanData);
 
             $this->dialplanDetailRepository->create($this->dialplan, $filteredDialplanDetails);
 
             $this->dialplan = $this->dialplanRepository->findByUuidWithDetails($this->dialplan->dialplan_uuid);
-            $xml = $this->dialplanRepository->buildXML($this->dialplan);
-            $this->dialplan->update([
-                'app_uuid' => $this->app_uuid ?? '90b0e24e-8014-4424-a606-06ea2f5e60c1',
-                'dialplan_xml' => $xml,
-            ]);
+
+            $this->dialplanRepository->buildXML($this->dialplan);
 
             session()->flash('message', 'Dialplan created successfully.');
         }
