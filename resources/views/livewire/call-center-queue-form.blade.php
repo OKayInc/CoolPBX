@@ -109,8 +109,6 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label for="queue_greeting" class="form-label">Greeting</label>
-@dd($available_sounds)
-
                                             <select id="queue_greeting"
                                                 class="form-control @error('queue_greeting') is-invalid @enderror"
                                                 wire:model="queue_greeting">
