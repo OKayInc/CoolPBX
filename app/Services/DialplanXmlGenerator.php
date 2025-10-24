@@ -162,7 +162,7 @@ class DialplanXmlGenerator
             return false;
         }
 
-        return DB::table('v_dialplans')
+        return DB::table(Dialplan::getTableName())
             ->where('dialplan_uuid', $dialplanUuid)
             ->update(['dialplan_xml' => $xml]) > 0;
     }

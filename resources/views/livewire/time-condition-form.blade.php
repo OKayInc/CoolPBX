@@ -326,23 +326,37 @@
                                                                                 </select>
                                                                             </td>
 
-                                                                            <template
-                                                                                x-if="selectedVar !== '' && selectedVar !== 'date-time'">
-                                                                                <select
-                                                                                    wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
-                                                                                    class="form-select form-select-sm">
-                                                                                    <option value="">Select...
-                                                                                    </option>
-                                                                                    @foreach ($this->getOptionsForVariable($groupIndex, $condIndex) as $option)
-                                                                                        <option
-                                                                                            value="{{ $option['value'] }}">
-                                                                                            {{ $option['label'] }}
+                                                                            <td>
+                                                                                <template x-if="selectedVar === ''">
+                                                                                    <input type="text"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="select type"
+                                                                                        disabled>
+                                                                                </template>
+                                                                                <template
+                                                                                    x-if="selectedVar !== '' && selectedVar !== 'date-time'">
+                                                                                    <select
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                        class="form-select form-select-sm">
+                                                                                        <option value="">Select...
                                                                                         </option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </template>
+                                                                                        @foreach ($this->getOptionsForVariable($groupIndex, $condIndex) as $option)
+                                                                                            <option
+                                                                                                value="{{ $option['value'] }}">
+                                                                                                {{ $option['label'] }}
+                                                                                            </option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </template>
+                                                                            </td>
 
                                                                             <td>
+                                                                                <template x-if="selectedVar === ''">
+                                                                                    <input type="text"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="select type"
+                                                                                        disabled>
+                                                                                </template>
                                                                                 <template
                                                                                     x-if="selectedVar !== '' && selectedVar !== 'date-time'">
                                                                                     <select
