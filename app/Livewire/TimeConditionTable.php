@@ -31,6 +31,11 @@ class TimeConditionTable extends DataTableComponent
                 return route('time_conditions.edit', $row->dialplan_uuid);
             });
         }
+
+        if(request('showAll'))
+        {
+            $this->showAll = true;
+        }
     }
 
     public function columns(): array
@@ -125,7 +130,7 @@ class TimeConditionTable extends DataTableComponent
             DB::beginTransaction();
 
             foreach ($selectRows as $dialplanUuid) {
-                $originalDialplan = Dialplan::with('details')->find($dialplanUuid);
+                $originalDialplan = Dialplan::with('dialplanDetails')->find($dialplanUuid);
 
                 if ($originalDialplan) {
                     $newDialplan = $originalDialplan->replicate();
@@ -160,20 +165,19 @@ class TimeConditionTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        //TODO: preguntar si el app_uuid esta bien que vaya asi o mediante otra query 
-        $timeConditions = '4b821450-926b-175a-af93-a03c441818b1';
+        $appUuid = env('TIME_CONDITION_APP_UUID');
 
         $query = Dialplan::query()
-            ->where('app_uuid', $timeConditions);
-            if(!$this->showAll)
-            {
-                $query->where(function($q){
-                    $q->where('domain_uuid', auth()->user()->domain_uuid)
-                      ->orWhereNull('domain_uuid');
-                });
-            }
-
-        $query->with('domain');
+            ->where('app_uuid', $appUuid);
+        if ($this->showAll) {
+            $query->leftJoin('v_domains', 'v_dialplans.domain_uuid', '=', 'v_domains.domain_uuid')
+                ->select('v_dialplans.*', 'v_domains.domain_name');
+        } else {
+            $query->where(function ($query) {
+                $query->where('v_dialplans.domain_uuid', auth()->user()->domain_uuid)
+                    ->orWhereNull('v_dialplans.domain_uuid');
+            });
+        }
 
         return $query;
 

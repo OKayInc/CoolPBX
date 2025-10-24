@@ -13,8 +13,6 @@ use Exception;
 
 class TimeConditionRepository
 {
-    const TIME_CONDITION_APP_UUID = '4b821450-926b-175a-af93-a03c441818b1';
-
     protected DialplanRepository $dialplanRepository;
     protected DialplanDetailRepository $dialplanDetailRepository;
     protected DialplanXmlGenerator $dialplanXmlGenerator;
@@ -46,7 +44,7 @@ class TimeConditionRepository
 
     public function getAllForDomain(string $domainUuid)
     {
-        return Dialplan::where('app_uuid', self::TIME_CONDITION_APP_UUID)
+        return Dialplan::where('app_uuid', env('TIME_CONDITION_APP_UUID'))
             ->where(function ($query) use ($domainUuid) {
                 $query->where('domain_uuid', $domainUuid)
                     ->orWhereNull('domain_uuid');
@@ -59,7 +57,7 @@ class TimeConditionRepository
     public function findByUuid(string $uuid, bool $withDetails = false): ?Dialplan
     {
         $query = Dialplan::where('dialplan_uuid', $uuid)
-            ->where('app_uuid', self::TIME_CONDITION_APP_UUID);
+            ->where('app_uuid', env('TIME_CONDITION_APP_UUID'));
 
         if ($withDetails) {
             $query->with(['dialplanDetails' => function ($query) {
@@ -108,7 +106,7 @@ class TimeConditionRepository
             $dialplanData = [
                 'dialplan_uuid' => $data['dialplan_uuid'] ?? Str::uuid(),
                 'domain_uuid' => $data['domain_uuid'] ?? Session::get('domain_uuid'),
-                'app_uuid' => self::TIME_CONDITION_APP_UUID,
+                'app_uuid' => env('TIME_CONDITION_APP_UUID'),
                 'dialplan_name' => str_replace('/', '', $data['dialplan_name']),
                 'dialplan_number' => $data['dialplan_number'],
                 'dialplan_context' => $data['dialplan_context'] ?? Session::get('domain_name'),

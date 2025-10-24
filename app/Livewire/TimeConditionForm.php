@@ -59,10 +59,10 @@ class TimeConditionForm extends Component
 
         $this->loadDropdownData();
 
-        if ($this->isEditing) {
-            $this->loadTimeCondition();
-        } else {
-            $this->initializeDefaults();
+            if ($this->isEditing) {
+                $this->loadTimeCondition();
+            } else {
+                $this->initializeDefaults();
         }
     }
 

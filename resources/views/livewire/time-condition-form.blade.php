@@ -435,7 +435,6 @@
                             </div>
                         </div>
 
-                        {{-- Alternate Destination (Anti-Action) --}}
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="border-bottom pb-2 mb-3">
@@ -443,7 +442,6 @@
                                     <span
                                         class="badge bg-primary">{{ count($availablePresets) > 0 ? '3' : '2' }}</span>
                                     Alternate Destination
-                                    <span class="badge bg-danger ms-2">Required</span>
                                 </h5>
                                 <p class="text-muted small mb-3">
                                     Where to route calls when <strong>none</strong> of the above conditions match. This

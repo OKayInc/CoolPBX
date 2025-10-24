@@ -11,7 +11,7 @@
             <div class="card-tools">
                 <div class="d-flex gap-2 " role="group" aria-label="Group actions">
                 @can('time_condition_all')
-                <a href="{{ route('time_conditions.index', ['show_all' => 1]) }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('time_conditions.index', ['showAll' => 1]) }}" class="btn btn-primary btn-sm">
                     <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Show All') }}
                 </a>
                 @endcan
