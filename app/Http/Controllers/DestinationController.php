@@ -19,11 +19,13 @@ class DestinationController extends Controller
 {
 	protected $destinationRepository;
 	protected $dialplanRepository;
+	protected $dialplanService;
 
-	public function __construct(DestinationRepository $destinationRepository, DialplanRepository $dialplanRepository)
+	public function __construct(DestinationRepository $destinationRepository, DialplanRepository $dialplanRepository, DialplanService $dialplanService)
 	{
 		$this->destinationRepository = $destinationRepository;
 		$this->dialplanRepository = $dialplanRepository;
+		$this->dialplanService = $dialplanService;
 	}
 
 	public function index(Request $request)
@@ -45,17 +47,17 @@ class DestinationController extends Controller
 		return view("pages.destinations.form", compact("faxes", "carriers", "users", "groups", "domains"));
 	}
 
-	public function store(DestinationRequest $request, DialplanService $dialplanService)
+	public function store(DestinationRequest $request)
 	{
 		$data = $request->validated();
 
 		$destination = $this->destinationRepository->create($data);
 
-		$dialplan = $this->setDialplan($destination, $data, $dialplanService);
+		$dialplan = $this->setDialplan($destination, $data);
 
 		if($dialplan)
 		{
-			$this->destinationRepository->update($destination, ["dialplan_uuid" => $dialplan->dialplan_uuid]);
+			$this->destinationRepository->setDialplan($destination, $dialplan);
 		}
 
 		return redirect()->route("destinations.edit", $destination->destination_uuid);
@@ -77,7 +79,7 @@ class DestinationController extends Controller
 		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "users", "groups", "domains"));
 	}
 
-	public function update(DestinationRequest $request, Destination $destination, DialplanService $dialplanService)
+	public function update(DestinationRequest $request, Destination $destination)
 	{
 		$data = $request->validated();
 
@@ -88,11 +90,11 @@ class DestinationController extends Controller
 			$this->dialplanRepository->delete($destination->dialplan_uuid);
 		}
 
-		$dialplan = $this->setDialplan($destination, $data, $dialplanService);
+		$dialplan = $this->setDialplan($destination, $data);
 
 		if($dialplan)
 		{
-			$this->destinationRepository->update($destination, ["dialplan_uuid" => $dialplan->dialplan_uuid]);
+			$this->destinationRepository->setDialplan($destination, $dialplan);
 		}
 
         return redirect()->route("destinations.edit", $destination->destination_uuid);
@@ -115,7 +117,7 @@ class DestinationController extends Controller
         return view('pages.destinations.export');
     }
 
-	private function setDialplan(Destination $destination, array $data, DialplanService $dialplanService)
+	private function setDialplan(Destination $destination, array $data)
 	{
 		$dialplan = null;
 
@@ -130,7 +132,7 @@ class DestinationController extends Controller
 			$data["condition_expression_1"] = $data["condition_expressions"];
 			$data["action_1"] = $data["destination_actions"];
 
-			$dialplan = $dialplanService->setInbound($data, $destination);
+			$dialplan = $this->dialplanService->setInbound($data, $destination);
 		}
 
 		return $dialplan;
