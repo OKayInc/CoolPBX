@@ -125,7 +125,18 @@ class SoundsService
 
     protected function getSoundFiles($language, $dialect, $voice): array
     {
-        return $this->soundFileRepository->getAllSoundFiles($language, $dialect, $voice);
+        $soundFiles = $this->soundFileRepository->getAllSoundFiles($language, $dialect, $voice);
+        
+        return collect($soundFiles)->map(function ($soundFile) {
+            $pathParts = explode('/', $soundFile);
+            $fileName = end($pathParts);
+            $nameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
+            
+            return [
+                'name' => $nameWithoutExtension,
+                'value' => $soundFile
+            ];
+        })->toArray();
     }
     
     /**
