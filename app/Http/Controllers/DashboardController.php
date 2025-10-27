@@ -24,10 +24,10 @@ class DashboardController extends Controller
     private function getServiceLevel()
     {
         // ToDo: define settings
-        // $threshold = Setting::getSetting("talkdesk", "threshold") ?? 20;
-        // $daysRange = Setting::getSetting("talkdesk", "days_range") ?? 30;
-        // $businessStart = Setting::getSetting("talkdesk", "business_hour_start") ?? 9;
-        // $businessEnd = Setting::getSetting("talkdesk", "business_hour_end") ?? 18;
+        // $threshold = Setting::getSetting("talkdesk", "threshold");
+        // $daysRange = Setting::getSetting("talkdesk", "days_range");
+        // $businessStart = Setting::getSetting("talkdesk", "business_hour_start");
+        // $businessEnd = Setting::getSetting("talkdesk", "business_hour_end");
 
         $threshold = 20;
         $daysRange = 30;
