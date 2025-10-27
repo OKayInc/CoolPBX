@@ -1,7 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Facades\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -21,10 +23,56 @@ class DashboardController extends Controller
 
     private function getServiceLevel()
     {
+        // ToDo: define settings
+        // $threshold = Setting::getSetting("talkdesk", "threshold") ?? 20;
+        // $daysRange = Setting::getSetting("talkdesk", "days_range") ?? 30;
+        // $businessStart = Setting::getSetting("talkdesk", "business_hour_start") ?? 9;
+        // $businessEnd = Setting::getSetting("talkdesk", "business_hour_end") ?? 18;
+
+        $threshold = 20;
+        $daysRange = 30;
+        $businessStart = 9;
+        $businessEnd = 18;
+
+        $result = DB::table('v_xml_cdr')
+            ->selectRaw("
+                SUM(CASE
+                        WHEN cc_queue_answered_epoch IS NOT NULL
+                            AND (cc_queue_joined_epoch - answer_epoch) <= ?
+                        THEN 1 ELSE 0
+                    END) AS callsAnsweredWithinThreshold,
+                SUM(CASE
+                        WHEN cc_queue_answered_epoch IS NULL
+                            AND (cc_queue_joined_epoch - answer_epoch) <= ?
+                        THEN 1 ELSE 0
+                    END) AS callsMissedWithinThreshold,
+                SUM(CASE
+                        WHEN cc_queue_answered_epoch IS NOT NULL
+                        THEN 1 ELSE 0
+                    END) AS totalAnsweredCalls,
+                SUM(CASE
+                        WHEN cc_queue_answered_epoch IS NULL
+                        THEN 1 ELSE 0
+                    END) AS totalMissedCalls
+            ", [$threshold, $threshold])
+            ->where('direction', 'inbound')
+            ->whereRaw('start_epoch >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))', [$daysRange])
+            ->whereRaw("HOUR(FROM_UNIXTIME(start_epoch)) BETWEEN ? AND ?", [$businessStart, $businessEnd - 1])
+            ->first();
+
+        $serviceLevel = 0;
+
+        $totalCalls = $result->totalAnsweredCalls + $result->totalMissedCalls;
+
+        if($totalCalls > 0)
+        {
+            $serviceLevel = (($result->callsAnsweredWithinThreshold + $result->callsMissedWithinThreshold) / $totalCalls) * 100;
+        }
+
         return [
             "title" => "Service Level",
             "subtitle" => "",
-            "value" => "50%",
+            "value" => round($serviceLevel, 2) . "%",
         ];
     }
 
