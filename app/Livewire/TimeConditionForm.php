@@ -96,7 +96,7 @@ class TimeConditionForm extends Component
         $this->dialplan_anti_action = $parsed['anti_action'] ?? null;
     }
 
-    protected function initializeDefaults()
+    protected function initializeDefaults():void
     {
         $user = auth()->user();
         $this->domain_uuid = $user->domain_uuid ?? Session::get('domain_uuid');
@@ -107,7 +107,7 @@ class TimeConditionForm extends Component
         $this->addCustomConditionGroup();
     }
 
-    protected function loadDropdownData()
+    protected function loadDropdownData():void
     {
         $user = auth()->user();
 
@@ -124,7 +124,7 @@ class TimeConditionForm extends Component
 
 
 
-    public function addCustomConditionGroup()
+    public function addCustomConditionGroup():void
     {
         $newIndex = count($this->customConditions);
 
@@ -139,7 +139,7 @@ class TimeConditionForm extends Component
         $this->dispatch('openNewAccordion', groupIndex: $newIndex);
     }
 
-    public function removeCustomConditionGroup($index)
+    public function removeCustomConditionGroup($index):void
     {
         if (isset($this->customConditions[$index])) {
             if (
@@ -157,7 +157,7 @@ class TimeConditionForm extends Component
         }
     }
 
-    public function addConditionToGroup($groupIndex)
+    public function addConditionToGroup($groupIndex):void
     {
         if (isset($this->customConditions[$groupIndex])) {
             $this->customConditions[$groupIndex]['conditions'][] = $this->createEmptyCondition();
@@ -166,7 +166,7 @@ class TimeConditionForm extends Component
         $this->dispatch('keepAccordionOpen', groupIndex: $groupIndex);
     }
 
-    public function removeConditionFromGroup($groupIndex, $conditionIndex)
+    public function removeConditionFromGroup($groupIndex, $conditionIndex):void
     {
         if (isset($this->customConditions[$groupIndex]['conditions'][$conditionIndex])) {
             unset($this->customConditions[$groupIndex]['conditions'][$conditionIndex]);
@@ -189,7 +189,7 @@ class TimeConditionForm extends Component
         ];
     }
 
-    public function togglePreset($presetName)
+    public function togglePreset($presetName):void
     {
         if (isset($this->presetGroups[$presetName])) {
             $groupIndex = $this->presetGroups[$presetName];
@@ -234,7 +234,7 @@ class TimeConditionForm extends Component
         }
     }
 
-    protected function reindexPresetGroups()
+    protected function reindexPresetGroups():void
     {
         $newPresetGroups = [];
         foreach ($this->presetGroups as $presetName => $oldIndex) {
@@ -282,7 +282,7 @@ class TimeConditionForm extends Component
         $this->showAdvanced = !$this->showAdvanced;
     }
 
-    protected function validateConditionsExist()
+    protected function validateConditionsExist():bool
     {
         $hasCustomConditions = !empty($this->customConditions);
         $hasPresets = !empty($this->selectedPresets);
@@ -295,7 +295,7 @@ class TimeConditionForm extends Component
         return true;
     }
 
-    protected function validateAlternateDestination()
+    protected function validateAlternateDestination():bool
     {
         $needsAlternate = false;
         foreach ($this->selectedPresets as $preset) {
@@ -353,7 +353,7 @@ class TimeConditionForm extends Component
                     $this->dialplanUuid,
                     $data,
                     $customConditions,
-                    [], // Todo: ya no usamos borrar del repositorio
+                    [],
                     $this->default_preset_action
                 );
                 session()->flash('success', 'Time Condition updated successfully.');
@@ -361,7 +361,7 @@ class TimeConditionForm extends Component
                 $dialplan = $this->timeConditionRepository->create(
                     $data,
                     $customConditions,
-                    [], // Todo: ya no usamos borrar del repositorio
+                    [],
                     $this->default_preset_action
                 );
                 session()->flash('success', 'Time Condition created successfully.');
@@ -435,7 +435,6 @@ class TimeConditionForm extends Component
     }
 
 
-    //TODO: preguntar si podemos usar carbon para esto
     public function getTimeVariableOptions($variable): array
     {
         switch ($variable) {
