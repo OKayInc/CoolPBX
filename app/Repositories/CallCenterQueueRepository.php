@@ -470,7 +470,7 @@ class CallCenterQueueRepository
             $xml .= "		<action application=\"set\" data=\"cc_exit_keys={$queue->queue_cc_exit_keys}\"/>\n";
         }
 
-        $xml .= "		<action application=\"lua\" data=\"callcenter {$queue->queue_extension}@{$domainName}\"/>\n";
+        $xml .= "		<action application=\"lua\" data=\"app.lua callcenter {$queue->queue_extension}@{$domainName}\"/>\n";
 
         if (!empty($queue->queue_timeout_action) && $queue->queue_timeout_action != 'hangup') {
             $timeoutParts = explode(':', $queue->queue_timeout_action);
