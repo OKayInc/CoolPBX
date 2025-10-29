@@ -43,7 +43,7 @@ class LcrRequest extends FormRequest
             'cid'                => 'bail|nullable|string|max:255',
             'enabled'            => 'bail|nullable|string|in:true,false',
             'description'        => 'bail|nullable|string|max:500',
-            'carrier_uuid'       => 'bail|required|uuid|exists:App\Models\Carrier,carrier_uuid',
+            'carrier_uuid'       => 'bail|nullable|uuid|exists:App\Models\Carrier,carrier_uuid',
             'digits' => [
                 'bail',
                 'required',
