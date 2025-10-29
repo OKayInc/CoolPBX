@@ -150,7 +150,7 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="destination_caller_id_name" class="form-label">Caller ID Name </label>
+                            <label for="destination_caller_id_name" class="form-label">Caller ID Name</label>
                             <input
                                 type="text"
                                 class="form-control @error('destination_caller_id_name') is-invalid @enderror"
@@ -367,7 +367,6 @@
                                 name="destination_cid_name_prefix"
                                 value="{{ old('destination_cid_name_prefix', $destination->destination_cid_name_prefix ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_cid_name_prefix')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -417,7 +416,6 @@
                                 name="destination_distinctive_ring"
                                 value="{{ old('destination_distinctive_ring', $destination->destination_distinctive_ring ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_distinctive_ring')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -439,7 +437,6 @@
                                 name="destination_accountcode"
                                 value="{{ old('destination_accountcode', $destination->destination_accountcode ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_accountcode')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
