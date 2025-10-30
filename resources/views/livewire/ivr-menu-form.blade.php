@@ -111,12 +111,53 @@
 					<div class="row mt-3">
 						<div class="col-md-6">
 							<div class="form-group">
+								<label class="form-label d-block">Exit action</label>
+								<x-switch-destinations name="ivr_menu_exit_action"
+									:selected="$ivrMenu->ivr_menu_exit_action ?? ''"
+									extension-type="dialplan"
+									ring-group-type="dialplan"
+									voice-mail-type="dialplan"
+									call-center-type="dialplan"
+									conference-center-type="dialplan"
+									ivr-menu-type="dialplan"
+									time-condition-type="dialplan"
+									tone-type="dialplan"
+									wire:model="ivr_menu_exit_action" />
+								@error('ivr_menu_exit_action')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
 								<label class="form-label d-block">Direct dial</label>
 								<div class="form-check form-switch">
 									<input class="form-check-input" type="checkbox" role="switch" id="ivr_menu_direct_dial" name="ivr_menu_direct_dial" wire:model="ivr_menu_direct_dial" value="true" {{ old('ivr_menu_direct_dial', $ivrMenu->ivr_menu_direct_dial ?? false) ? 'checked' : '' }}>
 									<label class="form-check-label" for="ivr_menu_direct_dial"></label>
 								</div>
 								@error('ivr_menu_direct_dial')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="form-label d-block">Ring back</label>
+								<x-switch-music-on-hold name="ivr_menu_ringback" class="form-select"
+									:selected="$ivrMenu->ivr_menu_ringback"
+									:withMusicOnHold="true"
+									:withRecordings="true"
+									:withStreams="true"
+									:withRingtones="true"
+									:withTones="true"
+									wire:model="ivr_menu_ringback" />
+								@error('ivr_menu_ringback')
 									<div class="invalid-feedback d-block">{{ $message }}</div>
 								@enderror
 							</div>

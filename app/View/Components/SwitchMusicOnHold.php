@@ -6,6 +6,7 @@ use Closure;
 use App\Models\MusicOnHold;
 use App\Models\Recording;
 use App\Models\Stream;
+use App\Models\Variable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\Component;
@@ -16,7 +17,7 @@ class SwitchMusicOnHold extends Component
     public $selected;
     public $options;
 
-    public function __construct($name = "", $selected = null, $withMusicOnHold = false, $withRecordings = false, $withStreams = false)
+    public function __construct($name = "", $selected = null, $withMusicOnHold = false, $withRecordings = false, $withStreams = false, $withRingtones = false, $withTones = false)
     {
         $this->name = $name;
         $this->selected = $selected;
@@ -95,6 +96,46 @@ class SwitchMusicOnHold extends Component
 
             $this->options[] = [
                 "label" => __("Streams"),
+                "values" => $values
+            ];
+        }
+
+        if($withRingtones)
+        {
+            $ringtones = Variable::where("var_category", "Ringtones")->orderBy("var_name", "asc")->get();
+
+            $values = [];
+
+            foreach($ringtones as $ringtone)
+            {
+                $values[] = [
+                    "id" => '${' . $ringtone->var_name . '}',
+                    "name" => $ringtone->var_name
+                ];
+            }
+
+            $this->options[] = [
+                "label" => __("Ringtones"),
+                "values" => $values
+            ];
+        }
+
+        if($withTones)
+        {
+            $tones = Variable::where("var_category", "Tones")->orderBy("var_name", "asc")->get();
+
+            $values = [];
+
+            foreach($tones as $tone)
+            {
+                $values[] = [
+                    "id" => '${' . $tone->var_name . '}',
+                    "name" => $tone->var_name
+                ];
+            }
+
+            $this->options[] = [
+                "label" => __("Ringtones"),
                 "values" => $values
             ];
         }
