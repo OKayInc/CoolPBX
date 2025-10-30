@@ -27,6 +27,7 @@ use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
 use App\Http\Controllers\EmailQueueController;
 use App\Http\Controllers\FaxController;
+use App\Http\Controllers\IVRMenuController;
 use App\Http\Controllers\LcrController;
 use App\Http\Controllers\UserGroupController;
 use App\Http\Controllers\ModFormatCDRController;
@@ -155,6 +156,9 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::post('/lcr/import', [LcrController::class, 'import'])->name('lcr.import', 'lcr.import');
     Route::post('/lcr/checkrate', [LcrController::class, 'checkrate'])->name('lcr.checkrate');
     Route::resource('/lcr', LcrController::class)->name('lcr', 'lcr');
+
+    // IVR MENU
+    Route::resource('/ivr_menu', IVRMenuController::class)->name('ivr_menu', 'ivr_menu');
 
     // MODULES
     Route::get('/modules/{module}/start', [ModuleController::class, 'start'])->name('modules.start');
