@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,4 +74,15 @@ class Voicemail extends Model
 	public function voicemailoptionss(): HasMany {
 		return $this->hasMany(VoicemailOption::class, 'voicemail_uuid', 'voicemail_uuid');
 	}
+
+    public function voicemailDestinations():HasMany
+    {
+        return $this->hasMany(VoicemailDestination::class, 'voicemail_uuid', 'voicemail_uuid');
+    }
+
+    public function voicemailGreetings():HasMany
+    {
+        return $this->hasMany(VoicemailGreeting::class, 'voicemail_id', 'voicemail_id');
+    }
+
 }

@@ -28,6 +28,7 @@ class VoicemailOption extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'voicemail_uuid',
         'domain_uuid',
         'voicemail_option_digits',
         'voicemail_option_action',

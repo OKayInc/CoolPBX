@@ -38,6 +38,7 @@ use App\Http\Controllers\MusicOnHoldController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
+use App\Http\Controllers\VoicemailController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
@@ -228,6 +229,8 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
     Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+
+    Route::resource('/voicemails', VoicemailController::class)->name('voicemails', 'voicemails');
 
 
 
