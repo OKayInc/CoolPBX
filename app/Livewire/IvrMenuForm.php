@@ -2,7 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Http\Requests\IVRMenuOptionequest;
+use App\Http\Requests\IVRMenuOptionRequest;
 use App\Http\Requests\IVRMenuRequest;
+use App\Repositories\IVRMenuOptionRepository;
 use App\Repositories\IVRMenuRepository;
 use App\Repositories\IVRMenuUserRepository;
 use Livewire\Component;
@@ -32,21 +35,30 @@ class IvrMenuForm extends Component
     public bool $ivr_menu_enabled = false;
     public ?string $ivr_menu_description = '';
 
+    public ?array $ivrMenuOptions = [];
+    public ?array $ivrMenuOptionsToDelete = [];
+
     protected $ivrMenuRepository;
+    protected $ivrMenuOptionRepository;
 
     public $ivrMenus = [];
     public $languagePaths = [];
 
-    public function boot(IVRMenuRepository $ivrMenuRepository)
+    public function boot(IVRMenuRepository $ivrMenuRepository, IVRMenuOptionRepository $ivrMenuOptionRepository)
     {
         $this->ivrMenuRepository = $ivrMenuRepository;
+        $this->ivrMenuOptionRepository = $ivrMenuOptionRepository;
     }
 
     public function rules()
     {
-        $request = new IVRMenuRequest();
+        $ivrMenuRequest = new IVRMenuRequest();
+        $ivrMenuRules = $ivrMenuRequest->rules();
 
-        return $request->rules();
+        $ivrMenuOptionRequest = new IVRMenuOptionRequest();
+        $ivrMenuOptionRules = $ivrMenuOptionRequest->rules();
+
+        return array_merge($ivrMenuRules, $ivrMenuOptionRules);
     }
 
     public function mount($ivrMenu = null, $ivrMenus = [], $languagePaths = []): void
@@ -77,8 +89,84 @@ class IvrMenuForm extends Component
 
             $this->ivr_menu_language = $this->ivr_menu_language . "/" . $this->ivr_menu_dialect . "/" . $this->ivr_menu_voice;
             $this->ivr_menu_exit_action = $this->ivr_menu_exit_app . ":" . $this->ivr_menu_exit_data;
+
+            $this->ivrMenuOptions = [];
+
+            foreach($ivrMenu->options as $ivrMenuOption)
+            {
+                $ivrMenuOptionActionParam = "";
+
+        	    if(!empty($ivrMenuOption->ivr_menu_option_action . $ivrMenuOption->ivr_menu_option_param))
+                {
+    				$ivrMenuOptionActionParam = $ivrMenuOption->ivr_menu_option_action . ":" . $ivrMenuOption->ivr_menu_option_param;
+                }
+
+                $this->ivrMenuOptions[] = [
+                    'ivr_menu_option_uuid' => $ivrMenuOption->ivr_menu_option_uuid,
+                    'ivr_menu_uuid' => $ivrMenuOption->ivr_menu_uuid,
+                    'ivr_menu_option_digits' => $ivrMenuOption->ivr_menu_option_digits,
+                    'ivr_menu_option_action' => $ivrMenuOption->ivr_menu_option_action,
+                    'ivr_menu_option_param' => $ivrMenuOptionActionParam,
+                    'ivr_menu_option_order' => $ivrMenuOption->ivr_menu_option_order,
+                    'ivr_menu_option_description' => $ivrMenuOption->ivr_menu_option_description,
+                    'ivr_menu_option_enabled' => $ivrMenuOption->ivr_menu_option_enabled,
+                ];
+            }
+        }
+
+        if(empty($this->ivrMenuOptions))
+        {
+            $this->addIvrMenuOption();
         }
     }
+
+    public function addIvrMenuOption(): void
+    {
+        $this->ivrMenuOptions[] = [
+            'ivr_menu_option_uuid' => '',
+            'ivr_menu_option_digits' => '',
+            'ivr_menu_option_action' => '',
+            'ivr_menu_option_param' => '',
+            'ivr_menu_option_order' => '',
+            'ivr_menu_option_description' => '',
+            'ivr_menu_option_enabled' => '',
+        ];
+    }
+
+    public function removeIvrMenuOption($index): void
+    {
+        if(isset($this->ivrMenuOptions[$index]['ivr_menu_option_uuid']) && !empty($this->ivrMenuOptions[$index]['ivr_menu_option_uuid']))
+        {
+            $this->ivrMenuOptionsToDelete[] = $this->ivrMenuOptions[$index]['ivr_menu_option_uuid'];
+        }
+
+        unset($this->ivrMenuOptions[$index]);
+
+        $this->ivrMenuOptions = array_values($this->ivrMenuOptions);
+    }
+
+	private function setIvrMenuOptionAction(&$IVRMenuOptions)
+	{
+        foreach($IVRMenuOptions as $key => $value)
+        {
+            if(empty($IVRMenuOptions[$key]["ivr_menu_option_param"]) && is_numeric($IVRMenuOptions[$key]["ivr_menu_option_param"]))
+            {
+                //add the ivr menu syntax
+                $ivr_menu_option_action = "menu-exec-app";
+                $ivr_menu_option_param = "transfer " . $IVRMenuOptions[$key]["ivr_menu_option_param"] . " XML " . $this->ivr_menu_context;
+            }
+            else
+            {
+                //seperate the action and the param
+                $options_array = explode(":", $IVRMenuOptions[$key]["ivr_menu_option_param"]);
+                $ivr_menu_option_action = array_shift($options_array);
+                $ivr_menu_option_param = join(":", $options_array);
+            }
+
+            $IVRMenuOptions[$key]["ivr_menu_option_action"] = $ivr_menu_option_action;
+            $IVRMenuOptions[$key]["ivr_menu_option_param"] = $ivr_menu_option_param;
+        }
+	}
 
     public function save(): void
     {
@@ -118,16 +206,47 @@ class IvrMenuForm extends Component
 
             if(!$updated)
             {
-                session()->flash('error', 'Failed to update ivr menu.');
+                session()->flash('error', 'Failed to update IVR Menu.');
 
 			    return;
             }
+
+            session()->flash('message', 'IVR Menu updated successfully.');
         }
         else
         {
             $this->ivrMenu = $this->ivrMenuRepository->create($ivrMenuData);
 
-            session()->flash('message', 'ivr menu created successfully.');
+            session()->flash('message', 'IVR Menu created successfully.');
+        }
+
+        $oldIVRMenuOptions = collect($this->ivrMenuOptions)->filter(function ($ivrMenuOption)
+        {
+            return !empty($ivrMenuOption['ivr_menu_option_uuid']);
+        })->toArray();
+
+        $newIVRMenuOptions = collect($this->ivrMenuOptions)->filter(function ($ivrMenuOption)
+        {
+            return empty($ivrMenuOption['ivr_menu_option_uuid']);
+        })->toArray();
+
+        if($oldIVRMenuOptions)
+        {
+            $this->setIvrMenuOptionAction($oldIVRMenuOptions);
+
+            $this->ivrMenuOptionRepository->update($this->ivrMenu, $oldIVRMenuOptions);
+        }
+
+        if($newIVRMenuOptions)
+        {
+            $this->setIvrMenuOptionAction($newIVRMenuOptions);
+
+            $this->ivrMenuOptionRepository->create($this->ivrMenu, $newIVRMenuOptions);
+        }
+
+        if(!empty($this->ivrMenuOptionsToDelete))
+        {
+            $this->ivrMenuOptionRepository->delete($this->ivrMenuOptionsToDelete);
         }
 
         redirect()->route('ivr_menu.edit', $this->ivrMenu->ivr_menu_uuid);

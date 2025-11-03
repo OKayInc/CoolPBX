@@ -86,6 +86,87 @@
 						</div>
 					</div>
 
+					<h5 class="mt-4 mb-3">Options</h5>
+					<div class="card mb-4">
+						<div class="card-body">
+							<div class="table-responsive">
+								<table class="table table-bordered">
+									<thead>
+										<tr>
+											<th>{{ __('Digits') }}</th>
+											<th>{{ __('Param') }}</th>
+											<th>{{ __('Order') }}</th>
+											<th>{{ __('Description') }}</th>
+											<th>{{ __('Enabled') }}</th>
+											<th class="text-center">{{ __('Action') }}</th>
+										</tr>
+									</thead>
+									<tbody>
+										@if(!empty($ivrMenuOptions))
+											@foreach($ivrMenuOptions as $index => $ivrMenuOption)
+											<tr>
+												<td>
+													<input type="number" class="form-control @error('ivrMenuOptions.' . $index . '.ivr_menu_option_digits') is-invalid @enderror" wire:model="ivrMenuOptions.{{ $index }}.ivr_menu_option_digits" required>
+													@error('ivrMenuOptions.' . $index . '.ivr_menu_option_digits')
+														<div class="invalid-feedback d-block">{{ $message }}</div>
+													@enderror
+												</td>
+												<td>
+													<x-switch-destinations name="ivr_menu_option_param" data-x="$ivrMenuOptions.{{$index}}.ivr_menu_option_param ?? ''"
+														:selected="$ivrMenuOptions[$index]['ivr_menu_option_param'] ?? ''"
+														extension-type="ivr"
+														ring-group-type="ivr"
+														voice-mail-type="ivr"
+														call-center-type="ivr"
+														conference-center-type="ivr"
+														ivr-menu-type="ivr"
+														time-condition-type="ivr"
+														tone-type="ivr"
+														wire:model="ivrMenuOptions.{{$index}}.ivr_menu_option_param" />
+													@error('ivrMenuOptions.' . $index . '.ivr_menu_option_param')
+														<div class="invalid-feedback d-block">{{ $message }}</div>
+													@enderror
+												</td>
+												<td>
+													<input type="number" class="form-control @error('ivrMenuOptions.' . $index . '.ivr_menu_option_order') is-invalid @enderror" wire:model="ivrMenuOptions.{{ $index }}.ivr_menu_option_order" min="0" max="999">
+													@error('ivrMenuOptions.' . $index . '.ivr_menu_option_order')
+														<div class="invalid-feedback d-block">{{ $message }}</div>
+													@enderror
+												</td>
+												<td>
+													<input type="text" class="form-control @error('ivrMenuOptions.' . $index . '.ivr_menu_option_description') is-invalid @enderror" wire:model="ivrMenuOptions.{{ $index }}.ivr_menu_option_description">
+													@error('ivrMenuOptions.'.$index.'.ivr_menu_option_description')
+														<div class="invalid-feedback">{{ $message }}</div>
+													@enderror
+												</td>
+												<td>
+													<select class="form-select @error('ivrMenuOptions.' . $index . '.ivr_menu_option_enabled') is-invalid @enderror" wire:model="ivrMenuOptions.{{ $index }}.ivr_menu_option_enabled">
+														<option value=""></option>
+														<option value="true">True</option>
+														<option value="false">False</option>
+													</select>
+													@error('ivrMenuOptions.' . $index . '.enabled')
+														<div class="invalid-feedback d-block">{{ $message }}</div>
+													@enderror
+												</td>
+												<td class="text-center">
+													@if (count($ivrMenuOptions) > 1)
+													<button type="button" class="btn btn-sm btn-danger" wire:click="removeIvrMenuOption({{ $index }})"><i class="fas fa-times"></i> <i class="bi bi-trash"></i> </button>
+													@endif
+
+													@if ($index === count($ivrMenuOptions) - 1)
+														<button type="button" class="btn btn-sm btn-success" wire:click="addIvrMenuOption"><i class="fas fa-plus"></i> Add</button>
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										@endif
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
 					<div class="row mt-3">
 						<div class="col-md-6">
 							<div class="form-group">

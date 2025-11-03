@@ -93,6 +93,6 @@ class IVRMenu extends Model
 	}
 
 	public function options(): HasMany {
-		return $this->hasMany(IVRMenuOption::class, 'ivr_menu_uuid', 'ivr_menu_uuid');
+		return $this->hasMany(IVRMenuOption::class, 'ivr_menu_uuid', 'ivr_menu_uuid')->orderBy("ivr_menu_option_digits")->orderBy("ivr_menu_option_order");
 	}
 }
