@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Facades\Setting;
+use App\Models\CallCenterAgent;
+use App\Models\XmlCDR;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,10 +33,9 @@ class DashboardController extends Controller
         return gmdate("i:s", (int)$seconds);
     }
 
-    private function baseInboundQuery()
+    private function baseXMLCDRQuery()
     {
-        return DB::table('v_xml_cdr')
-            ->where('direction', 'inbound')
+        return XmlCDR::where('direction', 'inbound')
             ->whereRaw('start_epoch >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))', [$this->daysRange])
             ->whereRaw('HOUR(FROM_UNIXTIME(start_epoch)) BETWEEN ? AND ?', [$this->businessStart, $this->businessEnd - 1]);
     }
@@ -55,7 +56,7 @@ class DashboardController extends Controller
 
     private function getServiceLevel()
     {
-        $result = $this->baseInboundQuery()
+        $result = $this->baseXMLCDRQuery()
             ->selectRaw("
                 SUM(CASE
                         WHEN cc_queue_answered_epoch IS NOT NULL
@@ -96,7 +97,7 @@ class DashboardController extends Controller
 
     private function getAverageAbandonTime()
     {
-        $result = $this->baseInboundQuery()
+        $result = $this->baseXMLCDRQuery()
             ->selectRaw('
                 COALESCE(
                     AVG(CASE
@@ -118,7 +119,7 @@ class DashboardController extends Controller
 
     private function getAverageWaitTime()
     {
-        $result = $this->baseInboundQuery()
+        $result = $this->baseXMLCDRQuery()
             ->selectRaw('
                 COALESCE(
                     AVG(CASE
@@ -139,7 +140,7 @@ class DashboardController extends Controller
 
     private function getLongestWaitTime()
     {
-        $result = $this->baseInboundQuery()
+        $result = $this->baseXMLCDRQuery()
             ->selectRaw('
                 COALESCE(
                     MAX(CASE
@@ -160,21 +161,30 @@ class DashboardController extends Controller
 
     private function getActiveAgents()
     {
+        $agents = CallCenterAgent::query()
+            ->select("agent_status", DB::raw("COUNT(*) as total"))
+            ->groupBy("agent_status")
+            ->pluck("total", "agent_status");
+
+        $online = ($agents["Available"] ?? 0) + ($agents["Available (On Demand)"] ?? 0);
+        $offline = $agents["Logged Out"] ?? 0;
+        $other = $agents["On Break"] ?? 0;
+
         return [
             "title" => "Active Agents",
             "subtitle" => "",
-            "count" => 7,
+            "count" => $online + $offline + $other,
             "metrics" => [
                 "online" => [
-                    "value" => 4,
+                    "value" => $online,
                     "color" => "#00A65A",
                 ],
                 "offline" => [
-                    "value" => 1,
+                    "value" => $offline,
                     "color" => "#DD4B39",
                 ],
                 "other" => [
-                    "value" => 2,
+                    "value" => $other,
                     "color" => "#F39C12",
                 ],
             ],
