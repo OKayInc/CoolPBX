@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Facades\Setting;
 use App\Http\Requests\IVRMenuRequest;
+use App\Models\Domain;
 use App\Models\IVRMenu;
 use App\Models\User;
 use App\Repositories\IVRMenuRepository;
@@ -28,7 +29,9 @@ class IVRMenuController extends Controller
 
 		$languagePaths = $this->getLanguagePaths();
 
-		return view("pages.ivr_menu.form", compact("ivrMenus", "languagePaths"));
+		$domains = Domain::all();
+
+		return view("pages.ivr_menu.form", compact("ivrMenus", "languagePaths", "domains"));
 	}
 
 	public function store(IVRMenuRequest $request)
@@ -49,7 +52,9 @@ class IVRMenuController extends Controller
 
 		$languagePaths = $this->getLanguagePaths();
 
-		return view("pages.ivr_menu.form", compact("ivrMenu", "ivrMenus", "languagePaths"));
+		$domains = Domain::all();
+
+		return view("pages.ivr_menu.form", compact("ivrMenu", "ivrMenus", "languagePaths", "domains"));
 	}
 
 	public function update(IVRMenuRequest $request, IVRMenu $ivrMenu)

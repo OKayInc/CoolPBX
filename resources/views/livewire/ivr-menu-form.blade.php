@@ -86,6 +86,42 @@
 						</div>
 					</div>
 
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="ivr_menu_greet_long" class="form-label">Greet long</label>
+								<x-switch-music-on-hold name="ivr_menu_greet_long" class="form-select"
+									:selected="$ivrMenu->ivr_menu_greet_long"
+									:withRecordings="true"
+									:withPhrases="true"
+									:withMisc="true"
+									:withOthers="false"
+									wire:model="ivr_menu_greet_long" />
+								@error('ivr_menu_greet_long')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="ivr_menu_greet_short" class="form-label">Greet short</label>
+								<x-switch-music-on-hold name="ivr_menu_greet_short" class="form-select"
+									:selected="$ivrMenu->ivr_menu_greet_short"
+									:withRecordings="true"
+									:withPhrases="true"
+									:withMisc="true"
+									:withOthers="false"
+									wire:model="ivr_menu_greet_short" />
+								@error('ivr_menu_greet_short')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
 					<h5 class="mt-4 mb-3">Options</h5>
 					<div class="card mb-4">
 						<div class="card-body">
@@ -275,6 +311,42 @@
 					</div>
 
 					<div id="show_advanced" style="display: none;">
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_invalid_sound" class="form-label">Invalid sound</label>
+									<x-switch-music-on-hold name="ivr_menu_invalid_sound" class="form-select"
+										:selected="$ivrMenu->ivr_menu_invalid_sound"
+										:withRecordings="true"
+										:withPhrases="true"
+										:withMisc="true"
+										:withOthers="false"
+										wire:model="ivr_menu_invalid_sound" />
+									@error('ivr_menu_invalid_sound')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_exit_sound" class="form-label">Exit sound</label>
+									<x-switch-music-on-hold name="ivr_menu_exit_sound" class="form-select"
+										:selected="$ivrMenu->ivr_menu_exit_sound"
+										:withRecordings="true"
+										:withPhrases="true"
+										:withMisc="true"
+										:withOthers="false"
+										wire:model="ivr_menu_exit_sound" />
+									@error('ivr_menu_exit_sound')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
 						<div class="row mt-3">
 							<div class="col-md-6">
 								<div class="form-group">
@@ -474,6 +546,24 @@
 								</div>
 							</div>
 						</div>
+
+						@can('ivr_menu_domain')
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="domain_uuid" class="form-label">Domain</label>
+									<select name="domain_uuid" class="form-select @error('domain_uuid') is-invalid @enderror" wire:model="domain_uuid">
+										@foreach($domains as $domain)
+										<option value="{{ $domain->domain_uuid }}" @selected($domain->domain_uuid == $ivrMenu->domain_uuid ?? '')>{{ $domain->domain_name }}</option>
+										@endforeach
+									</select>
+									@error('domain_uuid')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+						@endcan
 
 					</div>
 

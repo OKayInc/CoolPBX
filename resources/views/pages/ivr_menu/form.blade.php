@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<livewire:ivr-menu-form :ivrMenu="$ivrMenu ?? null" :ivrMenus="$ivrMenus ?? []" :languagePaths="$languagePaths ?? []" />
+<livewire:ivr-menu-form :ivrMenu="$ivrMenu ?? null" :ivrMenus="$ivrMenus ?? []" :languagePaths="$languagePaths ?? []" :domains="$domains ?? []" />
 @endsection
 
 @push("scripts")
