@@ -264,6 +264,219 @@
 						</div>
 					</div>
 
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<button type="button" class="btn btn-sm btn-primary" id="btn_toogle_advanced">
+								<i class="fa-solid fa-screwdriver-wrench"></i> Advanced
+							</button>
+							<div class="form-group">
+							</div>
+						</div>
+					</div>
+
+					<div id="show_advanced" style="display: none;">
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_pin_number" class="form-label">Pin number</label>
+									<input
+										type="text"
+										class="form-control @error('ivr_menu_pin_number') is-invalid @enderror"
+										id="ivr_menu_pin_number"
+										name="ivr_menu_pin_number"
+										maxlength="255"
+										wire:model="ivr_menu_pin_number"
+									>
+									@error('ivr_menu_pin_number')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_confirm_macro" class="form-label">Confirm macro</label>
+									<input
+										type="text"
+										class="form-control @error('ivr_menu_confirm_macro') is-invalid @enderror"
+										id="ivr_menu_confirm_macro"
+										name="ivr_menu_confirm_macro"
+										maxlength="255"
+										wire:model="ivr_menu_confirm_macro"
+									>
+									@error('ivr_menu_confirm_macro')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_confirm_key" class="form-label">Confirm key</label>
+									<input
+										type="text"
+										class="form-control @error('ivr_menu_confirm_key') is-invalid @enderror"
+										id="ivr_menu_confirm_key"
+										name="ivr_menu_confirm_key"
+										maxlength="255"
+										wire:model="ivr_menu_confirm_key"
+									>
+									@error('ivr_menu_confirm_key')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_tts_engine" class="form-label">TTS engine</label>
+									<input
+										type="text"
+										class="form-control @error('ivr_menu_tts_engine') is-invalid @enderror"
+										id="ivr_menu_tts_engine"
+										name="ivr_menu_tts_engine"
+										maxlength="255"
+										wire:model="ivr_menu_tts_engine"
+									>
+									@error('ivr_menu_tts_engine')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_tts_voice" class="form-label">TTS voice</label>
+									<input
+										type="text"
+										class="form-control @error('ivr_menu_tts_voice') is-invalid @enderror"
+										id="ivr_menu_tts_voice"
+										name="ivr_menu_tts_voice"
+										maxlength="255"
+										wire:model="ivr_menu_tts_voice"
+									>
+									@error('ivr_menu_tts_voice')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_confirm_attempts" class="form-label">Confirm attempts</label>
+									<input
+										type="number"
+										class="form-control @error('ivr_menu_confirm_attempts') is-invalid @enderror"
+										id="ivr_menu_confirm_attempts"
+										name="ivr_menu_confirm_attempts"
+										maxlength="255"
+										min="1"
+										step="1"
+										wire:model="ivr_menu_confirm_attempts"
+									>
+									@error('ivr_menu_confirm_attempts')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_inter_digit_timeout" class="form-label">Inter-digit timeout</label>
+									<input
+										type="number"
+										class="form-control @error('ivr_menu_inter_digit_timeout') is-invalid @enderror"
+										id="ivr_menu_inter_digit_timeout"
+										name="ivr_menu_inter_digit_timeout"
+										maxlength="255"
+										min="1"
+										step="1"
+										wire:model="ivr_menu_inter_digit_timeout"
+									>
+									@error('ivr_menu_inter_digit_timeout')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_max_failures" class="form-label">Max failures</label>
+									<input
+										type="number"
+										class="form-control @error('ivr_menu_max_failures') is-invalid @enderror"
+										id="ivr_menu_max_failures"
+										name="ivr_menu_max_failures"
+										maxlength="255"
+										min="1"
+										step="1"
+										wire:model="ivr_menu_max_failures"
+									>
+									@error('ivr_menu_max_failures')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_max_timeouts" class="form-label">Max timeouts</label>
+									<input
+										type="number"
+										class="form-control @error('ivr_menu_max_timeouts') is-invalid @enderror"
+										id="ivr_menu_max_timeouts"
+										name="ivr_menu_max_timeouts"
+										maxlength="255"
+										min="1"
+										step="1"
+										wire:model="ivr_menu_max_timeouts"
+									>
+									@error('ivr_menu_max_timeouts')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="ivr_menu_digit_len" class="form-label">Digit length</label>
+									<input
+										type="number"
+										class="form-control @error('ivr_menu_digit_len') is-invalid @enderror"
+										id="ivr_menu_digit_len"
+										name="ivr_menu_digit_len"
+										maxlength="255"
+										min="1"
+										step="1"
+										wire:model="ivr_menu_digit_len"
+									>
+									@error('ivr_menu_digit_len')
+										<div class="invalid-feedback d-block">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+						</div>
+
+					</div>
+
 					@can('ivr_menu_context')
 					<div class="row mt-3">
 						<div class="col-md-6">

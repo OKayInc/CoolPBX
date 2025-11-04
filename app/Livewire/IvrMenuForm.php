@@ -2,12 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Http\Requests\IVRMenuOptionequest;
 use App\Http\Requests\IVRMenuOptionRequest;
 use App\Http\Requests\IVRMenuRequest;
 use App\Repositories\IVRMenuOptionRepository;
 use App\Repositories\IVRMenuRepository;
-use App\Repositories\IVRMenuUserRepository;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\View\View;
@@ -31,6 +29,16 @@ class IvrMenuForm extends Component
     public bool $ivr_menu_direct_dial = false;
     public ?string $ivr_menu_ringback = '';
     public ?string $ivr_menu_cid_prefix = '';
+    public ?string $ivr_menu_pin_number = '';
+    public ?string $ivr_menu_confirm_macro = '';
+    public ?string $ivr_menu_confirm_key = '';
+    public ?string $ivr_menu_tts_engine = '';
+    public ?string $ivr_menu_tts_voice = '';
+    public ?string $ivr_menu_confirm_attempts = '';
+    public ?string $ivr_menu_inter_digit_timeout = '';
+    public ?string $ivr_menu_max_failures = '';
+    public ?string $ivr_menu_max_timeouts = '';
+    public ?string $ivr_menu_digit_len = '';
     public ?string $ivr_menu_context = '';
     public bool $ivr_menu_enabled = false;
     public ?string $ivr_menu_description = '';
@@ -83,6 +91,16 @@ class IvrMenuForm extends Component
             $this->ivr_menu_direct_dial = $ivrMenu->ivr_menu_direct_dial;
             $this->ivr_menu_ringback = $ivrMenu->ivr_menu_ringback;
             $this->ivr_menu_cid_prefix = $ivrMenu->ivr_menu_cid_prefix;
+            $this->ivr_menu_pin_number = $ivrMenu->ivr_menu_pin_number;
+            $this->ivr_menu_confirm_macro = $ivrMenu->ivr_menu_confirm_macro;
+            $this->ivr_menu_confirm_key = $ivrMenu->ivr_menu_confirm_key;
+            $this->ivr_menu_tts_engine = $ivrMenu->ivr_menu_tts_engine;
+            $this->ivr_menu_tts_voice = $ivrMenu->ivr_menu_tts_voice;
+            $this->ivr_menu_confirm_attempts = $ivrMenu->ivr_menu_confirm_attempts;
+            $this->ivr_menu_inter_digit_timeout = $ivrMenu->ivr_menu_inter_digit_timeout;
+            $this->ivr_menu_max_failures = $ivrMenu->ivr_menu_max_failures;
+            $this->ivr_menu_max_timeouts = $ivrMenu->ivr_menu_max_timeouts;
+            $this->ivr_menu_digit_len = $ivrMenu->ivr_menu_digit_len;
             $this->ivr_menu_context = $ivrMenu->ivr_menu_context;
             $this->ivr_menu_enabled = $ivrMenu->ivr_menu_enabled;
             $this->ivr_menu_description = $ivrMenu->ivr_menu_description;
@@ -195,6 +213,16 @@ class IvrMenuForm extends Component
             'ivr_menu_direct_dial' => $this->ivr_menu_direct_dial,
             'ivr_menu_ringback' => $this->ivr_menu_ringback,
             'ivr_menu_cid_prefix' => $this->ivr_menu_cid_prefix,
+            'ivr_menu_pin_number' => $this->ivr_menu_pin_number,
+            'ivr_menu_confirm_macro' => $this->ivr_menu_confirm_macro,
+            'ivr_menu_confirm_key' => $this->ivr_menu_confirm_key,
+            'ivr_menu_tts_engine' => $this->ivr_menu_tts_engine,
+            'ivr_menu_tts_voice' => $this->ivr_menu_tts_voice,
+            'ivr_menu_confirm_attempts' => $this->ivr_menu_confirm_attempts,
+            'ivr_menu_inter_digit_timeout' => $this->ivr_menu_inter_digit_timeout,
+            'ivr_menu_max_failures' => $this->ivr_menu_max_failures,
+            'ivr_menu_max_timeouts' => $this->ivr_menu_max_timeouts,
+            'ivr_menu_digit_len' => $this->ivr_menu_digit_len,
             'ivr_menu_context' => $this->ivr_menu_context,
             'ivr_menu_enabled' => $this->ivr_menu_enabled,
             'ivr_menu_description' => $this->ivr_menu_description,
