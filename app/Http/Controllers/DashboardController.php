@@ -168,23 +168,23 @@ class DashboardController extends Controller
 
         $online = ($agents["Available"] ?? 0) + ($agents["Available (On Demand)"] ?? 0);
         $offline = $agents["Logged Out"] ?? 0;
-        $other = $agents["On Break"] ?? 0;
+        $away = $agents["On Break"] ?? 0;
 
         return [
             "title" => "Active Agents",
             "subtitle" => "",
-            "count" => $online + $offline + $other,
+            "count" => $online + $offline + $away,
             "metrics" => [
-                "online" => [
+                "Available" => [
                     "value" => $online,
                     "color" => "#00A65A",
                 ],
-                "offline" => [
+                "Logged Out" => [
                     "value" => $offline,
                     "color" => "#DD4B39",
                 ],
-                "other" => [
-                    "value" => $other,
+                "On Break" => [
+                    "value" => $away,
                     "color" => "#F39C12",
                 ],
             ],
