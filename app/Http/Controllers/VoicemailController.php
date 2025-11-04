@@ -29,4 +29,11 @@ class VoicemailController extends Controller
         $voicemailUuid = $voicemail->voicemail_uuid;
         return view('pages.voicemails.form', compact('voicemailUuid'));
     }
+    
+    public function messages(string $voicemailUuid):View
+    {
+        $voicemail = $this->voicemailRepository->find($voicemailUuid);
+        $voicemailUuid = $voicemail->voicemail_uuid;
+        return view('pages.voicemails.messages', compact('voicemailUuid'));
+    }
 }

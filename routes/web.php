@@ -43,6 +43,7 @@ use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\VoicemailMessageController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
 use App\Models\Destination;
@@ -72,7 +73,7 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/login/okta/callback', [AuthController::class, 'handleProviderCallback']);
 });
 
-Route::middleware(['auth','permission'])->group(function () {
+Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
@@ -175,7 +176,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/menus', MenuController::class)->name('menus', 'menus');
 
     // MENU ITEM
-//    Route::resource('/menuitems', MenuItemController::class)->name('menuitems', 'menuitems');
+    //    Route::resource('/menuitems', MenuItemController::class)->name('menuitems', 'menuitems');
     Route::get('/menu/{menu}/menuitem/{menuitem}/edit', [MenuItemController::class, 'edit'])->name('menuitems.edit');
     Route::get('/menu/{menu}/menuitems', [MenuItemController::class, 'index'])->name('menuitems.index');
     Route::put('/menu/{menu}/menuitem/{menuitem}', [MenuItemController::class, 'update'])->name('menuitems.update');
@@ -228,19 +229,38 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
-    Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+    Route::get('/call_center_agent_status', [CallCenterAgentController::class, 'showStatus'])->name('callCenterAgentStatus');
 
     Route::resource('/voicemails', VoicemailController::class)->name('voicemails', 'voicemails');
+    Route::get('/voicemails/{voicemailUuid}/messages', [VoicemailController::class, 'messages'])->name('voicemails.messages');
 
+    Route::prefix('voicemails/{voicemailUuid}')->group(function () {
+        // Listado de mensajes
+        Route::get('/messages', [VoicemailController::class, 'messages'])
+            ->name('voicemails.messages');
+
+        // Play (streaming)
+        Route::get('/messages/{voicemailMessageUuid}/play', [VoicemailMessageController::class, 'play'])
+            ->name('voicemails.messages.play');
+
+        // Download
+        Route::get('/messages/{voicemailMessageUuid}/download', [VoicemailMessageController::class, 'download'])
+            ->name('voicemails.messages.download');
+
+        // Mark as read (AJAX)
+        Route::post('/messages/{voicemailMessageUuid}/mark-read', [VoicemailMessageController::class, 'markAsRead'])
+            ->name('voicemails.messages.mark-read');
+    });
+    // Route::resource('/voicemail_greetings', )
 
 
 });
 
-Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding){
+Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {
     $xml = new ModXMLCURLController;
     $allowedMethods = ['configuration', 'directory', 'dialplan', 'languages'];
 
-    if(!in_array($binding, $allowedMethods)){
+    if (!in_array($binding, $allowedMethods)) {
         return response('Method not allowed', 403)->header('Content-Type', 'text/xml');
     }
 

@@ -104,7 +104,7 @@ class VoicemailTable extends DataTableComponent
         if (auth()->user()->hasPermission('voicemail_message_view')) {
             $messageCount = $row->voicemailmessages()->count();
 
-            $messagesUrl = route('devices.index', ['id' => $row->voicemail_uuid]);
+            $messagesUrl = route('voicemails.messages', ['voicemailUuid' => $row->voicemail_uuid]);
             $html .= '<a href="' . $messagesUrl . '" class="btn btn-sm btn-outline-primary">Messages (' . $messageCount . ')</a>';
         }
 
