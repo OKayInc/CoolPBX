@@ -208,7 +208,7 @@ class PermissionForm extends Component
             DB::commit();
             
             session()->flash('success', 'Permission deleted successfully.');
-            return redirect()->route('permissions.index');
+            return redirect()->route('permissions.all');
             
         } catch (\Exception $e) {
             DB::rollBack();

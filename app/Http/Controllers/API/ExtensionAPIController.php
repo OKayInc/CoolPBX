@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ExtensionAPIController extends Controller
 {
-	protected $extensionRepository;
+	protected ExtensionRepository $extensionRepository;
 
 	public function __construct(ExtensionRepository $extensionRepository)
 	{
