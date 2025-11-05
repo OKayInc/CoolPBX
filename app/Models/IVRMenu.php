@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class IVRMenu extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_ivr_menus';
 	protected $primaryKey = 'ivr_menu_uuid';
 	public $incrementing = false;
@@ -79,6 +80,10 @@ class IVRMenu extends Model
 	protected $casts = [
 	];
 
+	protected static $stringBooleanFields = [
+		'ivr_menu_enabled'
+	];
+
     public function domain(): BelongsTo {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}
@@ -88,6 +93,6 @@ class IVRMenu extends Model
 	}
 
 	public function options(): HasMany {
-		return $this->hasMany(IVRMenuOption::class, 'ivr_menu_uuid', 'ivr_menu_uuid');
+		return $this->hasMany(IVRMenuOption::class, 'ivr_menu_uuid', 'ivr_menu_uuid')->orderBy("ivr_menu_option_digits")->orderBy("ivr_menu_option_order");
 	}
 }

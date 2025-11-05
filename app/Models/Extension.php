@@ -7,6 +7,7 @@ use App\Models\ExtensionSetting;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -138,4 +139,14 @@ class Extension extends Model
 		})
 			->first();
 	}
+
+    protected function fullName(): Attribute
+    {
+        $domainName = $this->domain->domain_name;
+	$extension = $this->extension;
+	$fullName = $extension.'@'.$domainName;
+        return Attribute::make(
+            get: fn ($fullName) => $fullName,
+        );
+    }
 }

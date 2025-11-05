@@ -3,6 +3,10 @@
 @section('content')
 <div class="container-fluid">
     <div class="mt-3">
+        <div class="card-header">
+            <h2>Call Center Stats</h2>
+        </div>
+        <br>
         <div class="card-body">
             <div class="row">
                 <x-widget-metric
