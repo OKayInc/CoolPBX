@@ -157,7 +157,6 @@
                                 id="destination_caller_id_name"
                                 name="destination_caller_id_name"
                                 value="{{ old('destination_caller_id_name', $destination->destination_caller_id_name ?? '') }}"
-                                required
                             >
                             @error('destination_caller_id_name')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -178,7 +177,6 @@
                                 id="destination_caller_id_number"
                                 name="destination_caller_id_number"
                                 value="{{ old('destination_caller_id_number', $destination->destination_caller_id_number ?? '') }}"
-                                required
                             >
                             @error('destination_caller_id_number')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -243,7 +241,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_actions" class="form-label">Action</label>
-                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" />
+                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" required/>
                             @error('destination_actions')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
