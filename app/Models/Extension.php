@@ -142,9 +142,11 @@ class Extension extends Model
 
     protected function fullName(): Attribute
     {
-        $domainName = $this->domain()->domain_name;
+        $domainName = $this->domain->domain_name;
+	$extension = $this->extension;
+	$fullName = $extension.'@'.$domainName;
         return Attribute::make(
-            get: fn (mixed $value, $domainName) => $value.'@'.$domainName,
+            get: fn ($fullName) => $fullName,
         );
     }
 }
