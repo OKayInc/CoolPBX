@@ -22,6 +22,7 @@ class ExtensionResource extends JsonResource
             'effective_caller_id_name' => $this->effective_caller_id_name,
             'description' => $this->description,
             'enabled' => boolval($this->enabled),
+            'full_name' => $this->full_name,
         ];
     }
 }
