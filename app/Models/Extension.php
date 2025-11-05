@@ -140,13 +140,15 @@ class Extension extends Model
 			->first();
 	}
 
-    protected function fullName(): Attribute
-    {
-        $domainName = $this->domain->domain_name;
-	$extension = $this->extension;
-	$fullName = $extension.'@'.$domainName;
-        return Attribute::make(
-            get: fn ($fullName) => $fullName,
-        );
-    }
+	protected function fullName(): Attribute
+	{
+		return Attribute::make(
+			get: function () {
+				if (empty($this->domain)) {
+					return null;
+				}
+				return $this->extension . '@' . $this->domain->domain_name;
+			}
+		);
+	}
 }
