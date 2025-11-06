@@ -24,6 +24,11 @@ class CallCenterAgentRepository
         $this->user = $user;
     }
 
+    public function mine()
+    {
+        return auth()->user()->agents->toResourceCollection();
+    }
+
     public function all()
     {
         return $this->callCenterAgent->all();
