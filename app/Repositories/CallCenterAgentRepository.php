@@ -24,17 +24,22 @@ class CallCenterAgentRepository
         $this->user = $user;
     }
 
+    public function mine()
+    {
+        return auth()->user()->agents->toResourceCollection();
+    }
+
     public function all()
     {
         return $this->callCenterAgent->all();
     }
-
+/*
     public function mine()
     {
         $user = auth()->user();
         return $this->callCenterAgent->where('domain_uuid', $user->domain_uuid)->get();
     }
-
+*/
     public function findByUuid(string $agentUuid, bool $withRelations = false): ?CallCenterAgent
     {
         $query = $this->callCenterAgent->where('call_center_agent_uuid', $agentUuid);

@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\API\CallCenterAgentAPIController;;
 use App\Http\Controllers\API\DomainAPIController;
 use App\Http\Controllers\API\ExtensionAPIController;
+use App\Http\Controllers\API\UserAPIController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EmailQueueController;
@@ -36,8 +38,10 @@ Route::post('/authenticate', [AuthController::class, 'apiLogin']);
 Route::post('/billing/{billing}/{paymentGateway}/notification', [BillingController::class, 'paymentNotification'])->name('billing.notification', 'billing.notification');
 
 Route::middleware(VerifyAuthenticationKey::class)->group(function () {
+    Route::get('/my/agents', [CallCenterAgentAPIController::class, 'mine']);
     Route::get('/my/domains', [DomainAPIController::class, 'mine']);
     Route::get('/my/extensions', [ExtensionAPIController::class, 'mine']);
+    Route::get('/my/user', [UserAPIController::class, 'mine']);
 });
 
 Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(function () {
