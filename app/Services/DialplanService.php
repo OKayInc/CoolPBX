@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Requests\InboundDialplanRequest;
 use App\Http\Requests\OutboundDialplanRequest;
 use App\Models\Destination;
+use App\Models\Dialplan;
 use App\Models\Fax;
 use App\Repositories\DialplanDetailRepository;
 use App\Repositories\DialplanRepository;
@@ -24,9 +25,18 @@ class DialplanService
         $this->dialplanDetailRepository = $dialplanDetailRepository;
     }
 
-	public function createDialplan($dialplanData, $dialplanDetailData)
+	public function createDialplan($dialplanData, $dialplanDetailData, ?Dialplan $dialplan = null)
 	{
-		$dialplan = $this->dialplanRepository->create($dialplanData);
+		if($dialplan)
+		{
+			$this->dialplanRepository->update($dialplan->dialplan_uuid, $dialplanData);
+
+			$this->dialplanDetailRepository->deleteByDialplan($dialplan);
+		}
+		else
+		{
+			$dialplan = $this->dialplanRepository->create($dialplanData);
+		}
 
 		$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
 

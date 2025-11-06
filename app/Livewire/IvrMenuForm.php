@@ -2,13 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Facades\Setting;
 use App\Http\Requests\IVRMenuOptionRequest;
 use App\Http\Requests\IVRMenuRequest;
 use App\Models\IVRMenu;
 use App\Repositories\IVRMenuOptionRepository;
 use App\Repositories\IVRMenuRepository;
-use App\Services\DialplanService;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\View\View;
@@ -41,11 +39,11 @@ class IvrMenuForm extends Component
     public ?string $ivr_menu_confirm_key = '';
     public ?string $ivr_menu_tts_engine = '';
     public ?string $ivr_menu_tts_voice = '';
-    public ?string $ivr_menu_confirm_attempts = '';
-    public ?string $ivr_menu_inter_digit_timeout = '';
-    public ?string $ivr_menu_max_failures = '';
-    public ?string $ivr_menu_max_timeouts = '';
-    public ?string $ivr_menu_digit_len = '';
+    public ?string $ivr_menu_confirm_attempts = '1';
+    public ?string $ivr_menu_inter_digit_timeout = '1';
+    public ?string $ivr_menu_max_failures = '1';
+    public ?string $ivr_menu_max_timeouts = '1';
+    public ?string $ivr_menu_digit_len = '1';
     public ?string $domain_uuid = '';
     public ?string $ivr_menu_context = '';
     public bool $ivr_menu_enabled = false;
@@ -56,17 +54,15 @@ class IvrMenuForm extends Component
 
     protected $ivrMenuRepository;
     protected $ivrMenuOptionRepository;
-    protected $dialplanService;
 
     public $ivrMenus = [];
     public $languagePaths = [];
     public $domains = [];
 
-    public function boot(IVRMenuRepository $ivrMenuRepository, IVRMenuOptionRepository $ivrMenuOptionRepository, DialplanService $dialplanService)
+    public function boot(IVRMenuRepository $ivrMenuRepository, IVRMenuOptionRepository $ivrMenuOptionRepository)
     {
         $this->ivrMenuRepository = $ivrMenuRepository;
         $this->ivrMenuOptionRepository = $ivrMenuOptionRepository;
-        $this->dialplanService = $dialplanService;
     }
 
     public function rules()
@@ -203,86 +199,6 @@ class IvrMenuForm extends Component
         }
 	}
 
-    private function buildDialplan(IVRMenu $ivrMenu)
-    {
-		$dialplanData = [
-            "domain_uuid" => $ivrMenu->domain_uuid,
-            "app_uuid" => "a5788e9b-58bc-bd1b-df59-fff5d51253ab",
-            "dialplan_name" => $ivrMenu->ivr_menu_name,
-            "dialplan_number" => $ivrMenu->ivr_menu_extension,
-            "dialplan_order" => "101",
-            "dialplan_continue" => "false",
-            "dialplan_context" => $ivrMenu->ivr_menu_context,
-            "dialplan_enabled" => $ivrMenu->ivr_menu_enabled,
-            "dialplan_description" => $ivrMenu->ivr_menu_description,
-        ];
-
-        $y = 0;
-
-        $dialplanDetailData = [];
-
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "condition", type: "field", data: "destination_number", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "ring_ready", data: "", order: $y++ * 10);
-
-        if(Setting::getSetting("ivr_menu", "answer", "boolean") == "true")
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "answer", data: "", order: $y++ * 10);
-        }
-
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "sleep", data: "1000", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "hangup_after_bridge=true", order: $y++ * 10);
-
-        if(!empty($ivrMenu->ivr_menu_ringback))
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "ivr_menu.lua", order: $y++ * 10);
-        }
-
-        if(!empty($ivrMenu->ivr_menu_language))
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "sound_prefix=\$\${sounds_dir}/{$ivrMenu->ivr_menu_language}/$ivrMenu->ivr_menu_dialect}/{$ivrMenu->ivr_menu_voice}", order: $y++ * 10, inline: "true");
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "default_language={$ivrMenu->ivr_menu_language}", order: $y++ * 10, inline: "true");
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "default_dialect={$ivrMenu->ivr_menu_dialect}", order: $y++ * 10, inline: "true");
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "default_voice={$ivrMenu->ivr_menu_voice}", order: $y++ * 10, inline: "true");
-        }
-
-        if(!empty($ivrMenu->ivr_menu_ringback))
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "transfer_ringback={$ivrMenu->ivr_menu_ringback}", order: $y++ * 10);
-        }
-
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "ivr_menu_uuid={$ivrMenu->ivr_menu_uuid}", order: $y++ * 10);
-
-        $ivrMenuApplicationText = Setting::getSetting("ivr_menu", "application", "text") ?? "";
-
-        if($ivrMenuApplicationText == "lua")
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "ivr_menu.lua", order: $y++ * 10);
-        }
-
-        else
-        {
-            if(!empty($ivrMenu->ivr_menu_cid_prefix))
-            {
-                $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "caller_id_name={$ivrMenu->ivr_menu_cid_prefix}#\${caller_id_name}", order: $y++ * 10);
-                $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "effective_caller_id_name=\${caller_id_name}", order: $y++ * 10);
-            }
-
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "ivr", data: "ivr_menu_uuid={$ivrMenu->ivr_menu_uuid}", order: $y++ * 10);
-        }
-
-        if(!empty($ivrMenu->ivr_menu_exit_app))
-        {
-            $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "{$ivrMenu->ivr_menu_exit_app}", data: "{$ivrMenu->ivr_menu_exit_data}", order: $y++ * 10);
-        }
-
-        $dialplan = $this->dialplanService->createDialplan($dialplanData, $dialplanDetailData);
-
-        if($dialplan)
-        {
-            $this->ivrMenuRepository->setDialplan($ivrMenu, $dialplan);
-        }
-    }
-
     public function save(): void
     {
         $this->validate();
@@ -378,8 +294,6 @@ class IvrMenuForm extends Component
         {
             $this->ivrMenuOptionRepository->delete($this->ivrMenuOptionsToDelete);
         }
-
-        $this->buildDialplan($this->ivrMenu);
 
         redirect()->route('ivr_menu.edit', $this->ivrMenu->ivr_menu_uuid);
     }
