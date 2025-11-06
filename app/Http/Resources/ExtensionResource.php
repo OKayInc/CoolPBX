@@ -17,6 +17,7 @@ class ExtensionResource extends JsonResource
         return [
             'extension_uuid' => $this->extension_uuid,
             'domain_uuid' => $this->domain_uuid,
+            'domain_name' => $this->domain->domain_name,
             'extension' => $this->extension,
             'password' => $this->password,
             'effective_caller_id_name' => $this->effective_caller_id_name,
