@@ -24,6 +24,17 @@ class DialplanService
         $this->dialplanDetailRepository = $dialplanDetailRepository;
     }
 
+	public function createDialplan($dialplanData, $dialplanDetailData)
+	{
+		$dialplan = $this->dialplanRepository->create($dialplanData);
+
+		$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
+
+		$this->dialplanRepository->buildXML($dialplan);
+
+		return $dialplan;
+	}
+
 	public function setInbound(array $data, ?Destination $destination)
 	{
 		$dialplanData = [
@@ -38,8 +49,6 @@ class DialplanService
             "dialplan_enabled" => $data["dialplan_enabled"] ?? "false",
             "dialplan_description" => $data["dialplan_description"],
         ];
-
-        $dialplan = $this->dialplanRepository->create($dialplanData);
 
 		$dialplanDetailData = [];
 
@@ -145,7 +154,7 @@ class DialplanService
 
 		if(Str::isUuid($fax_uuid ?? null))
 		{
-			$fax = Fax::where("domain_uuid", $dialplan->domain_uuid)->where("fax_uuid", $fax_uuid)->first();
+			$fax = Fax::where("domain_uuid", Session::get("domain_uuid"))->where("fax_uuid", $fax_uuid)->first();
 
 			if($fax)
 			{
@@ -176,11 +185,7 @@ class DialplanService
 		// 	$this->buildDialplanDetail(tag: "action", type:$action_application_2, data: $action_data_2, order: $y++ * 10);
 		// }
 
-		$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
-
-		$this->dialplanRepository->buildXML($dialplan);
-
-		return $dialplan;
+		return $this->createDialplan($dialplanData, $dialplanDetailData);
 	}
 
 	public function setOutbound(OutboundDialplanRequest $request)
@@ -601,8 +606,6 @@ class DialplanService
 					"dialplan_description" => $dialplan_description,
 				];
 
-				$dialplan = $this->dialplanRepository->create($dialplanData);
-
 				$y = 0;
 
 				$dialplanDetailData = [];
@@ -612,9 +615,7 @@ class DialplanService
 				$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'condition', type: 'destination_number', data: $dialplan_expression, order: $y++ * 10, group: 0, enabled: 'true');
 				$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'export', data: 'call_direction=outbound', order: $y++ * 10, inline: 'true', group: 0, enabled: 'true');
 
-				$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
-
-				$this->dialplanRepository->buildXML($dialplan);
+				$this->createDialplan($dialplanData, $dialplanDetailData);
 
 				//outbound route
 				$dialplanData = [
@@ -627,8 +628,6 @@ class DialplanService
 					"dialplan_enabled" => $dialplan_enabled,
 					"dialplan_description" => $dialplan_description,
 				];
-
-				$dialplan = $this->dialplanRepository->create($dialplanData);
 
 				$y = 1;
 
@@ -722,9 +721,7 @@ class DialplanService
 					$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'bridge', data: $bridge_3_data, order: $y++ * 10, group: 0, enabled: 'true');
 				}
 
-				$this->dialplanDetailRepository->create($dialplan, $dialplanDetailData);
-
-				$this->dialplanRepository->buildXML($dialplan);
+				$this->createDialplan($dialplanData, $dialplanDetailData);
 			}
 		}
 
@@ -745,7 +742,7 @@ class DialplanService
 		return [$app, $data];
 	}
 
-	private function buildDialplanDetail(string $tag, string $type, string $data, string $break = '', string $inline = '', int $order = 0, int $group = 0, string $enabled = 'false')
+	public function buildDialplanDetail(string $tag, string $type, string $data, string $break = '', string $inline = '', int $order = 0, int $group = 0, string $enabled = 'false')
 	{
 		return [
 			"dialplan_detail_tag" => $tag,

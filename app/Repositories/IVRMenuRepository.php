@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Dialplan;
 use App\Models\IVRMenu;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
@@ -41,5 +42,12 @@ class IVRMenuRepository
     public function delete(IVRMenu $ivrMenu): ?bool
     {
         return $ivrMenu->delete();
+    }
+
+    public function setDialplan(IVRMenu $ivrMenu, Dialplan $dialplan)
+    {
+        IVRMenu::where('ivr_menu_uuid', $ivrMenu->ivr_menu_uuid)->update([
+            "dialplan_uuid" => $dialplan->dialplan_uuid
+        ]);
     }
 }
