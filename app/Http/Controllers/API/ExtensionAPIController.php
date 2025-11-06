@@ -50,12 +50,4 @@ class ExtensionAPIController extends Controller
 		$d = $this->extensionRepository->delete($extension);
         return response()->json($d);
 	}
-
-	public function switch(Request $request)
-	{
-		ExtensionService::switchByUuid($request->domain_uuid);
-
-		$url = url()->previous();
-		return redirect($url);
-	}
 }
