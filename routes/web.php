@@ -43,6 +43,7 @@ use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\VoicemailGreetingController;
 use App\Http\Controllers\VoicemailMessageController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
@@ -231,29 +232,47 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
     Route::get('/call_center_agent_status', [CallCenterAgentController::class, 'showStatus'])->name('callCenterAgentStatus');
 
-    Route::resource('/voicemails', VoicemailController::class)->name('voicemails', 'voicemails');
-    Route::get('/voicemails/{voicemailUuid}/messages', [VoicemailController::class, 'messages'])->name('voicemails.messages');
+    Route::resource('voicemails', VoicemailController::class);
 
-    Route::prefix('voicemails/{voicemailUuid}')->group(function () {
-        // Listado de mensajes
-        Route::get('/messages', [VoicemailController::class, 'messages'])
-            ->name('voicemails.messages');
+    Route::prefix('voicemails/{voicemailUuid}')->name('voicemails.')->group(function () {
 
-        // Play (streaming)
-        Route::get('/messages/{voicemailMessageUuid}/play', [VoicemailMessageController::class, 'play'])
-            ->name('voicemails.messages.play');
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [VoicemailController::class, 'messages'])
+                ->name('index');
 
-        // Download
-        Route::get('/messages/{voicemailMessageUuid}/download', [VoicemailMessageController::class, 'download'])
-            ->name('voicemails.messages.download');
+            Route::get('/{voicemailMessageUuid}/play', [VoicemailMessageController::class, 'play'])
+                ->name('play');
 
-        // Mark as read (AJAX)
-        Route::post('/messages/{voicemailMessageUuid}/mark-read', [VoicemailMessageController::class, 'markAsRead'])
-            ->name('voicemails.messages.mark-read');
+            Route::get('/{voicemailMessageUuid}/download', [VoicemailMessageController::class, 'download'])
+                ->name('download');
+
+            Route::post('/{voicemailMessageUuid}/mark-read', [VoicemailMessageController::class, 'markAsRead'])
+                ->name('mark-read');
+        });
     });
-    // Route::resource('/voicemail_greetings', )
 
+    Route::prefix('voicemails/{voicemailId}')->name('voicemails.')->group(function () {
 
+        Route::prefix('greetings')->name('greetings.')->group(function () {
+            Route::get('/', [VoicemailController::class, 'greetings'])
+                ->name('index');
+
+            Route::get('/create', [VoicemailGreetingController::class, 'create'])
+                ->name('create');
+
+            Route::get('/{greetingUuid}/play', [VoicemailGreetingController::class, 'play'])
+                ->name('play');
+
+            Route::get('/{greetingUuid}/download', [VoicemailGreetingController::class, 'download'])
+                ->name('download');
+
+            Route::post('/upload', [VoicemailGreetingController::class, 'upload'])
+                ->name('upload');
+
+            Route::post('/{greetingUuid}/set-active', [VoicemailGreetingController::class, 'setActive'])
+                ->name('set-active');
+        });
+    });
 });
 
 Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {

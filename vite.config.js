@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/members-form-scripts.js',
                 'resources/js/select2-contacts-form.js',
                 'resources/js/voicemail-messages.js',
+                'resources/js/voicemail-greetings.js',
                 'node_modules/bootstrap4-duallistbox/dist/jquery.bootstrap-duallistbox.min.js',
                 'node_modules/bootstrap4-duallistbox/dist/bootstrap-duallistbox.min.css',
                 'node_modules/select2/dist/js/select2.min.js',

@@ -16,17 +16,16 @@ class VoicemailTable extends DataTableComponent
     public function configure(): void
     {
         $canEdit = auth()->user()->hasPermission('voicemail_edit');
-        $tableConfig = $this->setPrimaryKey('voicemail_uuid');
-        $this->setTableAttributes([
-            'class' => 'table table-striped table-hover table-bordered'
-        ])
+        $tableConfig = $this->setPrimaryKey('voicemail_uuid')
+            ->setTableAttributes([
+                'class' => 'table table-striped table-hover table-bordered'
+            ])
             ->setSearchEnabled()
             ->setSearchPlaceholder('Search voicemails')
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPaginationEnabled();
 
-        if ($canEdit)
-        {
+        if ($canEdit) {
             $tableConfig->setTableRowUrl(function ($row) use ($canEdit) {
                 return route('voicemails.edit', $row->voicemail_uuid);
             });
@@ -94,9 +93,8 @@ class VoicemailTable extends DataTableComponent
         $html = '<div class="d-flex gap-2" style="white-space: nowrap;">';
 
         if (auth()->user()->hasPermission('voicemail_greeting_view')) {
-            $greetingsUrl = route('devices.index', [
-                'id' => $row->voicemail_id,
-                'back' => urlencode(request()->fullUrl())
+            $greetingsUrl = route('voicemails.greetings.index', [
+                'voicemailId' => $row->voicemail_id
             ]);
             $html .= '<a href="' . $greetingsUrl . '" class="btn btn-sm btn-outline-primary">Greetings</a>';
         }
@@ -104,7 +102,7 @@ class VoicemailTable extends DataTableComponent
         if (auth()->user()->hasPermission('voicemail_message_view')) {
             $messageCount = $row->voicemailmessages()->count();
 
-            $messagesUrl = route('voicemails.messages', ['voicemailUuid' => $row->voicemail_uuid]);
+            $messagesUrl = route('voicemails.messages.index', ['voicemailUuid' => $row->voicemail_uuid]);
             $html .= '<a href="' . $messagesUrl . '" class="btn btn-sm btn-outline-primary">Messages (' . $messageCount . ')</a>';
         }
 

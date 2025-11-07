@@ -28,6 +28,7 @@ class VoicemailGreeting extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'domain_uuid',
         'voicemail_id',     // TODO: check if this the foreign key
         'greeting_id',
         'greeting_name',
@@ -57,7 +58,6 @@ class VoicemailGreeting extends Model
 
     public function voicemail():BelongsTo
     {
-        return $this->belongsTo(Voicemail::class, 'voicemail_id', 'voicemail_id')
-            ->where('domain_uuid', $this->domain_uuid);
+        return $this->belongsTo(Voicemail::class, 'voicemail_id', 'voicemail_id') ;
     }
 }
