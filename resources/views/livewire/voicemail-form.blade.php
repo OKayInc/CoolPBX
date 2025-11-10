@@ -21,7 +21,6 @@
             <div class="card-body">
                 <form wire:submit.prevent="save">
 
-                    <!-- Basic Information Section -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -31,7 +30,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- Voicemail ID -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="voicemail_id" class="form-label">
@@ -51,7 +49,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Voicemail Password -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="voicemail_password" class="form-label">
@@ -83,7 +80,6 @@
                             </div>
 
                             <div class="row mt-3">
-                                <!-- Description -->
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="voicemail_description" class="form-label">
@@ -103,7 +99,6 @@
                         </div>
                     </div>
 
-                    <!-- Greeting Settings Section -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -113,7 +108,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- Greeting -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="greeting_id" class="form-label">
@@ -139,7 +133,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Alternate Greeting ID -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="voicemail_alternate_greet_id" class="form-label">
@@ -168,9 +161,8 @@
                                             Tutorial
                                         </label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox"
-                                                id="voicemail_tutorial" wire:model="voicemail_tutorial"
-                                                value="true">
+                                            <input class="form-check-input" type="checkbox" id="voicemail_tutorial"
+                                                wire:model="voicemail_tutorial" value="true">
                                             <label class="form-check-label" for="voicemail_tutorial">
                                                 Enable tutorial for new users
                                             </label>
@@ -260,7 +252,6 @@
                                 @endcan
 
                                 @can('voicemail_local_after_email')
-                                    <!-- Keep Local -->
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="voicemail_local_after_email" class="form-label">
@@ -313,7 +304,6 @@
                         </div>
                     </div>
 
-                    <!-- Voicemail Options Section -->
                     @if (auth()->user()->hasPermission('voicemail_option_add') || auth()->user()->hasPermission('voicemail_option_edit'))
                         <div class="card mb-4">
                             <div class="card-header bg-light">
@@ -405,94 +395,6 @@
                             </div>
                         </div>
                     @endif
-
-                    {{-- @if (auth()->user()->hasPermission('voicemail_forward'))
-                        <div class="card mb-4">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-share text-primary mr-2"></i>
-                                    Forward Destinations
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                @if (count($assignedDestinations) > 0)
-                                    <div class="table-responsive mb-3">
-                                        <table class="table table-bordered table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>
-                                                        <i class="fas fa-voicemail"></i> Destination
-                                                    </th>
-                                                    <th class="text-center" style="width: 10%;">
-                                                        <i class="fas fa-tools"></i> Action
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($assignedDestinations as $index => $dest)
-                                                    <tr>
-                                                        <td>
-                                                            <i class="fas fa-arrow-right text-primary mr-2"></i>
-                                                            {{ $dest['voicemail_id'] }}
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <button type="button" class="btn btn-sm btn-danger"
-                                                                wire:click="removeVoicemailDestination({{ $index }})"
-                                                                title="Remove">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
-
-                                @if (count($availableDestinations) > 0)
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="voicemail_destination" class="form-label">
-                                                    <i class="fas fa-plus-circle text-muted mr-1"></i>
-                                                    Add Destination
-                                                </label>
-                                                <div class="input-group">
-                                                    <select class="form-select" id="voicemail_destination"
-                                                        wire:model="voicemail_destination">
-                                                        <option value="">Select destination...</option>
-                                                        @foreach ($availableDestinations as $dest)
-                                                            <option value="{{ $dest['voicemail_uuid'] }}">
-                                                                {{ $dest['voicemail_id'] }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @if ($isEditing)
-                                                        <button type="button" class="btn btn-primary"
-                                                            wire:click="save">
-                                                            <i class="fas fa-plus"></i> Add
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                                <small class="form-text text-muted">
-                                                    <i class="fas fa-info-circle"></i> Forward messages to another
-                                                    voicemail box
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @else
-                                    @if (count($assignedDestinations) == 0)
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-info-circle"></i> No available destinations to forward
-                                            voicemail
-                                        </div>
-                                    @endif
-                                @endif
-                            </div>
-                        </div>
-                    @endif --}}
-
                     @if (auth()->user()->hasPermission('voicemail_forward'))
                         <div class="card mb-4">
                             <div class="card-header bg-light">
@@ -619,15 +521,15 @@
 
                                 @if ($isEditing)
                                     @can('voicemail_greeting_view')
-                                        <a href="{{ route('voicemails.index', ['id' => $voicemail_id]) }}"
-                                            class="btn btn-info px-4 py-2">
-                                            <i class="fas fa-microphone mr-2"></i>
+                                        <a href="{{ route('voicemails.greetings.index', ['voicemailId' => $voicemail_id]) }}"
+                                            class="btn btn-primary px-4 py-2">
+                                            <i class="fas fa-handshake mr-2"></i>
                                             Greetings
                                         </a>
                                     @endcan
 
                                     @can('voicemail_message_view')
-                                        <a href="{{ route('voicemails.index', ['id' => $voicemailUuid]) }}"
+                                        <a href="{{ route('voicemails.messages.index', ['voicemailUuid' => $voicemailUuid]) }}"
                                             class="btn btn-secondary px-4 py-2">
                                             <i class="fas fa-envelope mr-2"></i>
                                             Messages

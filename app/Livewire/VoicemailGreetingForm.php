@@ -17,17 +17,12 @@ class VoicemailGreetingForm extends Component
     public $voicemailGreeting;
     public bool $isEditing = false;
     public bool $showModal = false;
-
     public string $voicemailId = '';
-    
     public string $greeting_name = '';
     public ?string $greeting_description = '';
     public $greeting_file = null;
-    
     public ?string $existing_filename = null;
-
     protected VoicemailGreetingRepository $voicemailGreetingRepository;
-
     protected $listeners = [
         'openGreetingModal' => 'openModal',
         'editGreeting' => 'editGreeting',
@@ -55,7 +50,7 @@ class VoicemailGreetingForm extends Component
                 $this->isEditing ? 'nullable' : 'required',
                 'file',
                 'mimes:wav,mp3,ogg',
-                'max:10240', 
+                'max:10240',
             ],
         ];
     }
@@ -74,9 +69,9 @@ class VoicemailGreetingForm extends Component
     public function mount($voicemailId)
     {
         $this->voicemailId = $voicemailId;
-        
+
         $voicemail = $this->voicemailGreetingRepository->getVoicemail($voicemailId);
-        
+
         if (!$voicemail) {
             session()->flash('error', 'Voicemail not found.');
             return redirect()->route('voicemails.index');
@@ -100,7 +95,7 @@ class VoicemailGreetingForm extends Component
     {
         $this->voicemailGreetingUuid = $greetingUuid;
         $this->isEditing = true;
-        
+
         $this->loadGreeting();
         $this->showModal = true;
     }
@@ -150,8 +145,9 @@ class VoicemailGreetingForm extends Component
                     $cleanName,
                     $this->greeting_file
                 );
-                
+
                 $greetingData['greeting_filename'] = $fileData['filename'];
+                $greetingData['greeting_id'] = $fileData['greeting_id']; 
             }
 
             if ($this->isEditing) {
@@ -159,18 +155,17 @@ class VoicemailGreetingForm extends Component
                     $this->voicemailGreetingUuid,
                     $greetingData
                 );
-                
+
                 session()->flash('success', 'Greeting updated successfully.');
             } else {
                 $greeting = $this->voicemailGreetingRepository->create($greetingData);
-                
+
                 session()->flash('success', 'Greeting created successfully.');
             }
 
             $this->closeModal();
-            
+
             $this->dispatch('greetingUpdated');
-            
         } catch (\Exception $e) {
             session()->flash('error', 'Error saving greeting: ' . $e->getMessage());
         }
@@ -189,13 +184,12 @@ class VoicemailGreetingForm extends Component
             }
 
             $this->voicemailGreetingRepository->delete($this->voicemailGreetingUuid);
-            
+
             session()->flash('success', 'Greeting deleted successfully.');
-            
+
             $this->closeModal();
-            
+
             $this->dispatch('greetingUpdated');
-            
         } catch (\Exception $e) {
             session()->flash('error', 'Error deleting greeting: ' . $e->getMessage());
         }

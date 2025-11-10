@@ -87,7 +87,6 @@ class VoicemailTable extends DataTableComponent
     }
 
 
-    //TODO:  Reemplazar por ruta correspondiente en devices.index (greetings y messages)
     protected function renderToolsColumn($row): string
     {
         $html = '<div class="d-flex gap-2" style="white-space: nowrap;">';
@@ -146,7 +145,6 @@ class VoicemailTable extends DataTableComponent
         session()->flash('message', 'Voicemail status toggled successfully');
     }
 
-    //todo: fijarse en el codigo viejo como funciona esto si borra mas entidades relacionadas.
     public function bulkDelete(): void
     {
         $selectRows = $this->getSelected();

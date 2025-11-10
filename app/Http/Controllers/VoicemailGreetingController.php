@@ -10,9 +10,6 @@ use Illuminate\Support\Str;
 
 class VoicemailGreetingController extends Controller
 {
-    /**
-     * Get the file path for a voicemail greeting
-     */
     private function getGreetingFilePath(VoicemailGreeting $greeting)
     {
         // TODO: get directory from settings service
@@ -27,10 +24,7 @@ class VoicemailGreetingController extends Controller
 
         return $base_path;
     }
-
-    /**
-     * Play a voicemail greeting
-     */
+    
     public function play($voicemailId, $greetingUuid)
     {
         $greeting = VoicemailGreeting::where('voicemail_greeting_uuid', $greetingUuid)
@@ -38,15 +32,14 @@ class VoicemailGreetingController extends Controller
             ->where('domain_uuid', auth()->user()->domain_uuid)
             ->firstOrFail();
 
-        // If base64 storage, decode and create temp file
         if (session('voicemail.storage_type.text') == 'base64' && $greeting->greeting_base64) {
             $decoded = base64_decode($greeting->greeting_base64);
             $tempPath = storage_path('app/temp/' . $greetingUuid . '.' . pathinfo($greeting->greeting_filename, PATHINFO_EXTENSION));
-            
+
             if (!file_exists(dirname($tempPath))) {
                 mkdir(dirname($tempPath), 0755, true);
             }
-            
+
             file_put_contents($tempPath, $decoded);
             $filePath = $tempPath;
         } else {
@@ -75,9 +68,8 @@ class VoicemailGreetingController extends Controller
             'Accept-Ranges' => 'bytes',
         ]);
 
-        // Clean up temp file if base64
         if (isset($tempPath) && file_exists($tempPath)) {
-            register_shutdown_function(function() use ($tempPath) {
+            register_shutdown_function(function () use ($tempPath) {
                 @unlink($tempPath);
             });
         }
@@ -85,9 +77,7 @@ class VoicemailGreetingController extends Controller
         return $response;
     }
 
-    /**
-     * Download a voicemail greeting
-     */
+
     public function download($voicemailId, $greetingUuid)
     {
         $greeting = VoicemailGreeting::where('voicemail_greeting_uuid', $greetingUuid)
@@ -98,11 +88,11 @@ class VoicemailGreetingController extends Controller
         if (session('voicemail.storage_type.text') == 'base64' && $greeting->greeting_base64) {
             $decoded = base64_decode($greeting->greeting_base64);
             $tempPath = storage_path('app/temp/' . $greetingUuid . '.' . pathinfo($greeting->greeting_filename, PATHINFO_EXTENSION));
-            
+
             if (!file_exists(dirname($tempPath))) {
                 mkdir(dirname($tempPath), 0755, true);
             }
-            
+
             file_put_contents($tempPath, $decoded);
             $filePath = $tempPath;
         } else {
@@ -123,7 +113,7 @@ class VoicemailGreetingController extends Controller
         ]);
 
         if (isset($tempPath) && file_exists($tempPath)) {
-            register_shutdown_function(function() use ($tempPath) {
+            register_shutdown_function(function () use ($tempPath) {
                 @unlink($tempPath);
             });
         }
@@ -131,9 +121,6 @@ class VoicemailGreetingController extends Controller
         return $response;
     }
 
-    /**
-     * Upload a new greeting
-     */
     public function upload(Request $request, $voicemailId)
     {
         $request->validate([
@@ -164,7 +151,7 @@ class VoicemailGreetingController extends Controller
         }
 
         $fileName = 'greeting_' . $greetingId . '.' . $extension;
-        
+
         $greetingDir = storage_path("app/public/voicemail") . '/' .
             'default' . '/' .
             $voicemail->domain->domain_name . '/' .
@@ -198,14 +185,6 @@ class VoicemailGreetingController extends Controller
         return back()->with('message', 'Greeting uploaded successfully');
     }
 
-    public function create(string $voicemailId)
-    {
-        return view('pages.voicemails.greetings-form', compact('voicemailId'));
-    }
-
-    /**
-     * Set a greeting as active
-     */
     public function setActive($voicemailId, $greetingUuid)
     {
         $greeting = VoicemailGreeting::where('voicemail_greeting_uuid', $greetingUuid)

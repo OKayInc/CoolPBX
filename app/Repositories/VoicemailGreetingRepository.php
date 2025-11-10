@@ -70,10 +70,13 @@ class VoicemailGreetingRepository
 
             $greetingName = str_replace("'", "", $data['greeting_name']);
 
+            $greetingId = $this->getNextAvailableGreetingId($data['voicemail_id']);
+
             $greeting = VoicemailGreeting::create([
                 'voicemail_greeting_uuid' => $voicemailGreetingUuid,
                 'domain_uuid' => Auth::user()->domain_uuid,
                 'voicemail_id' => $data['voicemail_id'],
+                'greeting_id' => $greetingId,
                 'greeting_name' => $greetingName,
                 'greeting_description' => $data['greeting_description'] ?? null,
                 'greeting_filename' => $data['greeting_filename'] ?? null,
@@ -204,7 +207,7 @@ class VoicemailGreetingRepository
             ->count();
     }
 
-    public function saveGreetingFile(string $voicemailId, string $greetingName, $file): array
+    public function saveGreetingFile(string $voicemailId, string $greetingName, $file, ?int $greetingId = null): array
     {
         $voicemail = Voicemail::with('domain')
             ->where('voicemail_id', $voicemailId)
@@ -213,7 +216,14 @@ class VoicemailGreetingRepository
 
         $safeName = Str::slug($greetingName);
         $extension = $file->getClientOriginalExtension();
-        $filename = "greeting_{$safeName}.{$extension}";
+
+        if ($greetingId === null) {
+            $greetingId = $this->getNextAvailableGreetingId($voicemailId);
+            if ($greetingId === null) {
+                throw new \Exception('No greeting slots available');
+            }
+        }
+        $filename = "greeting_{$greetingId}.{$extension}";
 
         $relativePath = "voicemail/default/{$voicemail->domain->domain_name}/{$voicemailId}";
 
@@ -225,8 +235,25 @@ class VoicemailGreetingRepository
         $storedPath = $file->storeAs("public/{$relativePath}", $filename);
 
         return [
+            'greeting_id' => $greetingId,
             'filename' => $filename,
             'path' => storage_path("app/{$storedPath}"),
         ];
+    }
+
+    protected function getNextAvailableGreetingId(string $voicemailId): ?int
+    {
+        for ($i = 1; $i <= 9; $i++) {
+            $exists = VoicemailGreeting::where('voicemail_id', $voicemailId)
+                ->where('domain_uuid', Auth::user()->domain_uuid)
+                ->where('greeting_id', $i)
+                ->exists();
+
+            if (!$exists) {
+                return $i;
+            }
+        }
+
+        return null;
     }
 }

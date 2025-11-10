@@ -15,6 +15,11 @@ class VoicemailGreetingTable extends DataTableComponent
     public string $voicemailUuid;
     public ?int $selectedGreetingId = null;
 
+    protected $listeners = [
+        'greetingUpdated' => '$refresh',
+        'refresh' => '$refresh', 
+    ];
+
     public function mount(string $voicemailId, string $voicemailUuid)
     {
         $this->voicemailId = $voicemailId;
@@ -28,7 +33,6 @@ class VoicemailGreetingTable extends DataTableComponent
 
     public function configure(): void
     {
-        $canEdit = auth()->user()->hasPermission('voicemail_greeting_edit');
         $this->setPrimaryKey('voicemail_greeting_uuid')
             ->setTableAttributes([
                 'class' => 'table table-striped table-hover table-bordered'
@@ -79,11 +83,11 @@ class VoicemailGreetingTable extends DataTableComponent
             ->sortable()
             ->searchable()
             ->format(fn($value) => $value ?: '—');
-        
+
         $columns[] =  Column::make("Actions", "voicemail_greeting_uuid")
-                ->label(fn($row) => $this->renderActionsColumn($row))
-                ->html()
-                ->excludeFromColumnSelect();
+            ->label(fn($row) => $this->renderActionsColumn($row))
+            ->html()
+            ->excludeFromColumnSelect();
 
         return $columns;
     }
@@ -93,15 +97,34 @@ class VoicemailGreetingTable extends DataTableComponent
         $checked = ($row->greeting_id == $this->selectedGreetingId) ? 'checked' : '';
 
         return '<input type="radio"
-                       name="active_greeting"
-                       value="' . $row->greeting_id . '"
-                       data-greeting-uuid="' . $row->voicemail_greeting_uuid . '"
-                       data-voicemail-id="' . $this->voicemailId . '"
-                       class="form-check-input set-active-greeting"
-                       style="cursor: pointer; width: 20px; height: 20px;"
-                       ' . $checked . '>';
+               name="active_greeting"
+               value="' . $row->greeting_id . '"
+               wire:click="setActiveGreeting(\'' . $row->voicemail_greeting_uuid . '\')"
+               class="form-check-input"
+               style="cursor: pointer; width: 20px; height: 20px;"
+               ' . $checked . '>';
     }
 
+    public function setActiveGreeting($greetingUuid)
+    {
+        $greeting = VoicemailGreeting::where('voicemail_greeting_uuid', $greetingUuid)
+            ->where('voicemail_id', $this->voicemailId)
+            ->where('domain_uuid', auth()->user()->domain_uuid)
+            ->firstOrFail();
+
+        $voicemail = Voicemail::where('voicemail_id', $this->voicemailId)
+            ->where('domain_uuid', auth()->user()->domain_uuid)
+            ->firstOrFail();
+
+        $voicemail->greeting_id = $greeting->greeting_id;
+        $voicemail->save();
+
+        $this->selectedGreetingId = $greeting->greeting_id;
+
+        session()->flash('message', 'Greeting set as active');
+
+        $this->dispatch('refresh');
+    }
     protected function renderActionsColumn($row): string
     {
         $canEdit = auth()->user()->hasPermission('voicemail_greeting_edit');
@@ -163,8 +186,8 @@ class VoicemailGreetingTable extends DataTableComponent
         } else {
             $greetingDir = storage_path("app/public/voicemail") . '/' .
                 'default' . '/' .
-                $row->domain . '/' .
-                $row->voicemail;
+                $row->domain->domain_name . '/' .
+                $row->voicemail->voicemail_id;
 
             $filePath = $greetingDir . '/' . $row->greeting_filename;
             $size = file_exists($filePath) ? filesize($filePath) : 0;
@@ -183,8 +206,8 @@ class VoicemailGreetingTable extends DataTableComponent
     {
         $greetingDir = storage_path("app/public/voicemail") . '/' .
             'default' . '/' .
-            $row->domain . '/' .
-            $row->voicemail;
+            $row->domain->domain_name . '/' .
+            $row->voicemail->voicemail_id;
 
         $filePath = $greetingDir . '/' . $row->greeting_filename;
 
@@ -247,6 +270,7 @@ class VoicemailGreetingTable extends DataTableComponent
     public function builder(): Builder
     {
         return VoicemailGreeting::query()
+            ->select('v_voicemail_greetings.*')
             ->where('voicemail_id', $this->voicemailId)
             ->where('domain_uuid', auth()->user()->domain_uuid)
             ->with(['voicemail', 'domain']);
