@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Session;
 
 class ValidMacAddress implements ValidationRule
 {
-    private bool strict = false;
+    private bool $strictMode = false;
 
     public function __construct(int $flag = 0)
     {
-        $this->strict = boolval($flag & config('freeswitch.STRICT_MAC_ADDREDSS'));
+        $this->strictMode = boolval($flag & config('freeswitch.STRICT_MAC_ADDREDSS'));
     }
 
     /**
@@ -35,7 +35,7 @@ class ValidMacAddress implements ValidationRule
                     Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] 000000000000 Mac address');
                 }
             }
-            elseif ($this->strict) {
+            elseif ($this->strictMode){
                 $found = false;
                 $oid = substr($value, 0, 6);
                 if (strlen($oid) == 6){
