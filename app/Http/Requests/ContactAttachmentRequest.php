@@ -23,7 +23,7 @@ class ContactAttachmentRequest extends FormRequest
     {
         return [
             'attachments' => 'required|array|min:1',
-            'attachments.*.file' => 'nullable|file',
+            'attachments.*.file' => 'nullable',
             'attachments.*.attachment_description' => 'nullable|string|max:500',
             'attachments.*.attachment_primary' => 'nullable|boolean',
             'attachments.*.contact_attachment_uuid' => 'nullable|string|uuid',
