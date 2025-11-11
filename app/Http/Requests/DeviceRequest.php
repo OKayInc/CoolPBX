@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidMacAddress;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class DeviceRequest extends FormRequest
@@ -34,6 +36,7 @@ class DeviceRequest extends FormRequest
                 'string',
                 'mac_address',
                 'max:17',
+                new ValidMacAddress(config('freeswitch.STRICT_MAC_ADDREDSS')),
                 Rule::unique('v_devices', 'device_mac_address')->ignore($this->device_uuid, 'device_uuid'),
             ],
             'device_label' => 'nullable|string|max:255',
@@ -88,6 +91,13 @@ class DeviceRequest extends FormRequest
             'deviceSettings.*.device_setting_enabled' => 'nullable',
             'deviceSettings.*.device_setting_description' => 'nullable|string',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'device_mac_address' => Str::lower($this->device_mac_address),
+        ]);
     }
 
 }

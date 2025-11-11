@@ -36,4 +36,7 @@ return [
     'BUYING_PRICING_LIST' => 2,
     'ALL_PRICING_LISTS' => 3,
 
+    'LAX_MAC_ADDREDSS' => 0,
+    'STRICT_MAC_ADDREDSS' => 1,
+
 ];
