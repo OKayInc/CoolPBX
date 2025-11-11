@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class ValidMacAddress implements ValidationRule
 {
@@ -43,8 +44,7 @@ class ValidMacAddress implements ValidationRule
                     if ($response->ok()){
                         $lines = explode("\n", $response->body());
                         foreach ($lines as $line){
-
-                                $oidTest = substr(trim($line), 0, 6);
+                                $oidTest = Str::lower(substr(trim($line), 0, 6));
                                 $l = strlen($oidTest);
                                 if (ctype_xdigit($oidTest)){
                                         if ($l == 6){
