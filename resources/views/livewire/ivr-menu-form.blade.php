@@ -56,7 +56,7 @@
 								<select name="ivr_menu_parent_uuid" class="form-select @error('ivr_menu_parent_uuid') is-invalid @enderror" wire:model="ivr_menu_parent_uuid">
 									<option value=""></option>
 									@foreach($ivrMenus as $x)
-									<option value="{{ $x->ivr_menu_uuid }}" @selected($x->ivr_menu_uuid == $ivrMenu->ivr_menu_parent_uuid ?? '')>{{ $x->ivr_menu_name }}</option>
+									<option value="{{ $x->ivr_menu_uuid }}" @selected($x->ivr_menu_uuid == $ivrMenu?->ivr_menu_parent_uuid ?? '')>{{ $x->ivr_menu_name }}</option>
 									@endforeach
 								</select>
 								@error('ivr_menu_parent_uuid')
@@ -91,7 +91,7 @@
 							<div class="form-group">
 								<label for="ivr_menu_greet_long" class="form-label">Greet long</label>
 								<x-switch-music-on-hold name="ivr_menu_greet_long" class="form-select"
-									:selected="$ivrMenu->ivr_menu_greet_long"
+									:selected="$ivrMenu?->ivr_menu_greet_long"
 									:withRecordings="true"
 									:withPhrases="true"
 									:withMisc="true"
@@ -109,7 +109,7 @@
 							<div class="form-group">
 								<label for="ivr_menu_greet_short" class="form-label">Greet short</label>
 								<x-switch-music-on-hold name="ivr_menu_greet_short" class="form-select"
-									:selected="$ivrMenu->ivr_menu_greet_short"
+									:selected="$ivrMenu?->ivr_menu_greet_short"
 									:withRecordings="true"
 									:withPhrases="true"
 									:withMisc="true"
@@ -267,7 +267,7 @@
 							<div class="form-group">
 								<label class="form-label d-block">Ring back</label>
 								<x-switch-music-on-hold name="ivr_menu_ringback" class="form-select"
-									:selected="$ivrMenu->ivr_menu_ringback"
+									:selected="$ivrMenu?->ivr_menu_ringback"
 									:withMusicOnHold="true"
 									:withRecordings="true"
 									:withStreams="true"
@@ -316,7 +316,7 @@
 								<div class="form-group">
 									<label for="ivr_menu_invalid_sound" class="form-label">Invalid sound</label>
 									<x-switch-music-on-hold name="ivr_menu_invalid_sound" class="form-select"
-										:selected="$ivrMenu->ivr_menu_invalid_sound"
+										:selected="$ivrMenu?->ivr_menu_invalid_sound"
 										:withRecordings="true"
 										:withPhrases="true"
 										:withMisc="true"
@@ -334,7 +334,7 @@
 								<div class="form-group">
 									<label for="ivr_menu_exit_sound" class="form-label">Exit sound</label>
 									<x-switch-music-on-hold name="ivr_menu_exit_sound" class="form-select"
-										:selected="$ivrMenu->ivr_menu_exit_sound"
+										:selected="$ivrMenu?->ivr_menu_exit_sound"
 										:withRecordings="true"
 										:withPhrases="true"
 										:withMisc="true"
@@ -554,7 +554,7 @@
 									<label for="domain_uuid" class="form-label">Domain</label>
 									<select name="domain_uuid" class="form-select @error('domain_uuid') is-invalid @enderror" wire:model="domain_uuid">
 										@foreach($domains as $domain)
-										<option value="{{ $domain->domain_uuid }}" @selected($domain->domain_uuid == $ivrMenu->domain_uuid ?? '')>{{ $domain->domain_name }}</option>
+										<option value="{{ $domain->domain_uuid }}" @selected($domain->domain_uuid == $ivrMenu?->domain_uuid ?? '')>{{ $domain->domain_name }}</option>
 										@endforeach
 									</select>
 									@error('domain_uuid')
