@@ -53,13 +53,6 @@ class DestinationController extends Controller
 
 		$destination = $this->destinationRepository->create($data);
 
-		$dialplan = $this->setDialplan($destination, $data);
-
-		if($dialplan)
-		{
-			$this->destinationRepository->setDialplan($destination, $dialplan);
-		}
-
 		return redirect()->route("destinations.edit", $destination->destination_uuid);
 	}
 
@@ -85,18 +78,6 @@ class DestinationController extends Controller
 
 		$this->destinationRepository->update($destination, $data);
 
-		if($destination->dialplan_uuid)
-		{
-			$this->dialplanRepository->delete($destination->dialplan_uuid);
-		}
-
-		$dialplan = $this->setDialplan($destination, $data);
-
-		if($dialplan)
-		{
-			$this->destinationRepository->setDialplan($destination, $dialplan);
-		}
-
         return redirect()->route("destinations.edit", $destination->destination_uuid);
 	}
 
@@ -116,25 +97,4 @@ class DestinationController extends Controller
     {
         return view('pages.destinations.export');
     }
-
-	private function setDialplan(Destination $destination, array $data)
-	{
-		$dialplan = null;
-
-		if($data["destination_type"] == "inbound")
-		{
-			$data["dialplan_name"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
-			$data["dialplan_number"] = $data["destination_area_code"] ?? "" . $data["destination_number"];
-			$data["dialplan_order"] = $data["destination_order"];
-			$data["dialplan_enabled"] = $data["destination_enabled"] ?? "false";
-			$data["dialplan_description"] = $data["destination_description"];
-			$data["condition_field_1"] = $data["destination_conditions"];
-			$data["condition_expression_1"] = $data["condition_expressions"];
-			$data["action_1"] = $data["destination_actions"];
-
-			$dialplan = $this->dialplanService->setInbound($data, $destination);
-		}
-
-		return $dialplan;
-	}
 }
