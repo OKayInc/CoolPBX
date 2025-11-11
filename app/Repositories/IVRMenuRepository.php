@@ -135,7 +135,7 @@ class IVRMenuRepository
 
         $dialplan = Dialplan::find($ivrMenu->dialplan_uuid);
 
-        return $this->dialplanService->createDialplan($dialplanData, $dialplanDetailData, $dialplan);
+        return $this->dialplanService->saveDialplan($dialplanData, $dialplanDetailData, $dialplan);
     }
 
     public function setDialplan(IVRMenu $ivrMenu, Dialplan $dialplan)

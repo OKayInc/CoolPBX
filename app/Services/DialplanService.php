@@ -25,7 +25,7 @@ class DialplanService
         $this->dialplanDetailRepository = $dialplanDetailRepository;
     }
 
-	public function createDialplan($dialplanData, $dialplanDetailData, ?Dialplan $dialplan = null)
+	public function saveDialplan($dialplanData, $dialplanDetailData, ?Dialplan $dialplan)
 	{
 		if($dialplan)
 		{
@@ -45,7 +45,7 @@ class DialplanService
 		return $dialplan;
 	}
 
-	public function setInbound(array $data, ?Destination $destination)
+	public function setInbound(array $data, ?Destination $destination, ?Dialplan $dialplan)
 	{
 		$dialplanData = [
             "domain_uuid" => Session::get("domain_uuid"),
@@ -111,7 +111,7 @@ class DialplanService
 			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "condition", type: $condition_field_1, data: $condition_expression_1, order: $y++ * 10);
 		}
 
-		if($condition_field_2)
+		if($condition_field_2 && $condition_expression_2)
 		{
 			$dialplanDetailData[] = $this->buildDialplanDetail(tag: "condition", type: $condition_field_2, data: $condition_expression_2, order: $y++ * 10);
 		}
@@ -195,10 +195,10 @@ class DialplanService
 		// 	$this->buildDialplanDetail(tag: "action", type:$action_application_2, data: $action_data_2, order: $y++ * 10);
 		// }
 
-		return $this->createDialplan($dialplanData, $dialplanDetailData);
+		return $this->saveDialplan($dialplanData, $dialplanDetailData, $dialplan);
 	}
 
-	public function setOutbound(OutboundDialplanRequest $request)
+	public function setOutbound(OutboundDialplanRequest $request, ?Dialplan $dialplan)
 	{
 		$dialplan_name = $request->input("dialplan_name") ?? '';
 		$dialplan_order = $request->input("dialplan_order") ?? '';
@@ -625,7 +625,7 @@ class DialplanService
 				$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'condition', type: 'destination_number', data: $dialplan_expression, order: $y++ * 10, group: 0, enabled: 'true');
 				$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'export', data: 'call_direction=outbound', order: $y++ * 10, inline: 'true', group: 0, enabled: 'true');
 
-				$this->createDialplan($dialplanData, $dialplanDetailData);
+				$this->saveDialplan($dialplanData, $dialplanDetailData, $dialplan);
 
 				//outbound route
 				$dialplanData = [
@@ -731,7 +731,7 @@ class DialplanService
 					$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'bridge', data: $bridge_3_data, order: $y++ * 10, group: 0, enabled: 'true');
 				}
 
-				$this->createDialplan($dialplanData, $dialplanDetailData);
+				$this->saveDialplan($dialplanData, $dialplanDetailData, $dialplan);
 			}
 		}
 
