@@ -49,6 +49,9 @@ class ValidMacAddress implements ValidationRule
                                 if (ctype_xdigit($oidTest)){
                                         if ($l == 6){
                                             if (!strcmp($oidTest, $oid)){
+                                                if(App::hasDebugModeEnabled()){
+                                                    Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] '. $oid. ' found.');
+                                                }
                                                 $found = true;
                                                 break;
                                             }
