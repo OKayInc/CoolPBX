@@ -34,7 +34,6 @@ class DeviceRequest extends FormRequest
             'device_mac_address' => [
                 'required',
                 'string',
-                'mac_address',
                 'max:17',
                 new ValidMacAddress(config('freeswitch.STRICT_MAC_ADDREDSS')),
                 Rule::unique('v_devices', 'device_mac_address')->ignore($this->device_uuid, 'device_uuid'),

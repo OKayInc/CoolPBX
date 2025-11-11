@@ -40,7 +40,7 @@ class ValidMacAddress implements ValidationRule
                 $oid = substr($value, 0, 6);
                 if (strlen($oid) == 6){
                     $response = Http::get('https://standards-oui.ieee.org/oui/oui.txt');
-                    if ($response->ok){
+                    if ($response->ok()){
                         $lines = explode("\n", $response->body());
                         foreach ($lines as $line){
 
