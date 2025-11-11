@@ -8,6 +8,7 @@ use App\Http\Controllers\API\UserAPIController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EmailQueueController;
+use App\Http\Controllers\FileURLRouteController;
 use App\Http\Controllers\UserActivationController;
 use App\Http\Middleware\VerifyAuthenticationKey;
 use App\Http\Requests\UserRequest;
@@ -49,3 +50,5 @@ Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(functio
     Route::get('/extensions', [ExtensionAPIController::class, 'index'])->name('extensions.all');
     Route::post('/email/test', [EmailQueueController::class, 'testEmail']);
 });
+
+Route::get("/fs/{path?}", [FileURLRouteController::class, "handle"])->where("path", ".*")->name("fileurlroute.handle");
