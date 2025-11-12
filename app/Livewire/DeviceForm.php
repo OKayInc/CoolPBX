@@ -185,9 +185,9 @@ class DeviceForm extends Component
     public function updatedDeviceMacAddress()
     {
         if ($this->device_mac_address) {
-            $normalizedMac = $this->deviceRepository->normalizeMacAddress($this->device_mac_address);
+            $this->device_mac_address = preg_replace('/[^a-fA-F0-9]/', '', $this->device_mac_address);
 
-            $this->device_mac_address = format_mac($normalizedMac, ':', 'upper');
+            $this->device_mac_address = strtoupper($this->device_mac_address);
 
             $this->duplicateMacDomain = $this->deviceRepository->checkDuplicateMacAddress(
                 $this->device_mac_address,
@@ -202,7 +202,6 @@ class DeviceForm extends Component
             }
         }
     }
-
     public function updatedDeviceUuidAlternate()
     {
         if ($this->device_uuid_alternate) {
