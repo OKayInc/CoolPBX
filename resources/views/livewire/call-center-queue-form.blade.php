@@ -192,215 +192,223 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-
                                     <div class="col-md-6 mb-3">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_enabled" wire:model="queue_enabled" value="true"
-                                                {{ $queue_enabled == 'true' ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="queue_enabled">Queue Enabled</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-                                <!-- Recording & Timeout Settings -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <h5 class="border-bottom pb-2 mb-3">
-                                            <i class="bi bi-record-circle me-2"></i>Recording & Timeout Settings
-                                        </h5>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_record_template" class="form-label">Record Template</label>
-                                        <select wire:model="queue_record_template"
-                                            class="form-select @error('queue_record_template') is-invalid @enderror"
-                                            id="queue_record_template">
-                                            <option value="false">Disabled</option>
-                                            <option value="true">Enabled</option>
-                                        </select>
-                                        @error('queue_record_template')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_time_base_score" class="form-label">Time Base Score</label>
-                                        <select wire:model="queue_time_base_score"
-                                            class="form-select @error('queue_time_base_score') is-invalid @enderror"
-                                            id="queue_time_base_score">
-                                            @foreach ($timeBaseScoreOptions as $value => $label)
-                                                <option value="{{ $value }}">{{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('queue_time_base_score')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_time_base_score_sec" class="form-label">Time Base Score Seconds</label>
-                                        <input type="number" wire:model="queue_time_base_score_sec"
-                                            class="form-control @error('queue_time_base_score_sec') is-invalid @enderror"
-                                            id="queue_time_base_score_sec" min="0" placeholder="30">
-                                        @error('queue_time_base_score_sec')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_timeout_action" class="form-label">Timeout Action</label>
-                                        <x-switch-destinations name="queue_timeout_action" :selected="$queue_timeout_action ?? ''"
-                                            extension-type="dialplan" ring-group-type="dialplan"
-                                            voice-mail-type="dialplan" call-center-type="dialplan"
-                                            conference-center-type="dialplan" ivr-menu-type="dialplan"
-                                            time-condition-type="dialplan" tone-type="dialplan"
-                                            wire:model="queue_timeout_action" />
-                                        @error('queue_timeout_action')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_discard_abandoned_after" class="form-label">Discard
-                                            Abandoned
-                                            After (seconds)</label>
-                                        <input type="number" wire:model="queue_discard_abandoned_after"
-                                            class="form-control @error('queue_discard_abandoned_after') is-invalid @enderror"
-                                            id="queue_discard_abandoned_after" min="0" placeholder="900">
-                                        @error('queue_discard_abandoned_after')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_abandoned_resume_allowed"
-                                                wire:model.boolean="queue_abandoned_resume_allowed"
-                                                {{ $queue_abandoned_resume_allowed === 'true' || $queue_abandoned_resume_allowed === true ? 'checked' : '' }}>
-                                            <label class="form-check-label"
-                                                for="queue_abandoned_resume_allowed">Abandoned Resume Allowed</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_cc_exit_keys" class="form-label">Exit Keys</label>
-                                        <input type="text" wire:model="queue_cc_exit_keys"
-                                            class="form-control @error('queue_cc_exit_keys') is-invalid @enderror"
-                                            id="queue_cc_exit_keys" placeholder="*,#,0" maxlength="50">
-                                        @error('queue_cc_exit_keys')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <div class="form-text">DTMF keys callers can press to exit the queue (comma
-                                            separated: *, #, 0-9)</div>
-                                    </div>
-                                </div>
-
-                                <!-- Tier Rules -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <h5 class="border-bottom pb-2 mb-3">
-                                            <i class="bi bi-layers me-2"></i>Tier Rules
-                                        </h5>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_tier_rules_apply"
-                                                wire:model.boolean="queue_tier_rules_apply"
-                                                {{ $queue_tier_rules_apply === 'true' || $queue_tier_rules_apply === true ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="queue_tier_rules_apply">Tier Rules
-                                                Apply</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="queue_tier_rule_wait_second" class="form-label">Tier Rule Wait
-                                            Second</label>
-                                        <input type="number" wire:model="queue_tier_rule_wait_second"
-                                            class="form-control @error('queue_tier_rule_wait_second') is-invalid @enderror"
-                                            id="queue_tier_rule_wait_second" min="0" placeholder="300">
-                                        @error('queue_tier_rule_wait_second')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_tier_rule_wait_multiply_level"
-                                                wire:model.boolean="queue_tier_rule_wait_multiply_level"
-                                                {{ $queue_tier_rule_wait_multiply_level === 'true' || $queue_tier_rule_wait_multiply_level === true ? 'checked' : '' }}>
-                                            <label class="form-check-label"
-                                                for="queue_tier_rule_wait_multiply_level">Wait Multiply Level</label>
+                                                id="queue_enabled" wire:model.boolean="queue_enabled" value="1">
+                                            <label class="form-check-label" for="queue_enabled">
+                                                Queue Enabled
+                                                <small class="text-muted">(Controls dialplan activation)</small>
+                                            </label>
                                         </div>
                                     </div>
 
 
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                id="queue_tier_rule_no_agent_no_wait"
-                                                wire:model.boolean="queue_tier_rule_no_agent_no_wait"
-                                                {{ $queue_tier_rule_no_agent_no_wait === 'true' || $queue_tier_rule_no_agent_no_wait === true ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="queue_tier_rule_no_agent_no_wait">No
-                                                Agent No Wait</label>
+                                    <!-- Recording & Timeout Settings -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h5 class="border-bottom pb-2 mb-3">
+                                                <i class="bi bi-record-circle me-2"></i>Recording & Timeout Settings
+                                            </h5>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_record_template" class="form-label">Record
+                                                Template</label>
+                                            <select wire:model="queue_record_template"
+                                                class="form-select @error('queue_record_template') is-invalid @enderror"
+                                                id="queue_record_template">
+                                                <option value="false">Disabled</option>
+                                                <option value="true">Enabled</option>
+                                            </select>
+                                            @error('queue_record_template')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_time_base_score" class="form-label">Time Base
+                                                Score</label>
+                                            <select wire:model="queue_time_base_score"
+                                                class="form-select @error('queue_time_base_score') is-invalid @enderror"
+                                                id="queue_time_base_score">
+                                                @foreach ($timeBaseScoreOptions as $value => $label)
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('queue_time_base_score')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_time_base_score_sec" class="form-label">Time Base Score
+                                                Seconds</label>
+                                            <input type="number" wire:model="queue_time_base_score_sec"
+                                                class="form-control @error('queue_time_base_score_sec') is-invalid @enderror"
+                                                id="queue_time_base_score_sec" min="0" placeholder="30">
+                                            @error('queue_time_base_score_sec')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_timeout_action" class="form-label">Timeout
+                                                Action</label>
+                                            <x-switch-destinations name="queue_timeout_action" :selected="$queue_timeout_action ?? ''"
+                                                extension-type="dialplan" ring-group-type="dialplan"
+                                                voice-mail-type="dialplan" call-center-type="dialplan"
+                                                conference-center-type="dialplan" ivr-menu-type="dialplan"
+                                                time-condition-type="dialplan" tone-type="dialplan"
+                                                wire:model="queue_timeout_action" />
+                                            @error('queue_timeout_action')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_discard_abandoned_after" class="form-label">Discard
+                                                Abandoned
+                                                After (seconds)</label>
+                                            <input type="number" wire:model="queue_discard_abandoned_after"
+                                                class="form-control @error('queue_discard_abandoned_after') is-invalid @enderror"
+                                                id="queue_discard_abandoned_after" min="0" placeholder="900">
+                                            @error('queue_discard_abandoned_after')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    id="queue_abandoned_resume_allowed"
+                                                    wire:model.boolean="queue_abandoned_resume_allowed"
+                                                    {{ $queue_abandoned_resume_allowed === 'true' || $queue_abandoned_resume_allowed === true ? 'checked' : '' }}>
+                                                <label class="form-check-label"
+                                                    for="queue_abandoned_resume_allowed">Abandoned Resume
+                                                    Allowed</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_cc_exit_keys" class="form-label">Exit Keys</label>
+                                            <input type="text" wire:model="queue_cc_exit_keys"
+                                                class="form-control @error('queue_cc_exit_keys') is-invalid @enderror"
+                                                id="queue_cc_exit_keys" placeholder="*,#,0" maxlength="50">
+                                            @error('queue_cc_exit_keys')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">DTMF keys callers can press to exit the queue (comma
+                                                separated: *, #, 0-9)</div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Wait Time Settings -->
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <h5 class="border-bottom pb-2 mb-3">
-                                            <i class="bi bi-clock me-2"></i>Wait Time Settings
-                                        </h5>
+                                    <!-- Tier Rules -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h5 class="border-bottom pb-2 mb-3">
+                                                <i class="bi bi-layers me-2"></i>Tier Rules
+                                            </h5>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    id="queue_tier_rules_apply"
+                                                    wire:model.boolean="queue_tier_rules_apply"
+                                                    {{ $queue_tier_rules_apply === 'true' || $queue_tier_rules_apply === true ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="queue_tier_rules_apply">Tier
+                                                    Rules
+                                                    Apply</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="queue_tier_rule_wait_second" class="form-label">Tier Rule Wait
+                                                Second</label>
+                                            <input type="number" wire:model="queue_tier_rule_wait_second"
+                                                class="form-control @error('queue_tier_rule_wait_second') is-invalid @enderror"
+                                                id="queue_tier_rule_wait_second" min="0" placeholder="300">
+                                            @error('queue_tier_rule_wait_second')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    id="queue_tier_rule_wait_multiply_level"
+                                                    wire:model.boolean="queue_tier_rule_wait_multiply_level"
+                                                    {{ $queue_tier_rule_wait_multiply_level === 'true' || $queue_tier_rule_wait_multiply_level === true ? 'checked' : '' }}>
+                                                <label class="form-check-label"
+                                                    for="queue_tier_rule_wait_multiply_level">Wait Multiply
+                                                    Level</label>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    id="queue_tier_rule_no_agent_no_wait"
+                                                    wire:model.boolean="queue_tier_rule_no_agent_no_wait"
+                                                    {{ $queue_tier_rule_no_agent_no_wait === 'true' || $queue_tier_rule_no_agent_no_wait === true ? 'checked' : '' }}>
+                                                <label class="form-check-label"
+                                                    for="queue_tier_rule_no_agent_no_wait">No
+                                                    Agent No Wait</label>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="col-md-4 mb-3">
-                                        <label for="queue_max_wait_time" class="form-label">Max Wait Time
-                                            (seconds)</label>
-                                        <input type="number" wire:model="queue_max_wait_time"
-                                            class="form-control @error('queue_max_wait_time') is-invalid @enderror"
-                                            id="queue_max_wait_time" min="0" placeholder="0">
-                                        @error('queue_max_wait_time')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <div class="form-text">0 = unlimited</div>
+                                    <!-- Wait Time Settings -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h5 class="border-bottom pb-2 mb-3">
+                                                <i class="bi bi-clock me-2"></i>Wait Time Settings
+                                            </h5>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label for="queue_max_wait_time" class="form-label">Max Wait Time
+                                                (seconds)</label>
+                                            <input type="number" wire:model="queue_max_wait_time"
+                                                class="form-control @error('queue_max_wait_time') is-invalid @enderror"
+                                                id="queue_max_wait_time" min="0" placeholder="0">
+                                            @error('queue_max_wait_time')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">0 = unlimited</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label for="queue_max_wait_time_with_no_agent" class="form-label">Max Wait
+                                                Time
+                                                with No Agent</label>
+                                            <input type="number" wire:model="queue_max_wait_time_with_no_agent"
+                                                class="form-control @error('queue_max_wait_time_with_no_agent') is-invalid @enderror"
+                                                id="queue_max_wait_time_with_no_agent" min="0"
+                                                placeholder="0">
+                                            @error('queue_max_wait_time_with_no_agent')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div class="form-text">0 = unlimited</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label for="queue_max_wait_time_with_no_agent_time_reached"
+                                                class="form-label">No
+                                                Agent Time Reached</label>
+                                            <input type="number"
+                                                wire:model="queue_max_wait_time_with_no_agent_time_reached"
+                                                class="form-control @error('queue_max_wait_time_with_no_agent_time_reached') is-invalid @enderror"
+                                                id="queue_max_wait_time_with_no_agent_time_reached" min="0"
+                                                placeholder="5">
+                                            @error('queue_max_wait_time_with_no_agent_time_reached')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
 
-                                    <div class="col-md-4 mb-3">
-                                        <label for="queue_max_wait_time_with_no_agent" class="form-label">Max Wait
-                                            Time
-                                            with No Agent</label>
-                                        <input type="number" wire:model="queue_max_wait_time_with_no_agent"
-                                            class="form-control @error('queue_max_wait_time_with_no_agent') is-invalid @enderror"
-                                            id="queue_max_wait_time_with_no_agent" min="0" placeholder="0">
-                                        @error('queue_max_wait_time_with_no_agent')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <div class="form-text">0 = unlimited</div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <label for="queue_max_wait_time_with_no_agent_time_reached"
-                                            class="form-label">No
-                                            Agent Time Reached</label>
-                                        <input type="number"
-                                            wire:model="queue_max_wait_time_with_no_agent_time_reached"
-                                            class="form-control @error('queue_max_wait_time_with_no_agent_time_reached') is-invalid @enderror"
-                                            id="queue_max_wait_time_with_no_agent_time_reached" min="0"
-                                            placeholder="5">
-                                        @error('queue_max_wait_time_with_no_agent_time_reached')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                {{-- <div class="row mb-4">
+                                    {{-- <div class="row mb-4">
                                     <div class="col-12">
                                         <h5
                                             class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
@@ -547,249 +555,261 @@
                                     </div>
                                 </div> --}}
 
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <h5
-                                            class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
-                                            <span><i class="bi bi-people me-2"></i>Queue Agents</span>
-                                            <button type="button" wire:click="addTier"
-                                                class="btn btn-success btn-sm"
-                                                {{ count($tierStructure) >= 10 ? 'disabled' : '' }}>
-                                                <i class="bi bi-plus-lg me-1"></i>Add Tier
-                                                @if (count($tierStructure) >= 10)
-                                                    <span class="badge bg-warning ms-1">Max</span>
-                                                @endif
-                                            </button>
-                                        </h5>
-                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <h5
+                                                class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+                                                <span><i class="bi bi-people me-2"></i>Queue Agents</span>
+                                                <button type="button" wire:click="addTier"
+                                                    class="btn btn-success btn-sm"
+                                                    {{ count($tierStructure) >= 10 ? 'disabled' : '' }}>
+                                                    <i class="bi bi-plus-lg me-1"></i>Add Tier
+                                                    @if (count($tierStructure) >= 10)
+                                                        <span class="badge bg-warning ms-1">Max</span>
+                                                    @endif
+                                                </button>
+                                            </h5>
+                                        </div>
 
-                                    <div class="col-12">
-                                        @if (count($tierStructure) > 0)
-                                            <div class="tiers-grid-container">
-                                                @foreach (array_chunk($tierStructure, 3, true) as $tierChunk)
-                                                    <div class="row mb-4">
-                                                        @foreach ($tierChunk as $level => $tierData)
-                                                            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-                                                                <div class="tier-group h-100"
-                                                                    data-tier-level="{{ $level }}">
-                                                                    <div class="tier-header">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="col-12">
+                                            @if (count($tierStructure) > 0)
+                                                <div class="tiers-grid-container">
+                                                    @foreach (array_chunk($tierStructure, 3, true) as $tierChunk)
+                                                        <div class="row mb-4">
+                                                            @foreach ($tierChunk as $level => $tierData)
+                                                                <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                                                                    <div class="tier-group h-100"
+                                                                        data-tier-level="{{ $level }}">
+                                                                        <div class="tier-header">
                                                                             <div
-                                                                                class="d-flex align-items-center gap-2">
-                                                                                <div class="tier-badge">Tier
-                                                                                    {{ $level }}</div>
-                                                                                <div class="tier-stats">
-                                                                                    <small class="text-muted">
-                                                                                        <i
-                                                                                            class="bi bi-people-fill me-1"></i>{{ count($tierData['agents']) }}
-                                                                                        Agent{{ count($tierData['agents']) !== 1 ? 's' : '' }}
-                                                                                    </small>
+                                                                                class="d-flex align-items-center justify-content-between mb-3">
+                                                                                <div
+                                                                                    class="d-flex align-items-center gap-2">
+                                                                                    <div class="tier-badge">Tier
+                                                                                        {{ $level }}</div>
+                                                                                    <div class="tier-stats">
+                                                                                        <small class="text-muted">
+                                                                                            <i
+                                                                                                class="bi bi-people-fill me-1"></i>{{ count($tierData['agents']) }}
+                                                                                            Agent{{ count($tierData['agents']) !== 1 ? 's' : '' }}
+                                                                                        </small>
+                                                                                    </div>
                                                                                 </div>
-                                                                            </div>
-                                                                            <div class="dropdown">
-                                                                                <button
-                                                                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                                                                    type="button"
-                                                                                    data-bs-toggle="dropdown">
-                                                                                    <i class="bi bi-three-dots"></i>
-                                                                                </button>
-                                                                                <ul class="dropdown-menu">
-                                                                                    <li>
-                                                                                        <button type="button"
-                                                                                            wire:click="addAgentToTier({{ $level }})"
-                                                                                            class="dropdown-item">
-                                                                                            <i
-                                                                                                class="bi bi-person-plus me-2"></i>Add
-                                                                                            Agent
-                                                                                        </button>
-                                                                                    </li>
-                                                                                    <li>
-                                                                                        <hr class="dropdown-divider">
-                                                                                    </li>
-                                                                                    <li>
-                                                                                        <button type="button"
-                                                                                            wire:click="deleteTierLevel({{ $level }})"
-                                                                                            class="dropdown-item text-danger"
-                                                                                            onclick="return confirm('Are you sure you want to delete this entire tier and all its agents?')">
-                                                                                            <i
-                                                                                                class="bi bi-trash me-2"></i>Delete
-                                                                                            Tier
-                                                                                        </button>
-                                                                                    </li>
-                                                                                </ul>
+                                                                                <div class="dropdown">
+                                                                                    <button
+                                                                                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                                                        type="button"
+                                                                                        data-bs-toggle="dropdown">
+                                                                                        <i
+                                                                                            class="bi bi-three-dots"></i>
+                                                                                    </button>
+                                                                                    <ul class="dropdown-menu">
+                                                                                        <li>
+                                                                                            <button type="button"
+                                                                                                wire:click="addAgentToTier({{ $level }})"
+                                                                                                class="dropdown-item">
+                                                                                                <i
+                                                                                                    class="bi bi-person-plus me-2"></i>Add
+                                                                                                Agent
+                                                                                            </button>
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <hr
+                                                                                                class="dropdown-divider">
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <button type="button"
+                                                                                                wire:click="deleteTierLevel({{ $level }})"
+                                                                                                class="dropdown-item text-danger"
+                                                                                                onclick="return confirm('Are you sure you want to delete this entire tier and all its agents?')">
+                                                                                                <i
+                                                                                                    class="bi bi-trash me-2"></i>Delete
+                                                                                                Tier
+                                                                                            </button>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
 
-                                                                    <div class="agents-container"
-                                                                        data-tier-level="{{ $level }}"
-                                                                        ondragover="event.preventDefault()"
-                                                                        ondrop="handleDrop(event, {{ $level }})">
+                                                                        <div class="agents-container"
+                                                                            data-tier-level="{{ $level }}"
+                                                                            ondragover="event.preventDefault()"
+                                                                            ondrop="handleDrop(event, {{ $level }})">
 
-                                                                        @if (count($tierData['agents']) > 0)
-                                                                            <div class="agents-list"
-                                                                                id="agents-tier-{{ $level }}">
-                                                                                @foreach ($tierData['agents'] as $index => $agent)
-                                                                                    @php
-                                                                                        $agentInfo = collect(
-                                                                                            $availableAgents,
-                                                                                        )->firstWhere(
-                                                                                            'call_center_agent_uuid',
-                                                                                            $agent[
-                                                                                                'call_center_agent_uuid'
-                                                                                            ],
-                                                                                        );
-                                                                                    @endphp
+                                                                            @if (count($tierData['agents']) > 0)
+                                                                                <div class="agents-list"
+                                                                                    id="agents-tier-{{ $level }}">
+                                                                                    @foreach ($tierData['agents'] as $index => $agent)
+                                                                                        @php
+                                                                                            $agentInfo = collect(
+                                                                                                $availableAgents,
+                                                                                            )->firstWhere(
+                                                                                                'call_center_agent_uuid',
+                                                                                                $agent[
+                                                                                                    'call_center_agent_uuid'
+                                                                                                ],
+                                                                                            );
+                                                                                        @endphp
 
-                                                                                    <div class="agent-card-compact draggable"
-                                                                                        draggable="true"
-                                                                                        data-agent-id="{{ $agent['call_center_tier_uuid'] ?? $agent['call_center_agent_uuid'] }}"
-                                                                                        data-tier-level="{{ $level }}"
-                                                                                        data-agent-index="{{ $index }}"
-                                                                                        ondragstart="handleDragStart(event)"
-                                                                                        ondragend="handleDragEnd(event)">
+                                                                                        <div class="agent-card-compact draggable"
+                                                                                            draggable="true"
+                                                                                            data-agent-id="{{ $agent['call_center_tier_uuid'] ?? $agent['call_center_agent_uuid'] }}"
+                                                                                            data-tier-level="{{ $level }}"
+                                                                                            data-agent-index="{{ $index }}"
+                                                                                            ondragstart="handleDragStart(event)"
+                                                                                            ondragend="handleDragEnd(event)">
 
-                                                                                        <div
-                                                                                            class="agent-compact-info">
                                                                                             <div
-                                                                                                class="agent-avatar-small">
-                                                                                                {{ $agentInfo ? strtoupper(substr($agentInfo->agent_name, 0, 2)) : 'AG' }}
-                                                                                            </div>
-                                                                                            <div class="agent-details">
+                                                                                                class="agent-compact-info">
                                                                                                 <div
-                                                                                                    class="fw-bold small">
-                                                                                                    {{ $agentInfo->agent_name ?? 'Unknown Agent' }}
+                                                                                                    class="agent-avatar-small">
+                                                                                                    {{ $agentInfo ? strtoupper(substr($agentInfo->agent_name, 0, 2)) : 'AG' }}
                                                                                                 </div>
-                                                                                                <div class="text-muted"
-                                                                                                    style="font-size: 0.75rem;">
-                                                                                                    Pos:
-                                                                                                    {{ $agent['tier_position'] }}
+                                                                                                <div
+                                                                                                    class="agent-details">
+                                                                                                    <div
+                                                                                                        class="fw-bold small">
+                                                                                                        {{ $agentInfo->agent_name ?? 'Unknown Agent' }}
+                                                                                                    </div>
+                                                                                                    <div class="text-muted"
+                                                                                                        style="font-size: 0.75rem;">
+                                                                                                        Pos:
+                                                                                                        {{ $agent['tier_position'] }}
+                                                                                                    </div>
                                                                                                 </div>
+                                                                                                <button type="button"
+                                                                                                    wire:click="deleteAgentFromTier({{ $level }}, {{ $index }}, '{{ $agent['call_center_tier_uuid'] ?? '' }}')"
+                                                                                                    class="btn btn-sm btn-outline-danger btn-remove"
+                                                                                                    onclick="return confirm('Are you sure?')"
+                                                                                                    title="Remove">
+                                                                                                    <i
+                                                                                                        class="bi bi-x"></i>
+                                                                                                </button>
                                                                                             </div>
-                                                                                            <button type="button"
-                                                                                                wire:click="deleteAgentFromTier({{ $level }}, {{ $index }}, '{{ $agent['call_center_tier_uuid'] ?? '' }}')"
-                                                                                                class="btn btn-sm btn-outline-danger btn-remove"
-                                                                                                onclick="return confirm('Are you sure?')"
-                                                                                                title="Remove">
-                                                                                                <i class="bi bi-x"></i>
-                                                                                            </button>
                                                                                         </div>
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            </div>
-                                                                        @else
-                                                                            <div class="empty-tier-message-compact">
-                                                                                <div class="text-center py-3">
-                                                                                    <div class="text-muted mb-2">
-                                                                                        <i class="bi bi-person-plus"
-                                                                                            style="font-size: 1.5rem;"></i>
-                                                                                    </div>
-                                                                                    <p class="text-muted small mb-2">No
-                                                                                        agents</p>
-                                                                                    <button type="button"
-                                                                                        wire:click="addAgentToTier({{ $level }})"
-                                                                                        class="btn btn-outline-primary btn-sm">
-                                                                                        Add Agent
-                                                                                    </button>
+                                                                                    @endforeach
                                                                                 </div>
-                                                                            </div>
-                                                                        @endif
+                                                                            @else
+                                                                                <div
+                                                                                    class="empty-tier-message-compact">
+                                                                                    <div class="text-center py-3">
+                                                                                        <div class="text-muted mb-2">
+                                                                                            <i class="bi bi-person-plus"
+                                                                                                style="font-size: 1.5rem;"></i>
+                                                                                        </div>
+                                                                                        <p
+                                                                                            class="text-muted small mb-2">
+                                                                                            No
+                                                                                            agents</p>
+                                                                                        <button type="button"
+                                                                                            wire:click="addAgentToTier({{ $level }})"
+                                                                                            class="btn btn-outline-primary btn-sm">
+                                                                                            Add Agent
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="text-center py-5">
-                                                <div class="text-muted mb-3">
-                                                    <i class="bi bi-layers" style="font-size: 3rem;"></i>
+                                                            @endforeach
+                                                        </div>
+                                                    @endforeach
                                                 </div>
-                                                <h6 class="text-muted">No tiers created</h6>
-                                                <p class="text-muted small">Click "Add Tier" to create your first agent
-                                                    tier (0-9)</p>
-                                            </div>
-                                        @endif
+                                            @else
+                                                <div class="text-center py-5">
+                                                    <div class="text-muted mb-3">
+                                                        <i class="bi bi-layers" style="font-size: 3rem;"></i>
+                                                    </div>
+                                                    <h6 class="text-muted">No tiers created</h6>
+                                                    <p class="text-muted small">Click "Add Tier" to create your first
+                                                        agent
+                                                        tier (0-9)</p>
+                                                </div>
+                                            @endif
 
-                                        <div class="mt-3">
-                                            <small class="text-muted">
-                                                <i class="bi bi-info-circle me-1"></i>
-                                                <strong>Tiers:</strong> Lower numbered tiers (0-9) have higher priority.
-                                                <strong>Drag & Drop:</strong> You can drag agents between tiers or
-                                                reorder within a tier.
-                                            </small>
+                                            <div class="mt-3">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <strong>Tiers:</strong> Lower numbered tiers (0-9) have higher
+                                                    priority.
+                                                    <strong>Drag & Drop:</strong> You can drag agents between tiers or
+                                                    reorder within a tier.
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Agent Modal -->
-                                @if ($showAgentModal)
-                                    <div class="modal fade show d-block" tabindex="-1"
-                                        style="background-color: rgba(0,0,0,0.5);">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">
-                                                        Add Agent to Tier {{ $modalAgent['tier_level'] ?? 'N/A' }}
-                                                    </h5>
-                                                    <button type="button" class="btn-close"
-                                                        wire:click="closeAgentModal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label for="modalAgent.call_center_agent_uuid"
-                                                            class="form-label">Agent <span
-                                                                class="text-danger">*</span></label>
-                                                        <select wire:model="modalAgent.call_center_agent_uuid"
-                                                            class="form-select @error('modalAgent.call_center_agent_uuid') is-invalid @enderror">
-                                                            <option value="">Select an agent</option>
-                                                            @foreach ($availableAgents as $agent)
-                                                                <option value="{{ $agent->call_center_agent_uuid }}">
-                                                                    {{ $agent->agent_name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        @error('modalAgent.call_center_agent_uuid')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
+                                    <!-- Agent Modal -->
+                                    @if ($showAgentModal)
+                                        <div class="modal fade show d-block" tabindex="-1"
+                                            style="background-color: rgba(0,0,0,0.5);">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">
+                                                            Add Agent to Tier {{ $modalAgent['tier_level'] ?? 'N/A' }}
+                                                        </h5>
+                                                        <button type="button" class="btn-close"
+                                                            wire:click="closeAgentModal"></button>
                                                     </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="modalAgent.call_center_agent_uuid"
+                                                                class="form-label">Agent <span
+                                                                    class="text-danger">*</span></label>
+                                                            <select wire:model="modalAgent.call_center_agent_uuid"
+                                                                class="form-select @error('modalAgent.call_center_agent_uuid') is-invalid @enderror">
+                                                                <option value="">Select an agent</option>
+                                                                @foreach ($availableAgents as $agent)
+                                                                    <option
+                                                                        value="{{ $agent->call_center_agent_uuid }}">
+                                                                        {{ $agent->agent_name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('modalAgent.call_center_agent_uuid')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
 
-                                                    <div class="alert alert-info">
-                                                        <i class="bi bi-lightbulb me-2"></i>
-                                                        <strong>Tip:</strong> After adding the agent, you can drag and
-                                                        drop to reorder within the tier or move to other tiers.
+                                                        <div class="alert alert-info">
+                                                            <i class="bi bi-lightbulb me-2"></i>
+                                                            <strong>Tip:</strong> After adding the agent, you can drag
+                                                            and
+                                                            drop to reorder within the tier or move to other tiers.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            wire:click="closeAgentModal">Cancel</button>
+                                                        <button type="button" class="btn btn-primary"
+                                                            wire:click="saveAgent">
+                                                            Add Agent to Tier
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        wire:click="closeAgentModal">Cancel</button>
-                                                    <button type="button" class="btn btn-primary"
-                                                        wire:click="saveAgent">
-                                                        Add Agent to Tier
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Form Actions -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <button type="button" wire:click="cancel"
+                                                        class="btn btn-secondary">
+                                                        <i class="bi bi-arrow-left me-1"></i>Back
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Form Actions -->
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <button type="button" wire:click="cancel" class="btn btn-secondary">
-                                                    <i class="bi bi-arrow-left me-1"></i>Back
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    {{ $isEditing ? 'Update' : 'Create' }}
                                                 </button>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="bi bi-check-circle me-1"></i>
-                                                {{ $isEditing ? 'Update' : 'Create' }}
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
                             </form>
                         </div>
                     </div>
