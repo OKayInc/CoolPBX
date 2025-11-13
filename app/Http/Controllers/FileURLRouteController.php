@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\FileURLRouteService;
+use Illuminate\Http\Request;
 
 class FileURLRouteController extends Controller
 {
@@ -12,38 +13,23 @@ class FileURLRouteController extends Controller
 		$this->fileURLRouteService = $fileURLRouteService;
 	}
 
-	public function handle($path = null)
+	public function create(Request $request, $path = null)
+	{
+		return $this->fileURLRouteService->create($request, $path);
+	}
+
+	public function read($path = null)
     {
-        return $this->fileURLRouteService->resolve($path);
+        return $this->fileURLRouteService->get($path);
     }
 
-	public function create()
+	public function update(Request $request, $path = null)
 	{
-
+		return $this->fileURLRouteService->update($request, $path);
 	}
 
-	public function store()
+	public function destroy($path = null)
 	{
-
+		return $this->fileURLRouteService->destroy($path);
 	}
-
-    public function show()
-    {
-        //
-    }
-
-	public function edit()
-	{
-
-	}
-
-	public function update()
-	{
-
-	}
-
-    public function destroy()
-    {
-
-    }
 }

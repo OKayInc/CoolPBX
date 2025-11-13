@@ -51,4 +51,10 @@ Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(functio
     Route::post('/email/test', [EmailQueueController::class, 'testEmail']);
 });
 
-Route::get("/fs/{path?}", [FileURLRouteController::class, "handle"])->where("path", ".*")->name("fileurlroute.handle");
+Route::middleware([VerifyAuthenticationKey::class, 'permission'])->prefix("fs")->group(function()
+{
+	Route::post("/{path?}", [FileURLRouteController::class, "create"])->where("path", ".*")->name("fileurlroute.create");
+	Route::get("/{path?}", [FileURLRouteController::class, "read"])->where("path", ".*")->name("fileurlroute.read");
+	Route::put("/{path?}", [FileURLRouteController::class, "update"])->where("path", ".*")->name("fileurlroute.update");
+	Route::delete("/{path?}", [FileURLRouteController::class, "destroy"])->where("path", ".*")->name("fileurlroute.destroy");
+});
