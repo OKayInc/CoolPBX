@@ -20,7 +20,7 @@ class FileURLRouteController extends Controller
 
 	public function read($path = null)
     {
-        return $this->fileURLRouteService->get($path);
+        return $this->fileURLRouteService->read($path);
     }
 
 	public function update(Request $request, $path = null)
@@ -28,8 +28,8 @@ class FileURLRouteController extends Controller
 		return $this->fileURLRouteService->update($request, $path);
 	}
 
-	public function destroy($path = null)
+	public function delete($path = null)
 	{
-		return $this->fileURLRouteService->destroy($path);
+		return $this->fileURLRouteService->delete($path);
 	}
 }

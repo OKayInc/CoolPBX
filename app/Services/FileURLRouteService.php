@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileURLRouteService
 {
-    public function get(?string $path)
+    public function read(?string $path)
     {
         $resolved = $this->resolveBasePath($path);
 
@@ -88,8 +88,10 @@ class FileURLRouteService
         ]);
     }
 
-    public function create(Request $request, ?string $path)
+    public function create(Request|array $request, ?string $path)
     {
+        $request = $this->normalizeRequest($request);
+
         $resolved = $this->resolveBasePath($path);
 
         if($resolved instanceof \Illuminate\Http\JsonResponse)
@@ -122,8 +124,10 @@ class FileURLRouteService
         return response()->json(["error" => "No file or directory specified"], 400);
     }
 
-    public function update(Request $request, ?string $path)
+    public function update(Request|array $request, ?string $path)
     {
+        $request = $this->normalizeRequest($request);
+
         $resolved = $this->resolveBasePath($path);
 
         if($resolved instanceof \Illuminate\Http\JsonResponse)
@@ -152,7 +156,7 @@ class FileURLRouteService
         return response()->json(["error" => "No action specified"], 400);
     }
 
-    public function destroy(?string $path)
+    public function delete(?string $path)
     {
         $resolved = $this->resolveBasePath($path);
 
@@ -236,5 +240,22 @@ class FileURLRouteService
         }
 
         return [$basePath, $subPath];
+    }
+
+    private function normalizeRequest($request)
+    {
+        if($request instanceof Request)
+        {
+            return $request;
+        }
+
+        $fakeRequest = Request::create("/", "POST", $request["data"] ?? []);
+
+        if(isset($request["file"]))
+        {
+            $fakeRequest->files->set("file", $request["file"]);
+        }
+
+        return $fakeRequest;
     }
 }

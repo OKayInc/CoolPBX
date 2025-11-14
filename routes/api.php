@@ -56,5 +56,5 @@ Route::middleware([VerifyAuthenticationKey::class, 'permission'])->prefix("fs")-
 	Route::post("/{path?}", [FileURLRouteController::class, "create"])->where("path", ".*")->name("fileurlroute.create");
 	Route::get("/{path?}", [FileURLRouteController::class, "read"])->where("path", ".*")->name("fileurlroute.read");
 	Route::put("/{path?}", [FileURLRouteController::class, "update"])->where("path", ".*")->name("fileurlroute.update");
-	Route::delete("/{path?}", [FileURLRouteController::class, "destroy"])->where("path", ".*")->name("fileurlroute.destroy");
+	Route::delete("/{path?}", [FileURLRouteController::class, "delete"])->where("path", ".*")->name("fileurlroute.destroy");
 });
