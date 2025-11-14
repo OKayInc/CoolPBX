@@ -7,27 +7,83 @@ use Illuminate\Http\Request;
 
 class VoicemailMessageController extends Controller
 {
-    private function getVoicemailFilePath(VoicemailMessage $message)
+    private function getVoicemailFilePath(VoicemailMessage $message): string
     {
-        // TODO: get directory from settings service
-        // $voicemail_dir = "/var/lib/freeswitch/storage/voicemail";
-        $voicemail_dir = storage_path("app/public/voicemail");
+        $storageType = session('voicemail.storage_type.text');
 
-        $base_path = $voicemail_dir . '/' .
-            'default' . '/' .
-            $message->domain->domain_name . '/' .
-            $message->voicemail->voicemail_id . '/' .
-            'msg_' . $message->voicemail_message_uuid;
-
-        if (file_exists($base_path . '.wav')) {
-            return $base_path . '.wav';
+        if ($storageType === 'base64') {
+            return $this->prepareBase64File($message);
         }
 
-        if (file_exists($base_path . '.mp3')) {
-            return $base_path . '.mp3';
+        return $this->getFileSystemPath($message);
+    }
+
+    private function getFileSystemPath(VoicemailMessage $message): string
+    {
+        $voicemailDir = config('services.freeswitch.voicemail_dir', '/var/lib/freeswitch/storage/voicemail');
+
+        $basePath = sprintf(
+            '%s/default/%s/%s/msg_%s',
+            $voicemailDir,
+            $message->domain->domain_name,
+            $message->voicemail->voicemail_id,
+            $message->voicemail_message_uuid
+        );
+
+
+        $extensions = ['wav', 'mp3', 'ogg'];
+
+        foreach ($extensions as $ext) {
+            $filePath = $basePath . '.' . $ext;
+            if (file_exists($filePath)) {
+                return $filePath;
+            }
         }
 
-        return $base_path;
+        throw new \Exception("Voicemail file not found at: {$basePath}.[wav|mp3|ogg]");
+    }
+
+    private function prepareBase64File(VoicemailMessage $message): string
+    {
+        if (empty($message->message_base64)) {
+            throw new \Exception('No base64 content found for voicemail message: ' . $message->voicemail_message_uuid);
+        }
+
+        $decodedContent = base64_decode($message->message_base64);
+
+        if ($decodedContent === false) {
+            throw new \Exception('Failed to decode base64 content');
+        }
+
+        $tempDir = storage_path('app/temp/voicemail');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $tempFile = $tempDir . '/msg_' . $message->voicemail_message_uuid . '.tmp';
+        file_put_contents($tempFile, $decodedContent);
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $tempFile);
+        finfo_close($finfo);
+
+        $extension = match ($mimeType) {
+            'audio/x-wav', 'audio/wav' => 'wav',
+            'audio/mpeg', 'audio/mp3' => 'mp3',
+            'audio/ogg' => 'ogg',
+            default => 'wav'
+        };
+
+        $finalPath = $tempDir . '/msg_' . $message->voicemail_message_uuid . '.' . $extension;
+        rename($tempFile, $finalPath);
+
+        register_shutdown_function(function () use ($finalPath) {
+            if (file_exists($finalPath)) {
+                @unlink($finalPath);
+            }
+        });
+
+        return $finalPath;
     }
 
 
@@ -67,8 +123,6 @@ class VoicemailMessageController extends Controller
             ->firstOrFail();
 
         $filePath = $this->getVoicemailFilePath($message);
-
-        dd('no hay');
 
         if (!file_exists($filePath)) {
             abort(404, 'Voicemail file not found');

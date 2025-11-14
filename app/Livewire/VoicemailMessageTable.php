@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\VoicemailMessage;
+use App\Services\FreeSwitch\FreeSwitchVoicemailService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -12,6 +13,13 @@ class VoicemailMessageTable extends DataTableComponent
 {
     protected $model = VoicemailMessage::class;
     public string $voicemailUuid;
+
+    protected FreeSwitchVoicemailService $voicemailService;
+
+    public function boot(): void
+    {
+        $this->voicemailService = app(FreeSwitchVoicemailService::class);
+    }
 
     public function configure(): void
     {
@@ -115,37 +123,46 @@ class VoicemailMessageTable extends DataTableComponent
             'voicemailMessageUuid' => $row->voicemail_message_uuid,
         ]);
 
-
         $html = '<div class="tools-container">';
-
         $html .= '<div class="progress-bar" data-uuid="' . $uuid . '" style="background-color: #0d6efd; width: 0; height: 3px; position: relative; margin: 5px 0; display: none;"></div>';
-
         $html .= '<audio class="voicemail-audio" 
-                 data-uuid="' . $uuid . '" 
-                 data-voicemail-uuid="' . $row->voicemail_uuid . '" 
-                 style="display: none;" 
-                 preload="none" 
-                 src="' . $playUrl . '"></audio>';
+             data-uuid="' . $uuid . '" 
+             data-voicemail-uuid="' . $row->voicemail_uuid . '" 
+             style="display: none;" 
+             preload="none" 
+             src="' . $playUrl . '"></audio>';
 
         $html .= '<div class="d-flex gap-2" style="white-space: nowrap;">';
-
         $html .= '<button type="button" class="btn btn-sm btn-outline-success btn-play-voicemail" data-uuid="' . $uuid . '" title="Play / Pause">
-                        <i class="fas fa-play"></i>
-                    </button>';
-
-
+                    <i class="fas fa-play"></i>
+                </button>';
         $html .= '<a href="' . $downloadUrl . '" class="btn btn-sm btn-outline-primary" title="Download" onclick="markAsRead(\'' . $uuid . '\')">
-                        <i class="fas fa-download"></i>
-                    </a>';
-
+                    <i class="fas fa-download"></i>
+                </a>';
 
         if (session('voicemail.transcribe_enabled.boolean') == 'true' && !empty($row->message_transcription)) {
-            $html .= '<button type="button" class="btn btn-sm btn-outline-info btn-toggle-transcription" data-uuid="' . $uuid . '" title="Transcription">
-                        <i class="fas fa-quote-right"></i>
-                    </button>';
+            $transcription = e($row->message_transcription);
+            $callerName = e($row->caller_id_name);
+            $callerNumber = e($row->caller_id_number);
+            $date = date('M d, Y H:i:s', $row->created_epoch);
+
+            $transcriptionJson = json_encode($transcription, JSON_HEX_APOS | JSON_HEX_QUOT);
+            $callerNameJson = json_encode($callerName, JSON_HEX_APOS | JSON_HEX_QUOT);
+            $callerNumberJson = json_encode($callerNumber, JSON_HEX_APOS | JSON_HEX_QUOT);
+            $dateJson = json_encode($date, JSON_HEX_APOS | JSON_HEX_QUOT);
+
+            $html .= '<button type="button" 
+                class="btn btn-sm btn-outline-info btn-show-transcription" 
+                data-transcription=' . $transcriptionJson . '
+                data-caller-name=' . $callerNameJson . '
+                data-caller-number=' . $callerNumberJson . '
+                data-date=' . $dateJson . '
+                title="View Transcription">
+                <i class="fas fa-quote-right"></i>
+            </button>';
         }
 
-        $html .= '</div>'; 
+        $html .= '</div>';
         $html .= '</div>';
 
         return $html;
@@ -170,16 +187,35 @@ class VoicemailMessageTable extends DataTableComponent
     {
         $selectedRows = $this->getSelected();
 
-        VoicemailMessage::whereIn('voicemail_message_uuid', $selectedRows)
-            ->update([
-                'message_status' => DB::raw("CASE WHEN message_status = 'saved' THEN '' ELSE 'saved' END")
-            ]);
+        $messages = VoicemailMessage::with('voicemail.domain')
+            ->whereIn('voicemail_message_uuid', $selectedRows)
+            ->get();
+
+        $voicemailsToUpdate = [];
+
+        foreach ($messages as $message) {
+            $message->message_status = ($message->message_status == 'saved') ? '' : 'saved';
+            $message->save();
+
+            $key = $message->voicemail->voicemail_id;
+            if (!isset($voicemailsToUpdate[$key])) {
+                $voicemailsToUpdate[$key] = [
+                    'voicemail_id' => $message->voicemail->voicemail_id,
+                    'domain_name' => $message->voicemail->domain->domain_name
+                ];
+            }
+        }
+
+        if (!empty($voicemailsToUpdate)) {
+            $this->voicemailService->bulkUpdateMWI(array_values($voicemailsToUpdate));
+        }
 
         $this->clearSelected();
         $this->dispatch('refresh');
 
         session()->flash('message', 'Message status toggled successfully');
     }
+
 
     public function bulkDelete(): void
     {
@@ -188,7 +224,27 @@ class VoicemailMessageTable extends DataTableComponent
         try {
             DB::beginTransaction();
 
+            $messages = VoicemailMessage::with('voicemail.domain')
+                ->whereIn('voicemail_message_uuid', $selectedRows)
+                ->get();
+
+            $voicemailsToUpdate = [];
+
+            foreach ($messages as $message) {
+                $key = $message->voicemail->voicemail_id;
+                if (!isset($voicemailsToUpdate[$key])) {
+                    $voicemailsToUpdate[$key] = [
+                        'voicemail_id' => $message->voicemail->voicemail_id,
+                        'domain_name' => $message->voicemail->domain->domain_name
+                    ];
+                }
+            }
+
             VoicemailMessage::whereIn('voicemail_message_uuid', $selectedRows)->delete();
+
+            if (!empty($voicemailsToUpdate)) {
+                $this->voicemailService->bulkUpdateMWI(array_values($voicemailsToUpdate));
+            }
 
             DB::commit();
 
@@ -198,13 +254,13 @@ class VoicemailMessageTable extends DataTableComponent
             session()->flash('message', 'Messages deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error deleting voicemail messages: ' . $e->getMessage());
             session()->flash('error', 'An error occurred while deleting messages: ' . $e->getMessage());
         }
     }
-
     public function builder(): Builder
     {
-        $query = VoicemailMessage::query();
+        $query = VoicemailMessage::query()->select('v_voicemail_messages.*');
 
         $this->voicemailUuid = request('voicemailUuid');
 
@@ -216,7 +272,6 @@ class VoicemailMessageTable extends DataTableComponent
             $query->where('domain_uuid', auth()->user()->domain_uuid);
         }
 
-        $query->orderBy('created_epoch', 'desc');
 
         return $query;
     }
