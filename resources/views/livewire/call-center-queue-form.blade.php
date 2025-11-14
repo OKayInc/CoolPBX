@@ -242,8 +242,8 @@
                                         </div>
 
                                         <div class="col-md-6 mb-3">
-                                            <label for="queue_time_base_score_sec" class="form-label">Time Base Score
-                                                Seconds</label>
+                                            <label for="queue_time_base_score_sec" class="form-label">Base Score
+                                                (Priority)</label>
                                             <input type="number" wire:model="queue_time_base_score_sec"
                                                 class="form-control @error('queue_time_base_score_sec') is-invalid @enderror"
                                                 id="queue_time_base_score_sec" min="0" placeholder="30">
