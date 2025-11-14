@@ -54,7 +54,7 @@
                                         class="text-danger">*</span></label>
                                 <input type="text" wire:model="device_label"
                                     class="form-control @error('device_label') is-invalid @enderror" id="device_label"
-                                    placeholder="Device name">
+                                    placeholder="Device name" required>
                                 @error('device_label')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
