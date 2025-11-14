@@ -187,7 +187,7 @@ class DeviceForm extends Component
         if ($this->device_mac_address) {
             $this->device_mac_address = preg_replace('/[^a-fA-F0-9]/', '', $this->device_mac_address);
 
-            $this->device_mac_address = strtoupper($this->device_mac_address);
+            $this->device_mac_address = strtolower($this->device_mac_address);
 
             $this->duplicateMacDomain = $this->deviceRepository->checkDuplicateMacAddress(
                 $this->device_mac_address,
