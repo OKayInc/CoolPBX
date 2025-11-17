@@ -33,21 +33,21 @@ class CallCenterAgentAPIController extends Controller
         return response()->json($newCallCenterAgent);
 	}
 
-	public function show(CallCenterAgent $extension)
+	public function show(CallCenterAgent $agent)
 	{
-		$d = $this->callCenterAgentRepository->findByUuid($extension->domain_uuid, true);
+		$d = $this->callCenterAgentRepository->findByUuid($agent->domain_uuid, true);
         return response()->json($d);
 	}
 
-	public function update(CallCenterAgentRequest $request, CallCenterAgent $extension)
+	public function update(CallCenterAgentRequest $request, CallCenterAgent $agent)
 	{
-		$d = $this->callCenterAgentRepository->update($extension, $request->validated());
+		$d = $this->callCenterAgentRepository->update($agent, $request->validated());
 		return response()->json($d);
 	}
 
-	public function destroy(CallCenterAgent $extension)
+	public function destroy(CallCenterAgent $agent)
 	{
-		$d = $this->callCenterAgentRepository->delete($extension);
+		$d = $this->callCenterAgentRepository->delete($agent);
         return response()->json($d);
 	}
 }

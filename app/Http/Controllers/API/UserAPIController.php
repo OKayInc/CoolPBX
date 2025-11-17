@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Http\Requests\UserRequest;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 

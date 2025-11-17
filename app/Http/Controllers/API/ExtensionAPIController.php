@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Extension;
 use App\Http\Requests\ExtensionRequest;
+use App\Models\Extension;
 use App\Repositories\ExtensionRepository;
 use Illuminate\Http\Request;
 
