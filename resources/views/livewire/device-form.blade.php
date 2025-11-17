@@ -204,12 +204,17 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="device_user_uuid" class="form-label">Assigned User</label>
-                                <select wire:model="device_user_uuid" class="form-select" id="device_user_uuid">
+                                <select wire:model="device_user_uuid"
+                                    class="form-select @error('device_user_uuid') is-invalid @enderror"
+                                    id="device_user_uuid">
                                     <option value="">No user assigned...</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user['user_uuid'] }}">{{ $user['username'] }}</option>
                                     @endforeach
                                 </select>
+                                @error('device_user_uuid')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             @can('device_alternate')
@@ -217,8 +222,12 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="device_uuid_alternate" class="form-label">Alternate Device</label>
                                         <input type="text" wire:model.lazy="device_uuid_alternate"
-                                            class="form-control" id="device_uuid_alternate"
+                                            class="form-control @error('device_uuid_alternate') is-invalid @enderror"
+                                            id="device_uuid_alternate"
                                             placeholder="Alternate device UUID">
+                                        @error('device_uuid_alternate')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                         @if (count($alternateDevices) > 0)
                                             <div class="form-text text-info">
                                                 <i class="bi bi-info-circle me-1"></i>
@@ -281,16 +290,24 @@
 
                             <div class="col-md-6 mb-3">
                                 <label for="device_username" class="form-label">Username</label>
-                                <input type="text" wire:model="device_username" class="form-control"
+                                <input type="text" wire:model="device_username"
+                                    class="form-control @error('device_username') is-invalid @enderror"
                                     id="device_username" placeholder="Username">
+                                @error('device_username')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="device_password" class="form-label">Password</label>
                                 <div class="input-group">
-                                    <input type="password" wire:model="device_password" class="form-control"
+                                    <input type="password" wire:model="device_password"
+                                        class="form-control @error('device_password') is-invalid @enderror"
                                         id="device_password" placeholder="Password">
                                 </div>
+                                @error('device_password')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
@@ -368,8 +385,11 @@
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.server_address"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.server_address') is-invalid @enderror"
                                                                     placeholder="Server Address">
+                                                                @error('deviceLines.' . $index . '.server_address')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_server_address_primary')
@@ -377,11 +397,15 @@
                                                                 @foreach ($deviceLinesServerPrimary as $item)
                                                                     <select name=""
                                                                         wire:model="deviceLines.{{ $index }}.server_address_primary"
+                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_primary') is-invalid @enderror"
                                                                         id="deviceLines.{{ $index }}.server_address_primary">
                                                                         <option value="{{ $item->id }}">
                                                                             {{ $item->name }}</option>
                                                                     </select>
                                                                 @endforeach
+                                                                @error('deviceLines.' . $index . '.server_address_primary')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_server_address_secondary')
@@ -389,11 +413,15 @@
                                                                 @foreach ($deviceLinesServerSecondary as $item)
                                                                     <select name=""
                                                                         wire:model="deviceLines.{{ $index }}.server_address_secondary"
+                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_secondary') is-invalid @enderror"
                                                                         id="deviceLines.{{ $index }}.server_address_secondary">
                                                                         <option value="{{ $item->name }}">
                                                                             {{ $item->name }}</option>
                                                                     </select>
                                                                 @endforeach
+                                                                @error('deviceLines.' . $index . '.server_address_secondary')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_outbound_proxy_primary')
@@ -401,11 +429,15 @@
                                                                 @foreach ($outboundProxyPrimary as $item)
                                                                     <select name=""
                                                                         wire:model="deviceLines.{{ $index }}.outbound_proxy_primary"
+                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_primary') is-invalid @enderror"
                                                                         id="">
                                                                         <option value="{{ $item->id }}">
                                                                             {{ $item->name }}</option>
                                                                     </select>
                                                                 @endforeach
+                                                                @error('deviceLines.' . $index . '.outbound_proxy_primary')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_outbound_proxy_secondary')
@@ -413,83 +445,115 @@
                                                                 @foreach ($outboundProxySecondary as $item)
                                                                     <select name=""
                                                                         wire:model="deviceLines.{{ $index }}.outbound_proxy_secondary"
+                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_secondary') is-invalid @enderror"
                                                                         id="">
                                                                         <option value="{{ $item->id }}">
                                                                             {{ $item->name }}</option>
                                                                     </select>
                                                                 @endforeach
+                                                                @error('deviceLines.' . $index . '.outbound_proxy_secondary')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_label')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.label"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.label') is-invalid @enderror"
                                                                     placeholder="Label">
+                                                                @error('deviceLines.' . $index . '.label')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_display_name')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.display_name"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.display_name') is-invalid @enderror"
                                                                     placeholder="Description">
+                                                                @error('deviceLines.' . $index . '.display_name')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceLines.{{ $index }}.user_id"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceLines.' . $index . '.user_id') is-invalid @enderror"
                                                                 placeholder="User">
+                                                            @error('deviceLines.' . $index . '.user_id')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
                                                         @can('device_line_auth_id')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.auth_id"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.auth_id') is-invalid @enderror"
                                                                     placeholder="Auth ID">
+                                                                @error('deviceLines.' . $index . '.auth_id')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_password')
                                                             <td>
                                                                 <input type="password"
                                                                     wire:model="deviceLines.{{ $index }}.password"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.password') is-invalid @enderror"
                                                                     placeholder="Password">
+                                                                @error('deviceLines.' . $index . '.password')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_port')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.sip_port"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.sip_port') is-invalid @enderror"
                                                                     placeholder="5060">
+                                                                @error('deviceLines.' . $index . '.sip_port')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_transport')
                                                             <td>
                                                                 <select name=""
                                                                     wire:model="deviceLines.{{ $index }}.sip_transport"
+                                                                    class="form-select form-select-sm @error('deviceLines.' . $index . '.sip_transport') is-invalid @enderror"
                                                                     id="deviceLines.{{ $index }}.sip_transport">
                                                                     <option value="udp">UDP</option>
                                                                     <option value="tcp">TCP</option>
                                                                     <option value="tls">TLS</option>
                                                                     <option value="dns srv">DNS SRV</option>
                                                                 </select>
+                                                                @error('deviceLines.' . $index . '.sip_transport')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_register_expires')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.register_expires"
-                                                                    class="form-control form-control-sm" placeholder="60">
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.register_expires') is-invalid @enderror" placeholder="60">
+                                                                @error('deviceLines.' . $index . '.register_expires')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         @can('device_line_shared')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceLines.{{ $index }}.shared_line"
-                                                                    class="form-control form-control-sm">
+                                                                    class="form-control form-control-sm @error('deviceLines.' . $index . '.shared_line') is-invalid @enderror">
+                                                                @error('deviceLines.' . $index . '.shared_line')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
 
@@ -652,7 +716,10 @@
                                                             <td>
                                                                 <input type="number" max="255"
                                                                     wire:model="deviceKeys.{{ $index }}.device_key_id"
-                                                                    class="form-control form-control-sm" placeholder="ID">
+                                                                    class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_id') is-invalid @enderror" placeholder="ID">
+                                                                @error('deviceKeys.' . $index . '.device_key_id')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
 
@@ -688,46 +755,64 @@
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceKeys.{{ $index }}.device_key_subtype"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_subtype') is-invalid @enderror"
                                                                     placeholder="Subtype">
+                                                                @error('deviceKeys.' . $index . '.device_key_subtype')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endif
                                                         @can('device_key_line')
                                                             <td>
                                                                 <input type="number"
                                                                     wire:model="deviceKeys.{{ $index }}.device_key_line"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_line') is-invalid @enderror"
                                                                     placeholder="Line">
+                                                                @error('deviceKeys.' . $index . '.device_key_line')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
 
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceKeys.{{ $index }}.device_key_value"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_value') is-invalid @enderror"
                                                                 placeholder="Value">
+                                                            @error('deviceKeys.' . $index . '.device_key_value')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
                                                         @can('device_key_extension')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceKeys.{{ $index }}.device_key_extension"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_extension') is-invalid @enderror"
                                                                     placeholder="Extension">
+                                                                @error('deviceKeys.' . $index . '.device_key_extension')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceKeys.{{ $index }}.device_key_label"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_label') is-invalid @enderror"
                                                                 placeholder="Label">
+                                                            @error('deviceKeys.' . $index . '.device_key_label')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
 
                                                         @can('device_key_icon')
                                                             <td>
                                                                 <input type="text"
                                                                     wire:model="deviceKeys.{{ $index }}.device_key_icon"
-                                                                    class="form-control form-control-sm"
+                                                                    class="form-control form-control-sm @error('deviceKeys.' . $index . '.device_key_icon') is-invalid @enderror"
                                                                     placeholder="Icon">
+                                                                @error('deviceKeys.' . $index . '.device_key_icon')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
                                                             </td>
                                                         @endcan
                                                         <td>
@@ -781,14 +866,20 @@
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceSettings.{{ $index }}.device_setting_name"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceSettings.' . $index . '.device_setting_name') is-invalid @enderror"
                                                                 placeholder="Name">
+                                                            @error('deviceSettings.' . $index . '.device_setting_name')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceSettings.{{ $index }}.device_setting_value"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceSettings.' . $index . '.device_setting_value') is-invalid @enderror"
                                                                 placeholder="Value">
+                                                            @error('deviceSettings.' . $index . '.device_setting_value')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
                                                         <td>
                                                             <div class="form-check form-switch">
@@ -802,8 +893,11 @@
                                                         <td>
                                                             <input type="text"
                                                                 wire:model="deviceSettings.{{ $index }}.device_setting_description"
-                                                                class="form-control form-control-sm"
+                                                                class="form-control form-control-sm @error('deviceSettings.' . $index . '.device_setting_description') is-invalid @enderror"
                                                                 placeholder="Description">
+                                                            @error('deviceSettings.' . $index . '.device_setting_description')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                         </td>
                                                         <td>
                                                             <button type="button"

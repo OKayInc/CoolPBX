@@ -126,6 +126,12 @@ class DeviceForm extends Component
         $this->domain_uuid = $user->domain_uuid;
         $this->device_enabled = true;
 
+        if (is_null($this->domain_uuid)) {
+            session()->flash('error', 'Por favor seleccione un dominio antes de continuar.');
+            return redirect()->route('devices.index');
+        }
+
+
         if ($user->hasPermission('device_password')) {
             $passwordLength = Setting::getSetting('device', 'password_length', 'numeric');
             $this->device_password = generatePassword($passwordLength, 1);
@@ -166,6 +172,8 @@ class DeviceForm extends Component
         $this->deviceLinesServerSecondary = [];
         $this->outboundProxyPrimary = [];
         $this->outboundProxySecondary = [];
+
+        dd(Setting::getSetting('provision', 'server_address_primary', 'text'));
 
         if (null !== Setting::getSetting('provision', 'server_address_primary') && null !== Setting::getSetting('provision', 'server_address_primary', 'text')) {
             $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')->get()->toArray();
@@ -354,6 +362,11 @@ class DeviceForm extends Component
 
     public function save()
     {
+        if (is_null($this->domain_uuid)) {
+            session()->flash('error', 'Por favor seleccione un dominio antes de continuar.');
+            return redirect()->route('devices.index');
+        }
+
         $this->validate();
 
         try {
