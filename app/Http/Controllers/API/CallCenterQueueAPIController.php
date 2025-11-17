@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CallCenterQueueRequest;
+use App\Models\CallCenterAgent;
 use App\Models\CallCenterQueue;
 use App\Repositories\CallCenterQueueRepository;
 use Illuminate\Http\Request;
@@ -17,8 +18,8 @@ class CallCenterQueueAPIController extends Controller
 		$this->callCenterAgentRepository = $callCenterAgentRepository;
 	}
 
-	public function mine(){
-        return response()->json(["data" => $this->callCenterAgentRepository->mine()]);
+	public function mine(callcenteragent $agent){
+        return response()->json(["data" => $this->callCenterAgentRepository->mine($agent)]);
     }
 
 	public function index()
