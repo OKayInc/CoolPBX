@@ -22,6 +22,19 @@ class CallCenterQueueRepository
         $this->model = $model;
     }
 
+    public function mine(CallCenterAgent $agent)
+    {
+        $answer = [];
+        foreach (auth()->user()->agents as $currentAgent)
+        {
+            if ($currentAgent->call_center_agent_uuid == $agent->call_center_agent_uuid){
+                $answer = $currentAgent->queues->toResourceCollection();
+                break;
+            }
+        }
+        return $answer;
+    }
+
     public function getAllByDomain(string $domainUuid): Collection
     {
         return $this->model->where('domain_uuid', $domainUuid)

@@ -17,6 +17,7 @@ class CallCenterAgentResource extends JsonResource
     {
 
         return [
+            'call_center_agent_uuid' => $this->call_center_agent_uuid,
             'agent_name' => $this->agent_name,
             'agent_type' => $this->agent_type,
             'agent_call_timeout' => intval($this->agent_call_timeout),

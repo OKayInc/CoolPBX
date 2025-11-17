@@ -72,7 +72,7 @@ class CallCenterAgent extends Model
 		return $this->HasOne(User::class, 'user_uuid', 'user_uuid');
 	}
 
-    public function callcenterqueues()
+    public function queues()
     {
         return $this->belongsToMany(CallCenterQueue::class, 'v_call_center_tiers', 'call_center_agent_uuid', 'call_center_queue_uuid')
             ->using(CallCenterTier::class)
