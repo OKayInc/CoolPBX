@@ -173,7 +173,6 @@ class DeviceForm extends Component
         $this->outboundProxyPrimary = [];
         $this->outboundProxySecondary = [];
 
-        dd(Setting::getSetting('provision', 'server_address_primary', 'text'));
 
         if (null !== Setting::getSetting('provision', 'server_address_primary') && null !== Setting::getSetting('provision', 'server_address_primary', 'text')) {
             $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')->get()->toArray();
