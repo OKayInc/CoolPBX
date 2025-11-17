@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\API\CallCenterAgentAPIController;;
+use App\Http\Controllers\API\CallCenterAgentAPIController;
+use App\Http\Controllers\API\CallCenterQueueAPIController;;
 use App\Http\Controllers\API\DomainAPIController;
 use App\Http\Controllers\API\ExtensionAPIController;
 use App\Http\Controllers\API\UserAPIController;
@@ -43,6 +44,7 @@ Route::middleware(VerifyAuthenticationKey::class)->group(function () {
     Route::get('/my/domains', [DomainAPIController::class, 'mine']);
     Route::get('/my/extensions', [ExtensionAPIController::class, 'mine']);
     Route::get('/my/user', [UserAPIController::class, 'mine']);
+    Route::get('/my/queues/{call_center_agent_uuid}', [CallCenterQueueAPIController::class, 'mine']);
 });
 
 Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(function () {
