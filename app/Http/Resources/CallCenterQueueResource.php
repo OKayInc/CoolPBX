@@ -17,10 +17,10 @@ class CallCenterQueueResource extends JsonResource
     {
 
         return [
-            'call_center_queue_uuid' => $this->call_center_agent_uuid,
-            'queue_name' => $this->agent_name,
-            'queue_extension' => $this->agent_type,
-            'queue_description' => intval($this->agent_call_timeout),
+            'call_center_queue_uuid' => $this->call_center_queue_uuid,
+            'queue_name' => $this->queue_name,
+            'queue_extension' => $this->queue_extension,
+            'queue_description' => $this->queue_description,
         ];
     }
 }
