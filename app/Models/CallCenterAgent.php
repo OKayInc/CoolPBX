@@ -76,7 +76,7 @@ class CallCenterAgent extends Model
     {
         return $this->belongsToMany(CallCenterQueue::class, 'v_call_center_tiers', 'call_center_agent_uuid', 'call_center_queue_uuid')
             ->using(CallCenterTier::class)
-            ->withPivot('call_center_tier_uuid')
+            ->withPivot('call_center_tier_uuid','tier_level','tier_position')
             ->withTimestamps();
     }
 }
