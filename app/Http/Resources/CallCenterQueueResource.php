@@ -6,7 +6,7 @@ use App\Http\Requests\CallCenterAgentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CallCenterAgentResource extends JsonResource
+class CallCenterQueueResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

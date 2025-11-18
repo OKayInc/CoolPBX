@@ -30,7 +30,7 @@ class CallCenterQueueRepository
         foreach (auth()->user()->agents as $currentAgent)
         {
             if ($currentAgent->call_center_agent_uuid == $agent->call_center_agent_uuid){
-                $answer = $currentAgent->queues;//->toResourceCollection();
+                $answer = $currentAgent->queues->toResourceCollection();
                 break;
             }
         }

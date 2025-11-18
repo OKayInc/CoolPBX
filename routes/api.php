@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\CallCenterAgentAPIController;
-use App\Http\Controllers\API\CallCenterQueueAPIController;;
+use App\Http\Controllers\API\CallCenterQueueAPIController;
 use App\Http\Controllers\API\DomainAPIController;
 use App\Http\Controllers\API\ExtensionAPIController;
 use App\Http\Controllers\API\UserAPIController;
