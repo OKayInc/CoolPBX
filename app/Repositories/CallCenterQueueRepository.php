@@ -7,11 +7,13 @@ use App\Models\CallCenterQueue;
 use App\Models\CallCenterTier;
 use App\Models\Dialplan;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\CallCenterQueueRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+
 
 class CallCenterQueueRepository
 {
@@ -21,10 +23,10 @@ class CallCenterQueueRepository
     {
         $this->model = $model;
     }
-
-    public function mine(CallCenterAgent $agent)
+    public function mine(CallCenterQueueRequest $request, string $agentUuid)
     {
         $answer = [];
+        $agent = CallCenterAgent::findOrFail($agentUuid);
         foreach (auth()->user()->agents as $currentAgent)
         {
             if ($currentAgent->call_center_agent_uuid == $agent->call_center_agent_uuid){
