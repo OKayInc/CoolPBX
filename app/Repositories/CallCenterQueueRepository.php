@@ -23,14 +23,14 @@ class CallCenterQueueRepository
     {
         $this->model = $model;
     }
-    public function mine(CallCenterQueueRequest $request, string $agentUuid)
+    public function mine(string $agentUuid)
     {
         $answer = [];
         $agent = CallCenterAgent::findOrFail($agentUuid);
         foreach (auth()->user()->agents as $currentAgent)
         {
             if ($currentAgent->call_center_agent_uuid == $agent->call_center_agent_uuid){
-                $answer = $currentAgent->queues->toResourceCollection();
+                $answer = $currentAgent->queues;//->toResourceCollection();
                 break;
             }
         }

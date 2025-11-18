@@ -7,7 +7,7 @@ use App\Http\Requests\CallCenterQueueRequest;
 use App\Models\CallCenterAgent;
 use App\Models\CallCenterQueue;
 use App\Repositories\CallCenterQueueRepository;
-use Illuminate\Http\CallCenterQueueRequest;
+use Illuminate\Http\Request;
 
 class CallCenterQueueAPIController extends Controller
 {
@@ -18,10 +18,10 @@ class CallCenterQueueAPIController extends Controller
 		$this->callCenterAgentRepository = $callCenterAgentRepository;
 	}
 
-	public function mine(CallCenterQueueRequest $request, string $agentUuid)
+	public function mine(string $agentUuid)
 	{
-        return response()->json(["data" => $this->callCenterAgentRepository->mine($request, $agentUuid)]);
-    }
+        return response()->json(["data" => $this->callCenterAgentRepository->mine($agentUuid)]);
+    	}
 
 	public function index()
 	{
