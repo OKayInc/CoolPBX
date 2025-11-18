@@ -44,7 +44,7 @@ Route::middleware(VerifyAuthenticationKey::class)->group(function () {
     Route::get('/my/domains', [DomainAPIController::class, 'mine']);
     Route::get('/my/extensions', [ExtensionAPIController::class, 'mine']);
     Route::get('/my/user', [UserAPIController::class, 'mine']);
-    Route::get('/my/queues/{call_center_agent_uuid}', [CallCenterQueueAPIController::class, 'mine']);
+    Route::get('/my/agent/{call_center_agent_uuid}/queues', [CallCenterQueueAPIController::class, 'mine']);
 });
 
 Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(function () {

@@ -18,9 +18,10 @@ class CallCenterQueueAPIController extends Controller
 		$this->callCenterAgentRepository = $callCenterAgentRepository;
 	}
 
-	public function mine(callcenteragent $agent){
+	public function mine(CallCenterAgent $agent)
+	{
         return response()->json(["data" => $this->callCenterAgentRepository->mine($agent)]);
-    }
+        }
 
 	public function index()
 	{
