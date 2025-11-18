@@ -22,6 +22,7 @@ class GroupPermissionController extends Controller
     public function __construct(PermissionRepository $permissionRepository)
     {
         $this->permissionRepository = $permissionRepository;
+        // $this->middleware('permission:group_permission_edit')->except(['update']);
     }
 
     public function setTelegramUser(?int $telegram_id)
@@ -69,7 +70,7 @@ class GroupPermissionController extends Controller
 
         $group = $groupUuid ? Group::findOrFail($groupUuid) : null;
 
-        $permissions = $this->permissionRepository->getFilteredPermissions($search, $groupUuid, $filter);
+        $permissions = $this->permissionRepository->getFilteredPermissions('', $groupUuid, $filter);
 
         $permissionsByApp = $this->permissionRepository->getUniqueApplicationNames($permissions);
 
@@ -131,7 +132,7 @@ class GroupPermissionController extends Controller
     {
         $permission = Permission::where('permission_uuid', $permissionUuid)->firstOrFail();
         $permissionUuid = $permission->permission_uuid;
-        
+
         return view('pages.permission.form', compact('permission', 'permissionUuid'));
     }
 }
