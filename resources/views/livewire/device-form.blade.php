@@ -394,15 +394,16 @@
                                                         @endcan
                                                         @can('device_line_server_address_primary')
                                                             <td>
-                                                                @foreach ($deviceLinesServerPrimary as $item)
-                                                                    <select name=""
-                                                                        wire:model="deviceLines.{{ $index }}.server_address_primary"
-                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_primary') is-invalid @enderror"
-                                                                        id="deviceLines.{{ $index }}.server_address_primary">
-                                                                        <option value="{{ $item->id }}">
-                                                                            {{ $item->name }}</option>
-                                                                    </select>
-                                                                @endforeach
+                                                                <select name=""
+                                                                    wire:model="deviceLines.{{ $index }}.server_address_primary"
+                                                                    class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_primary') is-invalid @enderror"
+                                                                    id="deviceLines.{{ $index }}.server_address_primary">
+                                                                    <option value="">Select...</option>
+                                                                    @foreach ($deviceLinesServerPrimary as $item)
+                                                                        <option value="{{ $item['server_address_primary'] }}">
+                                                                            {{ $item['server_address_primary'] }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                                 @error('deviceLines.' . $index . '.server_address_primary')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror
@@ -410,15 +411,16 @@
                                                         @endcan
                                                         @can('device_line_server_address_secondary')
                                                             <td>
-                                                                @foreach ($deviceLinesServerSecondary as $item)
-                                                                    <select name=""
-                                                                        wire:model="deviceLines.{{ $index }}.server_address_secondary"
-                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_secondary') is-invalid @enderror"
-                                                                        id="deviceLines.{{ $index }}.server_address_secondary">
-                                                                        <option value="{{ $item->name }}">
-                                                                            {{ $item->name }}</option>
-                                                                    </select>
-                                                                @endforeach
+                                                                <select name=""
+                                                                    wire:model="deviceLines.{{ $index }}.server_address_secondary"
+                                                                    class="form-select form-select-sm @error('deviceLines.' . $index . '.server_address_secondary') is-invalid @enderror"
+                                                                    id="deviceLines.{{ $index }}.server_address_secondary">
+                                                                    <option value="">Select...</option>
+                                                                    @foreach ($deviceLinesServerSecondary as $item)
+                                                                        <option value="{{ $item['server_address_secondary'] }}">
+                                                                            {{ $item['server_address_secondary'] }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                                 @error('deviceLines.' . $index . '.server_address_secondary')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror
@@ -426,15 +428,16 @@
                                                         @endcan
                                                         @can('device_line_outbound_proxy_primary')
                                                             <td>
-                                                                @foreach ($outboundProxyPrimary as $item)
-                                                                    <select name=""
-                                                                        wire:model="deviceLines.{{ $index }}.outbound_proxy_primary"
-                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_primary') is-invalid @enderror"
-                                                                        id="">
-                                                                        <option value="{{ $item->id }}">
-                                                                            {{ $item->name }}</option>
-                                                                    </select>
-                                                                @endforeach
+                                                                <select name=""
+                                                                    wire:model="deviceLines.{{ $index }}.outbound_proxy_primary"
+                                                                    class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_primary') is-invalid @enderror"
+                                                                    id="">
+                                                                    <option value="">Select...</option>
+                                                                    @foreach ($outboundProxyPrimary as $item)
+                                                                        <option value="{{ $item['outbound_proxy_primary'] }}">
+                                                                            {{ $item['outbound_proxy_primary'] }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                                 @error('deviceLines.' . $index . '.outbound_proxy_primary')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror
@@ -442,15 +445,16 @@
                                                         @endcan
                                                         @can('device_line_outbound_proxy_secondary')
                                                             <td>
-                                                                @foreach ($outboundProxySecondary as $item)
-                                                                    <select name=""
-                                                                        wire:model="deviceLines.{{ $index }}.outbound_proxy_secondary"
-                                                                        class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_secondary') is-invalid @enderror"
-                                                                        id="">
-                                                                        <option value="{{ $item->id }}">
-                                                                            {{ $item->name }}</option>
-                                                                    </select>
-                                                                @endforeach
+                                                                <select name=""
+                                                                    wire:model="deviceLines.{{ $index }}.outbound_proxy_secondary"
+                                                                    class="form-select form-select-sm @error('deviceLines.' . $index . '.outbound_proxy_secondary') is-invalid @enderror"
+                                                                    id="">
+                                                                    <option value="">Select...</option>
+                                                                    @foreach ($outboundProxySecondary as $item)
+                                                                        <option value="{{ $item['outbound_proxy_secondary'] }}">
+                                                                            {{ $item['outbound_proxy_secondary'] }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                                 @error('deviceLines.' . $index . '.outbound_proxy_secondary')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror

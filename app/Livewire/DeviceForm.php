@@ -175,17 +175,37 @@ class DeviceForm extends Component
 
 
         if (null !== Setting::getSetting('provision', 'server_address_primary') && null !== Setting::getSetting('provision', 'server_address_primary', 'text')) {
-            $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')->get()->toArray();
+            $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')
+                ->whereNotNull('server_address_primary')
+                ->where('server_address_primary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
         if (null !== Setting::getSetting('provision', 'server_address_secondary') && null !== Setting::getSetting('provision', 'server_address_secondary', 'text')) {
-            $this->deviceLinesServerSecondary = DeviceLine::select('server_address_secondary')->get()->toArray();
+            $this->deviceLinesServerSecondary = DeviceLine::select('server_address_secondary')
+                ->whereNotNull('server_address_secondary')
+                ->where('server_address_secondary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
 
         if (null !== Setting::getSetting('provision', 'outbound_proxy_primary') && null !== Setting::getSetting('provision', 'outbound_proxy_primary', 'text')) {
-            $this->outboundProxyPrimary = DeviceLine::select('outbound_proxy_primary')->get()->toArray();
+            $this->outboundProxyPrimary = DeviceLine::select('outbound_proxy_primary')
+                ->whereNotNull('outbound_proxy_primary')
+                ->where('outbound_proxy_primary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
         if (null !== Setting::getSetting('provision', 'outbound_proxy_secondary') && null !== Setting::getSetting('provision', 'outbound_proxy_secondary', 'text')) {
-            $this->outboundProxySecondary = DeviceLine::select('outbound_proxy_secondary')->get()->toArray();
+            $this->outboundProxySecondary = DeviceLine::select('outbound_proxy_secondary')
+                ->whereNotNull('outbound_proxy_secondary')
+                ->where('outbound_proxy_secondary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
     }
 
