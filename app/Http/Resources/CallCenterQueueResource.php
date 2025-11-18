@@ -21,7 +21,11 @@ class CallCenterQueueResource extends JsonResource
             'queue_name' => $this->queue_name,
             'queue_extension' => $this->queue_extension,
             'queue_description' => $this->queue_description,
-            'tiers' => $this->pivot,
+//            'tier' => $this->pivot,
+	    'tier' => [
+			'tier_level' => intval($this->pivot->tier_level),
+			'tier_position' => intval($this->pivot->tier_position),
+		],
         ];
     }
 }
