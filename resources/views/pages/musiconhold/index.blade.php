@@ -77,10 +77,7 @@
 						<tr>
 							<td>{{ $file["name"] }}</td>
 							<td>
-								<div class='progress-bar' style='background-color: #0d6efd; width: 0; height: 3px; position: relative; margin: 5px 0;'></div>
-								<audio style='display: none;' preload='none' src='{{ $play }}'></audio>
-								<button type='button' alt='Play / Pause' title='Play / Pause' class='btn btn-secondary btn-play-audio'><i class='fas fa-play'></i></button>
-								<a href='{{ $download }}' target='_self'><button alt='Download' title='Download' class='btn btn-secondary'><i class='fas fa-download'></i></button></a>
+								<x-buttons-audio urlPlay="{{ $play }}" urlDownload="{{ $download }}" />
 							</td>
 							<td>{{ $file["size"] }}</td>
 							<td>{{ $file["uploaded"] }}</td>
