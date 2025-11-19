@@ -43,6 +43,7 @@ use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\ViewCallRecordingController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
 use App\Models\Destination;
@@ -94,6 +95,11 @@ Route::middleware(['auth','permission'])->group(function () {
 
     // BRIDGE
     Route::resource('/bridges', BridgeController::class)->name('bridges', 'bridges');
+
+    //CALL RECORDINGS
+    Route::get('/callrecordings', [ViewCallRecordingController::class, 'index'])->name('callrecordings.index', 'callrecordings.index');
+    Route::get('/callrecordings/{file}/play', [ViewCallRecordingController::class, 'play'])->name('callrecordings.play', 'callrecordings.play');
+    Route::get('/callrecordings/{file}/download', [ViewCallRecordingController::class, 'download'])->name('callrecordings.download', 'callrecordings.download');
 
     // DESTINATION
     Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
