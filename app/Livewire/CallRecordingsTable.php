@@ -14,13 +14,22 @@ class CallRecordingsTable extends DataTableComponent
 
     public function configure(): void
     {
-        $tableConfig = $this->setPrimaryKey('call_recording_uuid')
+        $canViewDetail = auth()->user()->hasPermission('xml_cdr_details');
+
+        $this->setPrimaryKey('call_recording_uuid')
             ->setTableAttributes([
                 'class' => 'table table-striped table-hover table-bordered'
             ])
             ->setSearchEnabled()
             ->setSearchPlaceholder('Search ViewCallRecordings')
             ->setPerPageAccepted([10, 25, 50, 100])
+            ->setDefaultPerPage(100)
+            ->setTableRowUrl(function ($row) use ($canViewDetail)
+            {
+                return $canViewDetail
+                    ? route('callrecordings.details', $row->call_recording_uuid)
+                    : null;
+            })
             ->setPaginationEnabled();
     }
 
@@ -39,9 +48,6 @@ class CallRecordingsTable extends DataTableComponent
                 ->sortable()
                 ->searchable(),
             Column::make("Destination", "destination_number")
-                ->sortable()
-                ->searchable(),
-            Column::make("Name", "call_recording_name")
                 ->sortable()
                 ->searchable(),
         ];

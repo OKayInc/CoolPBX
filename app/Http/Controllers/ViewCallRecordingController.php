@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ViewCallRecording;
+use App\Models\XmlCDR;
 use App\Services\AudioPlayDownloadService;
 
 class ViewCallRecordingController extends Controller
@@ -41,5 +42,10 @@ class ViewCallRecordingController extends Controller
 
             return $this->audioPlayDownloadService->download($path);
         }
+    }
+
+    public function details(XmlCDR $xmlcdr)
+    {
+        return view('pages.callrecordings.details', compact("xmlcdr"));
     }
 }
