@@ -28,6 +28,20 @@ class UserRequest extends FormRequest
         $reqUpcase = DefaultSetting::get('users', 'password_uppercase', 'boolean') ?? false;
         $reqSpecial = DefaultSetting::get('users', 'password_special', 'boolean') ?? false;
 
+        $passwordRule = Password::min($reqLength > 0 ? $reqLength : 1);
+
+        if ($reqNumber)
+        {
+            $passwordRule->numbers();
+        }
+
+        if ($reqSpecial)
+        {
+            $passwordRule->symbols();
+        }
+
+        $passwordRule->uncompromised();
+
 		$rule =  [
 			"username" => [
                 "bail",
@@ -41,32 +55,15 @@ class UserRequest extends FormRequest
                 ($isCreating ? "required" : "nullable"),
                 "string",
                 "confirmed",
-                "Password::uncompromised()",
+                $passwordRule,
             ],
 			"domain_uuid" => "sometimes|uuid|exists:App\Models\Domain,domain_uuid",
 			"language" => ['bail', 'nullable','min:2','regex:/[a-z]{2,3}\-\w+/i'],   // TODO: Find a better rule
 			"timezone" => ["nullable", 'regex:/^\w+\/\w[\w\-]+\w$/i'],
             "contact_uuid" => "nullable|uuid",
-			"user_enabled" => "bail|nullable|stromg|in:true,false",
+			"user_enabled" => "bail|nullable|string|in:true,false",
 			"api_key" => ["nullable","min:30"],
 		];
-
-        if ($reqLength > 0)
-        {
-            //$rule["password"][] = "min:".$reqLength;
-            $rule["password"][] = "Password::min($reqLength)";
-        }
-        else
-        {
-            $rule["password"][] = "Password::min(1)";
-        }
-
-
-        if ($reqNumber)
-        {
-            //$rule["password"][] = 'regex:/(?=.*[\d])/';
-            $rule["password"][] = "Password::numbers()";
-        }
 
         if ($reqLowcase)
         {
@@ -76,12 +73,6 @@ class UserRequest extends FormRequest
         if ($reqUpcase)
         {
             $rule["password"][] = 'regex:/(?=.*[A-Z])/';
-        }
-
-        if ($reqSpecial)
-        {
-            //$rule["password"][] = 'regex:/(?=.*[\W])/';
-            $rule["password"][] = "Password::symbols()";
         }
 
         if(App::hasDebugModeEnabled())

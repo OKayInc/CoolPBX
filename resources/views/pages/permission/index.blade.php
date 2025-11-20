@@ -293,12 +293,10 @@
                     searchInput.value = '';
                     highlightAndScroll('', false);
 
-                    // Limpiar URL
                     const url = new URL(window.location);
                     url.searchParams.delete('search');
                     window.history.pushState({}, '', url);
 
-                    // Remover badge
                     const badge = document.getElementById('search-result-badge');
                     if (badge) badge.remove();
                 });
