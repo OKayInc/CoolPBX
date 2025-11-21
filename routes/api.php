@@ -41,6 +41,7 @@ Route::post('/billing/{billing}/{paymentGateway}/notification', [BillingControll
 
 Route::middleware(VerifyAuthenticationKey::class)->group(function () {
     Route::get('/my/agents', [CallCenterAgentAPIController::class, 'mine']);
+    Route::patch('/my/agents/status', [CallCenterAgentAPIController::class, 'updateMyStatus']);
     Route::get('/my/domains', [DomainAPIController::class, 'mine']);
     Route::get('/my/extensions', [ExtensionAPIController::class, 'mine']);
     Route::get('/my/user', [UserAPIController::class, 'mine']);

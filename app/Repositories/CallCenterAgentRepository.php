@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 
 class CallCenterAgentRepository
 {
-    protected $callCenterAgent;
+    protected CallCenterAgent $callCenterAgent;
     protected $user;
 
     public function __construct(
@@ -33,7 +33,7 @@ class CallCenterAgentRepository
     {
         return $this->callCenterAgent->all();
     }
-/*
+    /*
     public function mine()
     {
         $user = auth()->user();
@@ -277,6 +277,36 @@ class CallCenterAgentRepository
             if (empty($agentData[$key])) {
                 $agentData[$key] = $value;
             }
+        }
+    }
+
+    public function updateStatusByAgentName(string $agentName, string $newStatus): CallCenterAgent
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = auth()->user();
+
+            $agent = $this->callCenterAgent
+                ->where('agent_name', $agentName)
+                ->where('domain_uuid', $user->domain_uuid)
+                ->first();
+
+            if (!$agent) {
+                throw new Exception("Agent not found or you don't have permission to update it");
+            }
+
+            $agent->update(['agent_status' => $newStatus]);
+
+            if ($agent->user_uuid) {
+                $this->updateUserStatus($agent->user_uuid, $newStatus);
+            }
+
+            DB::commit();
+            return $agent->fresh();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
 }
