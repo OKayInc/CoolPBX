@@ -13,6 +13,7 @@ class DashboardController extends Controller
     private $daysRange;
     private $businessStart;
     private $businessEnd;
+    private $inboundTimeRange;
 
     public function __construct()
     {
@@ -23,9 +24,10 @@ class DashboardController extends Controller
         // $this->businessEnd = Setting::getSetting("talkdesk", "business_hour_end");
 
         $this->threshold = 20;      // seconds
-        $this->daysRange = 30;
+        $this->daysRange = 60;
         $this->businessStart = 9;   // local time
-        $this->businessEnd = 18;    // local time
+        $this->businessEnd = 18;    // localtime
+        $this->inboundTimeRange = 'today'; // today | 15m | 30m | hour
     }
 
     function formatSeconds($seconds)
@@ -191,13 +193,95 @@ class DashboardController extends Controller
         ];
     }
 
+    private function getInboundRange()
+    {
+        $now = time();
+
+        switch($this->inboundTimeRange)
+        {
+            case '15m':
+                $from = $now - 900;
+                break;
+            case '30m':
+                $from = $now - 1800;
+                break;
+            case 'hour':
+                $from = $now - 3600;
+                break;
+            default: // today
+                $from = strtotime(date('Y-m-d 00:00:00'));
+                break;
+        }
+
+        return [$from, $now];
+    }
+
     private function getInboundContacts()
     {
+        [$start, $end] = $this->getInboundRange();
+
+        $result = XmlCDR::where('direction', 'inbound')
+            ->whereBetween('start_epoch', [$start, $end])
+            ->selectRaw("
+                COALESCE(SUM(CASE
+                    WHEN cc_queue_answered_epoch IS NOT NULL
+                    THEN 1 ELSE 0 END), 0) AS answered,
+
+                COALESCE(SUM(CASE
+                    WHEN cc_queue_answered_epoch IS NULL
+                    AND cc_queue_canceled_epoch IS NOT NULL
+                    AND (cc_queue_canceled_epoch - cc_queue_joined_epoch) >= ?
+                    THEN 1 ELSE 0 END), 0) AS abandoned,
+
+                COALESCE(SUM(CASE
+                    WHEN cc_queue_answered_epoch IS NULL
+                    AND cc_queue_canceled_epoch IS NOT NULL
+                    AND (cc_queue_canceled_epoch - cc_queue_joined_epoch) < ?
+                    THEN 1 ELSE 0 END), 0) AS short_abandoned,
+
+                COALESCE(SUM(CASE
+                    WHEN cc_queue_answered_epoch IS NULL
+                    AND cc_queue_canceled_epoch IS NULL
+                    THEN 1 ELSE 0 END), 0) AS missed,
+
+                COALESCE(SUM(CASE
+                    WHEN voicemail_message = true
+                    THEN 1 ELSE 0 END), 0) AS voicemail
+            ", [$this->threshold, $this->threshold])
+            ->first();
+
+        $total =
+            $result->answered +
+            $result->abandoned +
+            $result->short_abandoned +
+            $result->missed +
+            $result->voicemail;
+
         return [
             "title" => "Inbound Contacts",
-            "subtitle" => "",
-            "count" => 0,
+            "subtitle" => ucfirst($this->inboundTimeRange),
+            "count" => $total,
             "metrics" => [
+                "Answered" => [
+                    "value" => (int) $result->answered,
+                    "color" => "#00A65A",
+                ],
+                "Abandoned" => [
+                    "value" => (int) $result->abandoned,
+                    "color" => "#DD4B39",
+                ],
+                "Short Abandoned" => [
+                    "value" => (int) $result->short_abandoned,
+                    "color" => "#F39C12",
+                ],
+                "Missed" => [
+                    "value" => (int) $result->missed,
+                    "color" => "#605CA8",
+                ],
+                "Voicemail" => [
+                    "value" => (int) $result->voicemail,
+                    "color" => "#3C8DBC",
+                ],
             ],
         ];
     }
