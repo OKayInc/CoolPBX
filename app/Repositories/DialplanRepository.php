@@ -28,6 +28,13 @@ class DialplanRepository
         return $this->model->where('dialplan_uuid', $uuid)->first();
     }
 
+    public function findOrFail($uuid)
+    {
+        return Dialplan::with('dialplanDetails')
+            ->where('dialplan_uuid', $uuid)
+            ->firstOrFail();
+    }
+
     public function findByUuidWithDetails(string $uuid): ?Dialplan
     {
         return $this->model->with('dialplanDetails')->where('dialplan_uuid', $uuid)->first();
@@ -298,14 +305,11 @@ class DialplanRepository
 
         $currentCondition = null;
 
-        foreach($dialplan->dialplanDetails as $dialplanDetail)
-        {
+        foreach ($dialplan->dialplanDetails as $dialplanDetail) {
             $tag = $dialplanDetail->dialplan_detail_tag;
 
-            if($tag === "condition")
-            {
-                if($currentCondition !== null)
-                {
+            if ($tag === "condition") {
+                if ($currentCondition !== null) {
                     $xml->endElement();
                 }
 
@@ -314,19 +318,15 @@ class DialplanRepository
                 $xml->startElement("condition");
                 $xml->writeAttribute("field", htmlspecialchars($dialplanDetail->dialplan_detail_type));
                 $xml->writeAttribute("expression", htmlspecialchars($dialplanDetail->dialplan_detail_data));
-                if (isset($dialplanDetail->dialplan_detail_break))
-                {
+                if (isset($dialplanDetail->dialplan_detail_break)) {
                     $xml->writeAttribute("break", $dialplanDetail->dialplan_detail_break);
                 }
-            }
-            else
-            {
+            } else {
                 $xml->startElement($tag);
                 $xml->writeAttribute("application", htmlspecialchars($dialplanDetail->dialplan_detail_type));
                 $xml->writeAttribute("data", htmlspecialchars($dialplanDetail->dialplan_detail_data));
 
-                if(isset($dialplanDetail->dialplan_detail_inline))
-                {
+                if (isset($dialplanDetail->dialplan_detail_inline)) {
                     $xml->writeAttribute("inline", $dialplanDetail->dialplan_detail_inline);
                 }
 
@@ -334,8 +334,7 @@ class DialplanRepository
             }
         }
 
-        if($currentCondition !== null)
-        {
+        if ($currentCondition !== null) {
             $xml->endElement();
         }
 

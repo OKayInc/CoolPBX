@@ -111,4 +111,9 @@ class DialplanController extends Controller
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
 	}
+
+	public function demo()
+	{
+		return view('pages.dialplans.builder-demo');
+	}
 }

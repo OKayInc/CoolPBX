@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import path from 'path';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [
@@ -15,8 +16,16 @@ export default defineConfig({
                 'node_modules/select2/dist/js/select2.min.js',
                 'node_modules/select2/dist/css/select2.min.css',
                 'node_modules/jquery/dist/jquery.min.js',
+                'resources/js/dialplan-builder.js', 
             ],
             refresh: true,
+        }),
+        vue({
+            template: {
+                compilerOptions: {
+                    isCustomElement: (tag) => tag === 'dialplan-builder'
+                }
+            }
         }),
     ],
     resolve: {

@@ -25,6 +25,7 @@ use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
+use App\Http\Controllers\DialplanBuilderController;
 use App\Http\Controllers\EmailQueueController;
 use App\Http\Controllers\FaxController;
 use App\Http\Controllers\IVRMenuController;
@@ -45,6 +46,7 @@ use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
 use App\Http\Controllers\ViewCallRecordingController;
 use App\Http\Middleware\Authenticate;
+use App\Livewire\DialplanBuilderDemo;
 use App\Models\AccessControl;
 use App\Models\Destination;
 use App\Models\Device;
@@ -239,6 +241,12 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
     Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+
+    Route::get('/dialplan-demo', [DialplanBuilderController::class, 'demo'])
+        ->name('dialplan.demo');
+
+    Route::get('/dialplan/{uuid}/flow', [DialplanBuilderController::class, 'show'])
+        ->name('dialplan.flow.show');
 
 
 

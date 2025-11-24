@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class XmlCDRTable extends DataTableComponent
+class XmlCdrTable extends DataTableComponent
 {
     protected $model = XmlCDR::class;
 
