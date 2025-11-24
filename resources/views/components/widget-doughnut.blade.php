@@ -1,9 +1,10 @@
 @php
+    $count = $count ?? 0;
     $labels = $labels ?? [];
     $values = $values ?? [];
     $colors = $colors ?? [];
 
-    if(empty($labels) || empty($values) || empty($colors))
+    if(empty($labels) || empty($values) || empty($colors) || empty($count))
     {
         $labels = ['No data'];
         $values = [100];
@@ -16,7 +17,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <h6 class="text-muted mb-2">{{ $title }}</h6>
-                <i class="fas fa-ellipsis-v text-muted"></i>
+                <!-- <i class="fas fa-ellipsis-v text-muted"></i> -->
             </div>
             <div class="d-flex justify-content-center">
                 <div style="max-width: 220px; width: 100%;">

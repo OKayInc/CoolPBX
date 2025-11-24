@@ -617,18 +617,14 @@ class XmlCDR extends Model
                     {
                         $call_result = 'answered';
                     }
-                    else if(!empty($this->answer_stamp) && 
-			(!property_exists($this, 'bride_uuid') || empty($this->bridge_uuid))
-			)
+                    else if(!empty($this->answer_stamp) && (!property_exists($this, 'bridge_uuid') || empty($this->bridge_uuid)))
                     {
                         $call_result = 'voicemail';
                     }
-                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && 
-			(property_exists($this, 'bride_uuid') && empty($this->bridge_uuid))
-			&& $this->sip_hangup_disposition != 'send_refuse')
-			{
+                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && (property_exists($this, 'bridge_uuid') && empty($this->bridge_uuid)) && $this->sip_hangup_disposition != 'send_refuse')
+			        {
                         $call_result = 'cancelled';
-		    }
+		            }
                     else
                     {
                         $call_result = 'failed';
@@ -644,9 +640,7 @@ class XmlCDR extends Model
                     {
                         $call_result = 'answered';
                     }
-                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && 
-			(property_exists($this, 'bride_uuid') && !empty($this->bridge_uuid))
-			&& $this->sip_hangup_disposition != 'send_refuse')
+                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && (property_exists($this, 'bridge_uuid') && !empty($this->bridge_uuid)) && $this->sip_hangup_disposition != 'send_refuse')
                     {
                         $call_result = 'cancelled';
                     }
