@@ -22,10 +22,10 @@ class DashboardController extends Controller
         // $this->businessStart = Setting::getSetting("talkdesk", "business_hour_start");
         // $this->businessEnd = Setting::getSetting("talkdesk", "business_hour_end");
 
-        $this->threshold = 20;
+        $this->threshold = 20;      // seconds
         $this->daysRange = 30;
-        $this->businessStart = 9;
-        $this->businessEnd = 18;
+        $this->businessStart = 9;   // local time
+        $this->businessEnd = 18;    // local time
     }
 
     function formatSeconds($seconds)
