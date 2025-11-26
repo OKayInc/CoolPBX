@@ -40,6 +40,7 @@ class DashboardController extends Controller
     private function baseXMLCDRQuery()
     {
         return XmlCDR::where('direction', 'inbound')
+            ->where('cc_side', 'member')
             ->whereRaw('start_epoch >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))', [$this->daysRange])
             ->whereRaw('HOUR(FROM_UNIXTIME(start_epoch)) BETWEEN ? AND ?', [$this->businessStart, $this->businessEnd - 1]);
     }
