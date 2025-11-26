@@ -169,30 +169,46 @@ class DashboardController extends Controller
     private function getActiveAgents()
     {
         $agents = CallCenterAgent::query()
-            ->select("agent_status", DB::raw("COUNT(*) as total"))
+            ->select("agent_status", "agent_name")
+            ->get()
             ->groupBy("agent_status")
-            ->pluck("total", "agent_status");
+            ->map(function($items)
+            {
+                return [
+                    "total"  => $items->count(),
+                    "names"  => $items->pluck("agent_name")->values()
+                ];
+            });
 
-        $online = ($agents["Available"] ?? 0) + ($agents["Available (On Demand)"] ?? 0);
-        $offline = $agents["Logged Out"] ?? 0;
-        $away = $agents["On Break"] ?? 0;
+        $available = $agents["Available"]["total"] ?? 0;
+        $availableOnDemand = $agents["Available (On Demand)"]["total"] ?? 0;
+        $loggedOut = $agents["Logged Out"]["total"] ?? 0;
+        $onBreak = $agents["On Break"]["total"] ?? 0;
 
         return [
             "title" => "Active Agents",
             "subtitle" => "",
-            "count" => $online + $offline + $away,
+            "count" => $available + $availableOnDemand + $loggedOut + $onBreak,
             "metrics" => [
                 "Available" => [
-                    "value" => $online,
+                    "value" => $available,
                     "color" => "#00A65A",
+                    "extra" => $agents["Available"]["names"] ?? [],
+                ],
+                "Available (On Demand)" => [
+                    "value" => $availableOnDemand,
+                    "color" => "#1D78DF",
+                    "extra" => $agents["Available (On Demand)"]["names"] ?? [],
                 ],
                 "Logged Out" => [
-                    "value" => $offline,
+                    "value" => $loggedOut,
                     "color" => "#DD4B39",
+                    "extra" => $agents["Logged Out"]["names"] ?? [],
                 ],
                 "On Break" => [
-                    "value" => $away,
+                    "value" => $onBreak,
                     "color" => "#F39C12",
+                    "extra" => $agents["On Break"]["names"] ?? [],
                 ],
             ],
         ];
