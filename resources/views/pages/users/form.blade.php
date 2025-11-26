@@ -67,7 +67,7 @@
                 <div class="row">
                     <div class="col-md-5 mt-3">
                         <div class="form-group">
-                            <label for="password_confirmation" class="form-label">Confirm password</label>
+                            <label for="password_confirmation" class="form-label">Confirm Password</label>
                             <input
                                 type="password"
                                 class="form-control @error('password_confirmation') is-invalid @enderror"
@@ -232,7 +232,7 @@
                 <div class="row mt-3">
                     <div class="col-md-5 mt-3">
                         <div class="form-group">
-                            <label for="api_key" class="form-label">APIKEY</label>
+                            <label for="api_key" class="form-label">API Key</label>
                             <input
                                 type="password"
                                 class="form-control @error('api_key') is-invalid @enderror"
@@ -240,7 +240,6 @@
                                 name="api_key"
                                 placeholder="APIKEY"
                                 value="{{ old('user_name', $api_key ?? $user->api_key) }}"
-                                required
                             >
 
                             @error('api_key')
