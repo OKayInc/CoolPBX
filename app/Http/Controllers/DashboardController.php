@@ -5,7 +5,9 @@ use App\Facades\Setting;
 use App\Models\CallCenterAgent;
 use App\Models\XmlCDR;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -58,7 +60,7 @@ class DashboardController extends Controller
 
     private function getServiceLevel()
     {
-        $result = $this->baseXMLCDRQuery()
+        $resultQuery = $this->baseXMLCDRQuery()
             ->selectRaw("
                 SUM(CASE
                         WHEN cc_queue_answered_epoch IS NOT NULL
@@ -78,8 +80,11 @@ class DashboardController extends Controller
                         WHEN cc_queue_answered_epoch IS NULL
                         THEN 1 ELSE 0
                     END) AS totalMissedCalls
-            ", [$this->threshold, $this->threshold])
-            ->first();
+            ", [$this->threshold, $this->threshold]);
+        if(App::hasDebugModeEnabled()){
+            Log::debug('dsn_callcenter: '.$dsn_callcenter_query->toRawSql());
+        }
+        $result = $resultQuery->first();
 
         $serviceLevel = 0;
 
