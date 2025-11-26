@@ -5,7 +5,9 @@ use App\Facades\Setting;
 use App\Models\CallCenterAgent;
 use App\Models\XmlCDR;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -38,6 +40,7 @@ class DashboardController extends Controller
     private function baseXMLCDRQuery()
     {
         return XmlCDR::where('direction', 'inbound')
+            ->where('cc_side', 'member')
             ->whereRaw('start_epoch >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))', [$this->daysRange])
             ->whereRaw('HOUR(FROM_UNIXTIME(start_epoch)) BETWEEN ? AND ?', [$this->businessStart, $this->businessEnd - 1]);
     }
@@ -58,7 +61,7 @@ class DashboardController extends Controller
 
     private function getServiceLevel()
     {
-        $result = $this->baseXMLCDRQuery()
+        $resultQuery = $this->baseXMLCDRQuery()
             ->selectRaw("
                 SUM(CASE
                         WHEN cc_queue_answered_epoch IS NOT NULL
@@ -78,8 +81,11 @@ class DashboardController extends Controller
                         WHEN cc_queue_answered_epoch IS NULL
                         THEN 1 ELSE 0
                     END) AS totalMissedCalls
-            ", [$this->threshold, $this->threshold])
-            ->first();
+            ", [$this->threshold, $this->threshold]);
+        if(App::hasDebugModeEnabled()){
+            Log::debug('['.__CLASS__.']['.__METHOD__.'] Dasboard Query: ' . $resultQuery->toRawSql());
+        }
+        $result = $resultQuery->first();
 
         $serviceLevel = 0;
 
@@ -164,30 +170,46 @@ class DashboardController extends Controller
     private function getActiveAgents()
     {
         $agents = CallCenterAgent::query()
-            ->select("agent_status", DB::raw("COUNT(*) as total"))
+            ->select("agent_status", "agent_name")
+            ->get()
             ->groupBy("agent_status")
-            ->pluck("total", "agent_status");
+            ->map(function($items)
+            {
+                return [
+                    "total"  => $items->count(),
+                    "names"  => $items->pluck("agent_name")->values()
+                ];
+            });
 
-        $online = ($agents["Available"] ?? 0) + ($agents["Available (On Demand)"] ?? 0);
-        $offline = $agents["Logged Out"] ?? 0;
-        $away = $agents["On Break"] ?? 0;
+        $available = $agents["Available"]["total"] ?? 0;
+        $availableOnDemand = $agents["Available (On Demand)"]["total"] ?? 0;
+        $loggedOut = $agents["Logged Out"]["total"] ?? 0;
+        $onBreak = $agents["On Break"]["total"] ?? 0;
 
         return [
             "title" => "Active Agents",
             "subtitle" => "",
-            "count" => $online + $offline + $away,
+            "count" => $available + $availableOnDemand + $loggedOut + $onBreak,
             "metrics" => [
                 "Available" => [
-                    "value" => $online,
+                    "value" => $available,
                     "color" => "#00A65A",
+                    "extra" => $agents["Available"]["names"] ?? [],
+                ],
+                "Available (On Demand)" => [
+                    "value" => $availableOnDemand,
+                    "color" => "#1D78DF",
+                    "extra" => $agents["Available (On Demand)"]["names"] ?? [],
                 ],
                 "Logged Out" => [
-                    "value" => $offline,
+                    "value" => $loggedOut,
                     "color" => "#DD4B39",
+                    "extra" => $agents["Logged Out"]["names"] ?? [],
                 ],
                 "On Break" => [
-                    "value" => $away,
+                    "value" => $onBreak,
                     "color" => "#F39C12",
+                    "extra" => $agents["On Break"]["names"] ?? [],
                 ],
             ],
         ];

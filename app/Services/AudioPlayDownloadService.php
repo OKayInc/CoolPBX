@@ -12,7 +12,7 @@ class AudioPlayDownloadService
 {
 	public function play($path)
 	{
-		if(!file_exists($path))
+		if(!file_exists($path) || !is_file($path))
 		{
 			abort(404, 'File not found');
 		}

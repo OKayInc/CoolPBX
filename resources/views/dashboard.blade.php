@@ -36,6 +36,7 @@
                     :labels="array_keys($stats['active_agents']['metrics'])"
                     :values="array_column($stats['active_agents']['metrics'], 'value')"
                     :colors="array_column($stats['active_agents']['metrics'], 'color')"
+                    :extra="array_column($stats['active_agents']['metrics'], 'extra')"
                     :count="$stats['active_agents']['count']"
                     :title="$stats['active_agents']['title']"
                 />
@@ -44,6 +45,7 @@
                     :labels="array_keys($stats['inbound_contacts']['metrics'])"
                     :values="array_column($stats['inbound_contacts']['metrics'], 'value')"
                     :colors="array_column($stats['inbound_contacts']['metrics'], 'color')"
+                    :extra="array_column($stats['inbound_contacts']['metrics'], 'extra')"
                     :count="$stats['inbound_contacts']['count']"
                     :title="$stats['inbound_contacts']['title']"
                 />

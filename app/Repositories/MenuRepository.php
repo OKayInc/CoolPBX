@@ -5,7 +5,6 @@ namespace App\Repositories;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\MenuItemGroup;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class MenuRepository
@@ -21,30 +20,25 @@ class MenuRepository
         $this->menuItemGroup = $menuItemGroup;
     }
 
-
     public function getAll()
     {
         return $this->menu->all();
     }
-
 
     public function findByUuid($uuid)
     {
         return $this->menu->findOrFail($uuid);
     }
 
-
     public function create(array $data)
     {
         return $this->menu->create($data);
     }
 
-
     public function update(Menu $menu, array $data)
     {
         return $menu->update($data);
     }
-
 
     public function delete(Menu $menu)
     {
@@ -58,10 +52,11 @@ class MenuRepository
             FROM ".$this->menuItem->getTableName()." mi
             INNER JOIN ".$this->menuItemGroup->getTableName()." mig ON mig.menu_item_uuid = mi.menu_item_uuid
             WHERE mig.group_uuid IN ('" . implode("', '", $userGroups). "')
-            ORDER BY mi.menu_item_order
+            ORDER BY mi.menu_item_order, mi.menu_item_title
         ";
 
         $results = DB::select($sql);
+
         return json_decode(json_encode($results), true);
     }
 
@@ -108,15 +103,16 @@ class MenuRepository
         return $sortedList;
     }
 
-
     public function getApplicationMenu(array $userGroups)
     {
         $app_menu = [
             "items" => []
         ];
 
-        if (!empty($userGroups)) {
+        if(!empty($userGroups))
+        {
             $menuItems = $this->getMenuItemsByUserGroups($userGroups);
+
             $app_menu["items"] = $this->buildMenu($menuItems);
         }
 

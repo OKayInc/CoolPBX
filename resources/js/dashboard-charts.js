@@ -27,7 +27,26 @@ document.addEventListener("DOMContentLoaded", function()
                 responsive: true,
                 plugins: {
                     legend: { display: type !== "doughnut" },
-                    tooltip: { enabled: true },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function(ctx) {
+                                return `Total: ${ctx.formattedValue}`;
+                            },
+                            afterLabel: function(ctx) {
+                                const extras = JSON.parse(ctx.chart.canvas.dataset.extra || "[]");
+                                const extra = extras[ctx.dataIndex] ?? [];
+
+                                if (!extra.length) return "";
+
+                                return [
+                                    "",
+                                    "Agents:",
+                                    ...extra
+                                ];
+                            }
+                        }
+                    }
                 },
             },
             plugins: [],
