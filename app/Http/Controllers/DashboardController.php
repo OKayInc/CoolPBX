@@ -82,7 +82,7 @@ class DashboardController extends Controller
                     END) AS totalMissedCalls
             ", [$this->threshold, $this->threshold]);
         if(App::hasDebugModeEnabled()){
-            Log::debug('dsn_callcenter: '.$dsn_callcenter_query->toRawSql());
+            Log::debug('['.__CLASS__.']['.__METHOD__.'] Dasboard Query: ' . $resultQuery->toRawSql());
         }
         $result = $resultQuery->first();
 
