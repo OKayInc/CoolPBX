@@ -560,6 +560,7 @@ if (!class_exists('xml_cdr')) {
 						}
 						$this->array[$key]['cc_queue'] = urldecode($xml->variables->cc_queue);
 						$this->array[$key]['call_center_queue_uuid'] = urldecode($xml->variables->call_center_queue_uuid);
+						$this->array[$key]['cc_queue_joined_epoch'] = urldecode($xml->variables->cc_queue_joined_epoch);
 
 					//app info
 						$this->array[$key]['last_app'] = urldecode($xml->variables->last_app);
