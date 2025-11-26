@@ -312,6 +312,17 @@ class XmlCDRTable extends DataTableComponent
                 })
                 ->when($this->filters['order_field'] ?? null, fn($q, $v) => $q->orderBy($this->filters['order_field'], $this->filters['order_sort'] ?? 'asc'))
                 ->when($this->filters['tags'] ?? null, fn($q, $v) => $q->where('tags', 'like', "%{$v}%"))
+                ->when($this->filters['type'] ?? [], function ($q, $v) {
+                    foreach($this->filters['type'] as $v)
+                    {
+                        match($v)
+                        {
+                            'callcenter' => $q->where('cc_side', 'member'),
+                            'conference' => $q->whereNotNull('conference_uuid'),
+                            default => null
+                        };
+                    }
+                })
                 ->with("extension")
                 ->orderBy("start_epoch", "desc");
         	if(App::hasDebugModeEnabled()){
