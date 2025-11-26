@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
-class DialplanViewer extends Component
+class DialplanMapViewer extends Component
 {
     public $flowData;
 
@@ -15,6 +15,6 @@ class DialplanViewer extends Component
 
     public function render()
     {
-        return view('livewire.dialplan-viewer');
+        return view('livewire.dialplan-map-viewer');
     }
 }

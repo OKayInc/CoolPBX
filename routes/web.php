@@ -245,8 +245,8 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('/dialplan-demo', [DialplanBuilderController::class, 'demo'])
         ->name('dialplan.demo');
 
-    Route::get('/dialplan/{uuid}/flow', [DialplanBuilderController::class, 'show'])
-        ->name('dialplan.flow.show');
+    Route::get('/dialplan-map', [DialplanBuilderController::class, 'map'])
+        ->name('dialplan.map');
 
 
 

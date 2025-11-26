@@ -2,28 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\DialplanRepository;
-use App\Services\DialplanFlowParser;
+use App\Services\DialplanMapParser;
 use Illuminate\Http\Request;
 
 class DialplanBuilderController extends Controller
 {
     public function __construct(
-        private DialplanRepository $dialplanRepository,
-        private DialplanFlowParser $flowParser
+        private DialplanMapParser $mapParser
     ) {}
 
-    public function demo()
+    public function map(Request $request)
     {
-        return view('pages.dialplans.builder-demo');
-    }
+        $domainUuid = session('domain_uuid');
+        $flowData = $this->mapParser->parseAllDialplans($domainUuid);
 
-    public function show($uuid)
-    {
-        $dialplan = $this->dialplanRepository->findOrFail($uuid);
-
-        $flowData = $this->flowParser->parse($dialplan);
-
-        return view('pages.dialplans.builder-show', compact('dialplan', 'flowData'));
+        return view('pages.dialplans.map', compact('flowData'));
     }
 }
