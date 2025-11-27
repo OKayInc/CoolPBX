@@ -89,7 +89,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="agent_contact" class="form-label">Contact</label>
                                 <x-switch-destinations name="user_contact" :selected="$agent_contact ?? ''" bridge-type="user_contact"
-                                    extension-type="user_contact" :gatewayType="'user_contact'" wire:model="agent_contact" />
+                                    extension-type="user_contact" :gatewayType="user_contact" :controlType="text" wire:model="agent_contact" />
                                 @error('agent_contact')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
