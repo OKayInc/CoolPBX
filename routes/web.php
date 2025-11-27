@@ -218,6 +218,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('/xmlcdr', [XmlCDRController::class, 'index'])->name('xmlcdr.index');
     Route::get('/xmlcdr/{xmlcdr}/play', [XmlCDRController::class, 'play'])->name('xmlcdr.play');
     Route::get('/xmlcdr/{xmlcdr}/download', [XmlCDRController::class, 'download'])->name('xmlcdr.download');
+    Route::get('/xmlcdr/status/{status}', [XmlCDRController::class, 'filterByStatus'])->name('xmlcdr.filter_status');
 
     Route::resource('registrations', RegistrationsController::class)->name('registrations', 'registrations');
 
