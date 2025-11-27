@@ -304,6 +304,7 @@ class ModFormatCDRController extends Controller
             }
             $payload['cc_queue'] = urldecode($cdr->variables->cc_queue);
             $payload['call_center_queue_uuid'] = urldecode($cdr->variables->call_center_queue_uuid);
+            $payload['cc_queue_joined_epoch'] = urldecode($xml->variables->cc_queue_joined_epoch);
 
             //app info
             $payload['last_app'] = urldecode($cdr->variables->last_app);
