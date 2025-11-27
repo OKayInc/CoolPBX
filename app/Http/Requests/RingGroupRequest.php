@@ -23,7 +23,7 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        $ringGroupUuid = $this->RingGroupUuid;
+        $ringGroupUuid = $this->ringGroup->ring_group_uuid;
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
