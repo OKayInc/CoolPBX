@@ -77,7 +77,7 @@ class RingGroupRequest extends FormRequest
 
         ];
 
-        if ($isCreating)
+        if (!$isCreating)
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
             $rules['ring_group_extension'][] = Rule::unique('App\Models\RingGroup','ring_group_extension')->ignore($this->ringGroup, $this->ringGroup->getKeyName());
