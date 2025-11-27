@@ -43,7 +43,7 @@ class XmlCdrPage extends Component
     private function initFilters()
     {
         return [
-            "caller_destination" => null,
+            "type" => [],
         ];
     }
 

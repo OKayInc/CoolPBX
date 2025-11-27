@@ -240,6 +240,16 @@
             </div>
         </div>
         @endcan
+
+        @can('xml_cdr_search_type')
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label>Type</label><br>
+                <label><input class="form-check-input" type="checkbox" role="switch" value="callcenter" wire:model.defer="filters.type"> Call Center</label>
+                <label><input class="form-check-input" type="checkbox" role="switch" value="conference" wire:model.defer="filters.type"> Conference</label>
+            </div>
+        </div>
+        @endcan
     </div>
 
     <div class="row g-2 mb-5 justify-content-end">
