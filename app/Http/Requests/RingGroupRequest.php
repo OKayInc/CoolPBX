@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\RingGroup;
 use App\Rules\UniqueFSDestination;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RingGroupRequest extends FormRequest
 {
