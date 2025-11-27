@@ -71,7 +71,7 @@ class RingGroupForm extends Component
     public function rules()
     {
         $request = new RingGroupRequest();
-        return $request->rules();
+        return $request->rules($this->ringGroupUuid);
     }
 
     public function mount($ringGroupUuid = null)
