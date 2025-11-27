@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\RingGroup;
+use App\Rules\UniqueFSDestination;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RingGroupRequest extends FormRequest
@@ -21,7 +23,8 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $ringGroupUuid = $this->RingGroupUuid;
+        $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
                 'required',
@@ -73,5 +76,18 @@ class RingGroupRequest extends FormRequest
             'ring_group_users' => 'nullable|array',
 
         ];
+
+        if ($ringGroupUuid)
+        {
+		// TODO: fix UniqueFSDestination to accept ->ignore()
+            $rules['ring_group_uuid'][] = Rule::unique('App\Models\RingGroup','ring_group_uuid')->ignore($this->extension, $this->extension->getKeyName());
+            $rules['ring_group_extension'][] = Rule::unique('App\Models\Extension','ring_group_extension')->ignore($this->extension, $this->extension->getKeyName());
+        }
+        else
+        {
+            $rules['ring_group_extension'][] = new UniqueFSDestination();
+        }
+
+        return $rules;
     }
 }
