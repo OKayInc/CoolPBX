@@ -27,6 +27,7 @@
                         data-values='@json($values)'
                         data-colors='@json($colors)'
                         data-extra='@json($extra)'
+                        data-links='@json($links)'
                         data-count='@json($count)'
                         height="200"
                     ></canvas>

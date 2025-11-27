@@ -82,6 +82,25 @@ document.addEventListener("DOMContentLoaded", function()
                 break;
         }
 
-        new Chart(ctx, config);
+        const chart = new Chart(ctx, config);
+
+        canvas.addEventListener("click", function(event)
+        {
+            const points = chart.getElementsAtEventForMode(event, "nearest", { intersect: true }, false);
+
+            if(points.length)
+            {
+                const index = points[0].index;
+
+                const links = JSON.parse(canvas.dataset.links || "[]");
+                const url = links[index] ?? null;
+
+                if(url)
+                {
+                    window.location.href = url;
+                }
+            }
+        });
+
     });
 });

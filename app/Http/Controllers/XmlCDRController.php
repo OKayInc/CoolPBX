@@ -38,4 +38,14 @@ class XmlCDRController extends Controller
             return $this->audioPlayDownloadService->download($path);
         }
     }
+
+    public function filterByStatus(string $status)
+    {
+        $filters = [
+            "direction" => "inbound",
+            "status" => $status,
+        ];
+
+        return view('pages.xmlcdr.index', compact("filters"));
+    }
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class DashboardController extends Controller
 {
@@ -39,7 +40,8 @@ class DashboardController extends Controller
 
     private function baseXMLCDRQuery()
     {
-        return XmlCDR::where('direction', 'inbound')
+        return XmlCDR::where('domain_uuid', Session::get("domain_uuid"))
+            ->where('direction', 'inbound')
             ->where('cc_side', 'member')
             ->whereRaw('start_epoch >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))', [$this->daysRange])
             ->whereRaw('HOUR(FROM_UNIXTIME(start_epoch)) BETWEEN ? AND ?', [$this->businessStart, $this->businessEnd - 1]);
@@ -171,6 +173,7 @@ class DashboardController extends Controller
     {
         $agents = CallCenterAgent::query()
             ->select("agent_status", "agent_name")
+            ->where('domain_uuid', Session::get("domain_uuid"))
             ->get()
             ->groupBy("agent_status")
             ->map(function($items)
@@ -242,7 +245,8 @@ class DashboardController extends Controller
     {
         [$start, $end] = $this->getInboundRange();
 
-        $result = XmlCDR::where('direction', 'inbound')
+        $result = XmlCDR::where('domain_uuid', Session::get("domain_uuid"))
+            ->where('direction', 'inbound')
             ->whereBetween('start_epoch', [$start, $end])
             ->selectRaw("
                 COALESCE(SUM(CASE
@@ -287,22 +291,27 @@ class DashboardController extends Controller
                 "Answered" => [
                     "value" => (int) $result->answered,
                     "color" => "#00A65A",
+                    "link" => route("xmlcdr.filter_status", ["status" => "answered"]),
                 ],
                 "Abandoned" => [
                     "value" => (int) $result->abandoned,
                     "color" => "#DD4B39",
+                    "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Short Abandoned" => [
                     "value" => (int) $result->short_abandoned,
                     "color" => "#F39C12",
+                    "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Missed" => [
                     "value" => (int) $result->missed,
                     "color" => "#605CA8",
+                    "link" => route("xmlcdr.filter_status", ["status" => "missed"]),
                 ],
                 "Voicemail" => [
                     "value" => (int) $result->voicemail,
                     "color" => "#3C8DBC",
+                    "link" => route("xmlcdr.filter_status", ["status" => "voicemail"]),
                 ],
             ],
         ];

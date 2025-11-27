@@ -10,7 +10,7 @@
         </div>
 
         <div class="card-body">
-            <livewire:xml-cdr-page />
+            <livewire:xml-cdr-page :filters="$filters ?? []" />
         </div>
     </div>
 </div>
