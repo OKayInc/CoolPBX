@@ -23,7 +23,7 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        $ringGroupUuid = $this->ringGroup->ring_group_uuid;
+        $isCreating = $this->isMethod("post");
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
@@ -77,10 +77,9 @@ class RingGroupRequest extends FormRequest
 
         ];
 
-        if ($ringGroupUuid)
+        if ($isCreating)
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
-            $rules['ring_group_uuid'][] = Rule::unique('App\Models\RingGroup','ring_group_uuid')->ignore($this->ringGroup, $this->ringGroup->getKeyName());
             $rules['ring_group_extension'][] = Rule::unique('App\Models\RingGroup','ring_group_extension')->ignore($this->ringGroup, $this->ringGroup->getKeyName());
         }
         else
