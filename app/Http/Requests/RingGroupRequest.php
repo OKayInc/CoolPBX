@@ -80,8 +80,8 @@ class RingGroupRequest extends FormRequest
         if ($ringGroupUuid)
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
-            $rules['ring_group_uuid'][] = Rule::unique('App\Models\RingGroup','ring_group_uuid')->ignore($this->extension, $this->extension->getKeyName());
-            $rules['ring_group_extension'][] = Rule::unique('App\Models\Extension','ring_group_extension')->ignore($this->extension, $this->extension->getKeyName());
+            $rules['ring_group_uuid'][] = Rule::unique('App\Models\RingGroup','ring_group_uuid')->ignore($this->ringGroup, $this->ringGroup->getKeyName());
+            $rules['ring_group_extension'][] = Rule::unique('App\Models\RingGroup','ring_group_extension')->ignore($this->ringGroup, $this->ringGroup->getKeyName());
         }
         else
         {
