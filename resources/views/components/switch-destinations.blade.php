@@ -12,7 +12,7 @@
     @endforeach
 </select>
 @else
-<input name="{{ $name }}" {{ $attributes->merge(['class' => 'form-select']) }} list="{{ $name }}-suggestions" />
+<input name="{{ $name }}" {{ $attributes->merge(['class' => 'form-control']) }} list="{{ $name }}-suggestions" />
 <datalist id="{{ $name }}-suggestions">
 <select class = 'form-select'>
     <option value=""></option>
