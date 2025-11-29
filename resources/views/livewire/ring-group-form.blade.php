@@ -9,17 +9,17 @@
                     <div>
                         @if ($isEditing)
                             @can('ring_group_delete')
-                            <button type="button" class="btn btn-primary btn-sm me-2"
-                                wire:click="$set('showDeleteConfirmation', true)">
-                                <i class="fa fa-trash" aria-hidden="true"></i> Delete
-                            </button>
+                                <button type="button" class="btn btn-primary btn-sm me-2"
+                                    wire:click="$set('showDeleteConfirmation', true)">
+                                    <i class="fa fa-trash" aria-hidden="true"></i> Delete
+                                </button>
                             @endcan
 
                             @can('ring_group_add')
-                            <button type="button" class="btn btn-primary btn-sm"
-                                wire:click="$set('showCopyConfirmation', true)">
-                                <i class="fa fa-clone" aria-hidden="true"></i> Copy
-                            </button>
+                                <button type="button" class="btn btn-primary btn-sm"
+                                    wire:click="$set('showCopyConfirmation', true)">
+                                    <i class="fa fa-clone" aria-hidden="true"></i> Copy
+                                </button>
                             @endcan
                         @endif
                     </div>
@@ -191,66 +191,66 @@
                         <div class="card-body">
                             <div class="row">
                                 @can('ring_group_caller_id_name')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_caller_id_name" class="form-label">Caller ID
-                                            Name</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_caller_id_name') is-invalid @enderror"
-                                            id="ring_group_caller_id_name" wire:model="ring_group_caller_id_name"
-                                            placeholder="Caller name">
-                                        @error('ring_group_caller_id_name')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_caller_id_name" class="form-label">Caller ID
+                                                Name</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_caller_id_name') is-invalid @enderror"
+                                                id="ring_group_caller_id_name" wire:model="ring_group_caller_id_name"
+                                                placeholder="Caller name">
+                                            @error('ring_group_caller_id_name')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                                 @can('ring_group_caller_id_number')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_caller_id_number" class="form-label">Caller ID
-                                            Number</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_caller_id_number') is-invalid @enderror"
-                                            id="ring_group_caller_id_number" wire:model="ring_group_caller_id_number"
-                                            placeholder="Caller number">
-                                        @error('ring_group_caller_id_number')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_caller_id_number" class="form-label">Caller ID
+                                                Number</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_caller_id_number') is-invalid @enderror"
+                                                id="ring_group_caller_id_number" wire:model="ring_group_caller_id_number"
+                                                placeholder="Caller number">
+                                            @error('ring_group_caller_id_number')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                             </div>
                             <div class="row">
                                 @can('ring_group_cid_name_prefix')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_cid_name_prefix" class="form-label">CID Name
-                                            Prefix</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_cid_name_prefix') is-invalid @enderror"
-                                            id="ring_group_cid_name_prefix" wire:model="ring_group_cid_name_prefix"
-                                            placeholder="Name prefix">
-                                        @error('ring_group_cid_name_prefix')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_cid_name_prefix" class="form-label">CID Name
+                                                Prefix</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_cid_name_prefix') is-invalid @enderror"
+                                                id="ring_group_cid_name_prefix" wire:model="ring_group_cid_name_prefix"
+                                                placeholder="Name prefix">
+                                            @error('ring_group_cid_name_prefix')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                                 @can('ring_group_cid_number_prefix')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_cid_number_prefix" class="form-label">CID Number
-                                            Prefix</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_cid_number_prefix') is-invalid @enderror"
-                                            id="ring_group_cid_number_prefix"
-                                            wire:model="ring_group_cid_number_prefix" placeholder="Number prefix">
-                                        @error('ring_group_cid_number_prefix')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_cid_number_prefix" class="form-label">CID Number
+                                                Prefix</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_cid_number_prefix') is-invalid @enderror"
+                                                id="ring_group_cid_number_prefix"
+                                                wire:model="ring_group_cid_number_prefix" placeholder="Number prefix">
+                                            @error('ring_group_cid_number_prefix')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                             </div>
                         </div>
@@ -267,7 +267,7 @@
                                             <th class="text-center">Delay (sec)</th>
                                             <th class="text-center">Timeout (sec)</th>
                                             @can('ring_group_prompt')
-                                            <th class="text-center">Prompt</th>
+                                                <th class="text-center">Prompt</th>
                                             @endcan
                                             <th class="text-center">Enabled</th>
                                             <th class="text-center">Action</th>
@@ -306,11 +306,11 @@
                                                     @enderror
                                                 </td>
                                                 @can('ring_group_prompt')
-                                                <td class="text-center">
-                                                    <input class="form-check-input" type="checkbox"
-                                                        wire:model="ring_group_destinations.{{ $index }}.destination_prompt"
-                                                        {{ $destination['destination_prompt'] ? 'checked' : '' }}>
-                                                </td>
+                                                    <td class="text-center">
+                                                        <input class="form-check-input" type="checkbox"
+                                                            wire:model="ring_group_destinations.{{ $index }}.destination_prompt"
+                                                            {{ $destination['destination_prompt'] ? 'checked' : '' }}>
+                                                    </td>
                                                 @endcan
                                                 <td class="text-center">
                                                     <input class="form-check-input" type="checkbox"
@@ -425,51 +425,52 @@
 
                             <div class="row">
                                 @can('ring_group_missed_call')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_missed_call_app" class="form-label">Missed Call
-                                            App</label>
-                                        <select
-                                            class="form-select @error('ring_group_missed_call_app') is-invalid @enderror"
-                                            id="ring_group_missed_call_app"
-                                            wire:model.live="ring_group_missed_call_app">
-                                            <option value="">None</option>
-                                            <option value="email">Email</option>
-                                            <option value="text">Text</option>
-                                        </select>
-                                        @error('ring_group_missed_call_app')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    @if ($showMissedCallData)
+                                    <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label for="ring_group_missed_call_data" class="form-label">Missed Call
-                                                Data
-                                                @if ($ring_group_missed_call_app == 'email')
-                                                    (Email Address)
-                                                @elseif($ring_group_missed_call_app == 'text')
-                                                    (Phone Number)
-                                                @endif
-                                            </label>
-                                            <input type="text"
-                                                class="form-control @error('ring_group_missed_call_data') is-invalid @enderror"
-                                                id="ring_group_missed_call_data"
-                                                wire:model="ring_group_missed_call_data" placeholder="">
-                                            @error('ring_group_missed_call_data')
+                                            <label for="ring_group_missed_call_app" class="form-label">Missed Call
+                                                App</label>
+                                            <select
+                                                class="form-select @error('ring_group_missed_call_app') is-invalid @enderror"
+                                                id="ring_group_missed_call_app"
+                                                wire:model.live="ring_group_missed_call_app">
+                                                <option value="">None</option>
+                                                <option value="email">Email</option>
+                                                <option value="text">Text</option>
+                                            </select>
+                                            @error('ring_group_missed_call_app')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                    @endif
-                                </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        @if ($showMissedCallData)
+                                            <div class="form-group mb-3">
+                                                <label for="ring_group_missed_call_data" class="form-label">Missed Call
+                                                    Data
+                                                    @if ($ring_group_missed_call_app == 'email')
+                                                        (Email Address)
+                                                    @elseif($ring_group_missed_call_app == 'text')
+                                                        (Phone Number)
+                                                    @endif
+                                                </label>
+                                                <input type="text"
+                                                    class="form-control @error('ring_group_missed_call_data') is-invalid @enderror"
+                                                    id="ring_group_missed_call_data"
+                                                    wire:model="ring_group_missed_call_data" placeholder="">
+                                                @error('ring_group_missed_call_data')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        @endif
+                                    </div>
                                 @endcan
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="ring_group_timeout_action" class="form-label">Timeout Destination</label>
+                                        <label for="ring_group_timeout_action" class="form-label">Timeout
+                                            Destination</label>
 
                                         <x-switch-destinations name="ring_group_timeout_action" :selected="$ring_group_timeout_action ?? ''"
                                             extension-type="dialplan" ring-group-type="dialplan"
@@ -484,70 +485,70 @@
                                     </div>
                                 </div>
                                 @can('ring_group_context')
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_context" class="form-label">Context</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_context') is-invalid @enderror"
-                                            id="ring_group_context" wire:model="ring_group_context"
-                                            value="{{ auth()->user()->domain->domain_name }}">
-                                        @error('ring_group_context')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_context" class="form-label">Context</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_context') is-invalid @enderror"
+                                                id="ring_group_context" wire:model="ring_group_context"
+                                                value="{{ auth()->user()->domain->domain_name }}">
+                                            @error('ring_group_context')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                             </div>
 
                             <div class="row">
                                 @can('ring_group_forward')
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-3">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="ring_group_call_forward_enabled"
-                                            wire:model="ring_group_call_forward_enabled" value="true">
-                                        <label class="form-check-label" for="ring_group_call_forward_enabled">
-                                            Call Forward Enabled
-                                        </label>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="ring_group_call_forward_enabled"
+                                                wire:model="ring_group_call_forward_enabled" value="true">
+                                            <label class="form-check-label" for="ring_group_call_forward_enabled">
+                                                Call Forward Enabled
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="ring_group_follow_me_enabled"
+                                                wire:model="ring_group_follow_me_enabled" value="true">
+                                            <label class="form-check-label" for="ring_group_follow_me_enabled">
+                                                Follow Me Enabled
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="ring_group_forward_enabled" wire:model="ring_group_forward_enabled"
+                                                value="true">
+                                            <label class="form-check-label" for="ring_group_forward_enabled">
+                                                Forward Enabled
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-3">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="ring_group_follow_me_enabled"
-                                            wire:model="ring_group_follow_me_enabled" value="true">
-                                        <label class="form-check-label" for="ring_group_follow_me_enabled">
-                                            Follow Me Enabled
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-3">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="ring_group_forward_enabled" wire:model="ring_group_forward_enabled"
-                                            value="true">
-                                        <label class="form-check-label" for="ring_group_forward_enabled">
-                                            Forward Enabled
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="ring_group_forward_destination" class="form-label">Forward
-                                            Destination</label>
-                                        <input type="text"
-                                            class="form-control @error('ring_group_forward_destination') is-invalid @enderror"
-                                            id="ring_group_forward_destination"
-                                            wire:model="ring_group_forward_destination"
-                                            placeholder="Forward destination">
-                                        @error('ring_group_forward_destination')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="ring_group_forward_destination" class="form-label">Forward
+                                                Destination</label>
+                                            <input type="text"
+                                                class="form-control @error('ring_group_forward_destination') is-invalid @enderror"
+                                                id="ring_group_forward_destination"
+                                                wire:model="ring_group_forward_destination"
+                                                placeholder="Forward destination">
+                                            @error('ring_group_forward_destination')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
                                 @endcan
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">

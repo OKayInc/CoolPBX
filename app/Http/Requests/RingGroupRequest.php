@@ -24,7 +24,8 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(?string $ringGroupUuid = null): array
     {
-        $isCreating = $this->isMethod("post");
+        $isEditing = !empty($ringGroupUuid);
+
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
@@ -41,52 +42,36 @@ class RingGroupRequest extends FormRequest
             'ring_group_cid_number_prefix' => 'nullable|numeric|integer',
             'ring_group_distinctive_ring' => 'nullable|string|max:255',
             'ring_group_ringback' => 'nullable|string|max:255',
-            'ring_group_call_forward_enabled' => 'nullable|string|in:true,false',
-            'ring_group_follow_me_enabled' => 'nullable|string|in:true,false',
+            'ring_group_call_forward_enabled' => 'nullable|boolean',
+            'ring_group_follow_me_enabled'    => 'nullable|boolean',
+            'ring_group_forward_enabled'      => 'nullable|boolean',
+            'ring_group_enabled'              => 'nullable|boolean',
             'ring_group_missed_call_app' => 'nullable|in:email,text',
-            'ring_group_missed_call_data' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'ring_group_forward_enabled' => 'nullable|string|in:true,false',
-            'ring_group_forward_destination' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+            'ring_group_missed_call_data' => ['nullable', 'string', 'max:255'],
+            'ring_group_forward_destination' => ['nullable', 'string', 'max:255'],
             'ring_group_forward_toll_allow' => 'nullable|string|max:255',
             'ring_group_timeout_action' => 'nullable|string|max:255',
             'ring_group_context' => 'nullable|string|max:255',
-            'ring_group_enabled' => 'nullable|string|in:true,false',
             'ring_group_description' => 'nullable|string|max:500',
-
             'ring_group_destinations' => 'nullable|array|max:50',
-            'ring_group_destinations.*.destination_number' => [
-                'nullable',
-                'string',
-                'max:255'
-            ],
+            'ring_group_destinations.*.destination_number' => ['nullable', 'string', 'max:255'],
             'ring_group_destinations.*.destination_delay' => 'nullable|numeric|integer|min:0|max:300',
             'ring_group_destinations.*.domain_uuid' => 'nullable|string|exists:App\Models\Domain,domain_uuid',
             'ring_group_destinations.*.ring_group_uuid' => 'nullable|string',
             'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|integer|min:5',
             'ring_group_destinations.*.destination_prompt' => 'boolean',
-            'ring_group_destinations.*.destination_enabled' => 'nullable|string|in:true,false',
-
+            'ring_group_destinations.*.destination_enabled' => 'nullable|boolean',
             'ring_group_users' => 'nullable|array',
-
         ];
 
-        if (!$isCreating)
-        {
-		// TODO: fix UniqueFSDestination to accept ->ignore()
-            $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
+        if ($isEditing) {
+            $ringGroup = RingGroup::where('ring_group_uuid', $ringGroupUuid)->first();
 
-            $rules['ring_group_extension'][] = Rule::unique('App\Models\RingGroup','ring_group_extension')->ignore($ringGroup->ring_group_uuid, $ringGroup->getKeyName());
-        }
-        else
-        {
+            if ($ringGroup) {
+                $rules['ring_group_extension'][] = Rule::unique('v_ring_groups', 'ring_group_extension')
+                    ->ignore($ringGroup->ring_group_uuid, 'ring_group_uuid');
+            }
+        } else {
             $rules['ring_group_extension'][] = new UniqueFSDestination();
         }
 
