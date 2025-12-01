@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\CallCenterAgent;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
