@@ -41,9 +41,9 @@ class CallCenterQueueAPIController extends Controller
         return response()->json($d);
 	}
 
-	public function update(CallCenterQueueRequest $request, CallCenterQueue $queue)
+	public function update(CallCenterQueueRequest $request, CallCenterQueue $queueUuid)
 	{
-		$d = $this->callCenterQueueRepository->update($queue, $request->validated());
+		$d = $this->callCenterQueueRepository->update($queueUuid, $request->validated());
 		return response()->json($d);
 	}
 
