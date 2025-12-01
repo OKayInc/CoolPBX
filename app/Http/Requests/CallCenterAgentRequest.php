@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 
 class CallCenterAgentRequest extends FormRequest
 {
@@ -26,7 +27,8 @@ class CallCenterAgentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $name = Route::currentRouteName();
+//        $name = Route::currentRouteName();
+	$name = request()->route()->getName();
         if(App::hasDebugModeEnabled()){
             Log::debug("current Route Name = $name");
         }
