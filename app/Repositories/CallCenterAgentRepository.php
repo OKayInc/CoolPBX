@@ -5,12 +5,14 @@ namespace App\Repositories;
 use App\Facades\FreeSwitch;
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
-use App\Models\User;
 use App\Models\Domain;
+use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CallCenterAgentRepository
 {
@@ -43,6 +45,9 @@ class CallCenterAgentRepository
 */
     public function findByUuid(string $agentUuid, bool $withRelations = false): ?CallCenterAgent
     {
+        if(App::hasDebugModeEnabled()){
+            Log::debug("public function findByUuid(string $agentUuid, bool $withRelations = false)");
+        }
         $query = $this->callCenterAgent->where('call_center_agent_uuid', $agentUuid);
 
         if ($withRelations) {
