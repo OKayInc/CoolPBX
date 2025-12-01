@@ -46,7 +46,7 @@ Route::middleware(VerifyAuthenticationKey::class)->group(function () {
     Route::get('/my/extensions', [ExtensionAPIController::class, 'mine']);
     Route::get('/my/user', [UserAPIController::class, 'mine']);
     Route::get('/my/agent/{agentUuid}/queues', [CallCenterQueueAPIController::class, 'mine']);
-    Route::patch('/my/agent/{agentUuid})', [CallCenterQueueAPIController::class, 'update']);
+    Route::patch('/my/agent/{agentUuid}', [CallCenterQueueAPIController::class, 'update']);
 });
 
 Route::middleware([VerifyAuthenticationKey::class, 'permission'])->group(function () {
