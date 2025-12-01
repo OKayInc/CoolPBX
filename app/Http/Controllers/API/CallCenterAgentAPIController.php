@@ -47,7 +47,7 @@ class CallCenterAgentAPIController extends Controller
 	public function update(CallCenterAgentRequest $request, string $agentUuid)
 	{
         if(App::hasDebugModeEnabled()){
-            Log::debug("public function update(CallCenterAgentRequest $request, string $agentUuid)";
+            Log::debug("public function update(CallCenterAgentRequest $request, string $agentUuid)");
         }
         $errorCode = 403;
         $payload['message'] ='Not authorized';
