@@ -85,7 +85,7 @@ class DashboardController extends Controller
                     END) AS totalMissedCalls
             ", [$this->threshold, $this->threshold]);
         if(App::hasDebugModeEnabled()){
-            Log::debug('['.__CLASS__.']['.__METHOD__.'] Dasboard Query: ' . $resultQuery->toRawSql());
+            Log::debug('['.__CLASS__.']['.__METHOD__.'] Dasboard - Service Level: ' . $resultQuery->toRawSql());
         }
         $result = $resultQuery->first();
 
@@ -245,7 +245,7 @@ class DashboardController extends Controller
     {
         [$start, $end] = $this->getInboundRange();
 
-        $result = XmlCDR::where('domain_uuid', Session::get("domain_uuid"))
+        $resultQuery = XmlCDR::where('domain_uuid', Session::get("domain_uuid"))
             ->where('direction', 'inbound')
             ->whereBetween('start_epoch', [$start, $end])
             ->selectRaw("
@@ -273,8 +273,13 @@ class DashboardController extends Controller
                 COALESCE(SUM(CASE
                     WHEN voicemail_message = true
                     THEN 1 ELSE 0 END), 0) AS voicemail
-            ", [$this->threshold, $this->threshold])
-            ->first();
+            ", [$this->threshold, $this->threshold]);
+
+        if(App::hasDebugModeEnabled()){
+            Log::debug('['.__CLASS__.']['.__METHOD__.'] Dasboard - Inbound contacts: ' . $resultQuery->toRawSql());
+        }
+
+        $result = $resultQuery->first();
 
         $total =
             $result->answered +
