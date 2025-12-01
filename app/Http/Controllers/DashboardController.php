@@ -247,6 +247,7 @@ class DashboardController extends Controller
 
         $resultQuery = XmlCDR::where('domain_uuid', Session::get("domain_uuid"))
             ->where('direction', 'inbound')
+            ->where('cc_side', 'member')
             ->whereBetween('start_epoch', [$start, $end])
             ->selectRaw("
                 COALESCE(SUM(CASE
