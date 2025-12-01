@@ -59,7 +59,7 @@ class CallCenterAgentAPIController extends Controller
             {
                 if ($myAgent->call_center_agent_uuid == $agent->call_center_agent_uuid)
                 {
-                    $d = $this->callCenterAgentRepository->update($agent, $request->validated());
+                    $d = $this->callCenterAgentRepository->update($agent->call_center_agent_uuid, $request->validated());
                     $errorCode = 200;
                     $payload['message'] ='Agent updated successfully';
                     $payload['data'] = $d;
