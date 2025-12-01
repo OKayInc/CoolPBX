@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Facades\FreeSwitch;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CallCenterAgentRequest;
 use App\Http\Requests\UpdateAgentStatusRequest;
@@ -41,10 +42,32 @@ class CallCenterAgentAPIController extends Controller
 		return response()->json($d);
 	}
 
-	public function update(CallCenterAgentRequest $request, CallCenterAgent $agent)
+	public function update(CallCenterAgentRequest $request, string $agentUuid)
 	{
-		$d = $this->callCenterAgentRepository->update($agent, $request->validated());
-		return response()->json($d);
+        $errorCode = 403;
+        $payload['message'] ='Not authorized';
+
+        $agent = $this->callCenterAgentRepository->findByUuid($agentUuid);
+        if ($agent)
+        {
+            foreach ($this->callCenterAgentRepository->mine() as $myAgent)
+            {
+                if ($myAgent->call_center_agent_uuid == $agent->call_center_agent_uuid)
+                {
+                    $d = $this->callCenterAgentRepository->update($agent, $request->validated());
+                    $errorCode = 200;
+                    $payload['message'] ='Agent updated successfully';
+                    $payload['data'] = $d;
+                    break;
+                }
+            }
+        }
+        else {
+            $payload['message'] ='Agent not found';
+            $errorCode = 404;
+        }
+
+		return response()->json($payload, $errorCode);
 	}
 
 	public function destroy(CallCenterAgent $agent)

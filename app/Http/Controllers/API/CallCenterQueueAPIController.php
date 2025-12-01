@@ -11,45 +11,45 @@ use Illuminate\Http\Request;
 
 class CallCenterQueueAPIController extends Controller
 {
-	protected CallCenterQueueRepository $callCenterAgentRepository;
+	protected CallCenterQueueRepository $callCenterQueueRepository;
 
-	public function __construct(CallCenterQueueRepository $callCenterAgentRepository)
+	public function __construct(CallCenterQueueRepository $callCenterQueueRepository)
 	{
-		$this->callCenterAgentRepository = $callCenterAgentRepository;
+		$this->callCenterQueueRepository = $callCenterQueueRepository;
 	}
 
 	public function mine(string $agentUuid)
 	{
-        return response()->json(["data" => $this->callCenterAgentRepository->mine($agentUuid)]);
+        return response()->json(["data" => $this->callCenterQueueRepository->mine($agentUuid)]);
     	}
 
 	public function index()
 	{
-        return response()->json($this->callCenterAgentRepository->all());
+        return response()->json($this->callCenterQueueRepository->all());
 	}
 
     // TODO:
     public function store(CallCenterQueueRequest $request)
 	{
-		$newCallCenterQueue = $this->callCenterAgentRepository->create($request->validated());
+		$newCallCenterQueue = $this->callCenterQueueRepository->create($request->validated());
         return response()->json($newCallCenterQueue);
 	}
 
 	public function show(CallCenterQueue $queue)
 	{
-		$d = $this->callCenterAgentRepository->findByUuid($queue->domain_uuid, true);
+		$d = $this->callCenterQueueRepository->findByUuid($queue->domain_uuid, true);
         return response()->json($d);
 	}
 
 	public function update(CallCenterQueueRequest $request, CallCenterQueue $queue)
 	{
-		$d = $this->callCenterAgentRepository->update($queue, $request->validated());
+		$d = $this->callCenterQueueRepository->update($queue, $request->validated());
 		return response()->json($d);
 	}
 
 	public function destroy(CallCenterQueue $extension)
 	{
-		$d = $this->callCenterAgentRepository->delete($extension);
+		$d = $this->callCenterQueueRepository->delete($extension);
         return response()->json($d);
 	}
 }

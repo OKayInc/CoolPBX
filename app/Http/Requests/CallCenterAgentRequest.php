@@ -24,9 +24,10 @@ class CallCenterAgentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'domain_uuid' => 'nullable|string',
-            'agent_name' => 'required|string|max:255',
+            'domain_uuid' => 'sometimes|nullable|string',
+            'agent_name' => 'sometimes|required|string|max:255',
             'agent_id' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:50',
@@ -34,18 +35,18 @@ class CallCenterAgentRequest extends FormRequest
                     ->where('domain_uuid', $this->domain_uuid)
                     ->ignore($this->agentUuid, 'call_center_agent_uuid')
             ],
-            'agent_password' => 'nullable|string|max:255',
-            'agent_type' => 'nullable|in:callback,uuid-standby',
-            'agent_call_timeout' => 'nullable|integer|min:1|max:300',
-            'user_uuid' => 'nullable|string',
-            'agent_status' => 'nullable|in:Logged Out,Available,Available (On Demand),On Break',
-            'agent_contact' => 'nullable|string',
-            'agent_no_answer_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_max_no_answer' => 'nullable|integer|min:0|max:100',
-            'agent_wrap_up_time' => 'nullable|integer|min:0|max:300',
-            'agent_reject_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_busy_delay_time' => 'nullable|integer|min:0|max:300',
-            'agent_record' => 'nullable|in:true,false',
+            'agent_password' => 'sometimes|nullable|string|max:255',
+            'agent_type' => 'sometimes|nullable|in:callback,uuid-standby',
+            'agent_call_timeout' => 'sometimes|nullable|integer|min:1|max:300',
+            'user_uuid' => 'sometimes|nullable|string|uuid',
+            'agent_status' => 'sometimes|nullable|in:Logged Out,Available,Available (On Demand),On Break',
+            'agent_contact' => 'sometimes|nullable|string',
+            'agent_no_answer_delay_time' => 'sometimes|nullable|integer|min:0',
+            'agent_max_no_answer' => 'sometimes|nullable|integer|min:0',
+            'agent_wrap_up_time' => 'sometimes|nullable|integer|min:0',
+            'agent_reject_delay_time' => 'sometimes|nullable|integer|min:0|max:300',
+            'agent_busy_delay_time' => 'sometimes|nullable|integer|min:0|max:300',
+            'agent_record' => 'sometimes|nullable|in:true,false',
         ];
     }
 }
