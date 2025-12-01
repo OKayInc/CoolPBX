@@ -40,7 +40,7 @@ Route::post('/authenticate', [AuthController::class, 'apiLogin']);
 Route::post('/billing/{billing}/{paymentGateway}/notification', [BillingController::class, 'paymentNotification'])->name('billing.notification', 'billing.notification');
 
 Route::middleware(VerifyAuthenticationKey::class)->group(function () {
-    Route::patch('/my/agent/{agentUuid}', [CallCenterQueueAPIController::class, 'update']);
+    Route::patch('/my/agent/{agentUuid}', [CallCenterAgentAPIController::class, 'update']);
     Route::get('/my/agent/{agentUuid}/queues', [CallCenterQueueAPIController::class, 'mine']);
     Route::get('/my/agents', [CallCenterAgentAPIController::class, 'mine']);
     Route::patch('/my/agents/status', [CallCenterAgentAPIController::class, 'updateMyStatus']);
