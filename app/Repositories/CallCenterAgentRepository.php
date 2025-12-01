@@ -324,7 +324,7 @@ class CallCenterAgentRepository
     private function updateSwitch(callCenterAgent $callCenterAgent)
     {
         $cmd[] = "agent add ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_type;
-        $cmd[] = "agent set contact ".$callCenterAgent->ccall_center_agent_uuid." ".$callCenterAgent->cagent_contact;
+        $cmd[] = "agent set contact ".$callCenterAgent->ccall_center_agent_uuid." ".$callCenterAgent->agent_contact;
         $cmd[] = "agent set status ".$callCenterAgent->call_center_agent_uuid." '".$callCenterAgent->agent_status."'";
         $cmd[] = "agent set reject_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_reject_delay_time;
         $cmd[] = "agent set busy_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_busy_delay_time;
