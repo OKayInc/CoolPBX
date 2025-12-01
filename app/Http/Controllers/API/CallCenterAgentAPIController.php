@@ -9,6 +9,8 @@ use App\Http\Requests\UpdateAgentStatusRequest;
 use App\Models\CallCenterAgent;
 use App\Repositories\CallCenterAgentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 
 class CallCenterAgentAPIController extends Controller
 {
@@ -44,6 +46,9 @@ class CallCenterAgentAPIController extends Controller
 
 	public function update(CallCenterAgentRequest $request, string $agentUuid)
 	{
+        if(App::hasDebugModeEnabled()){
+            Log::debug("public function update(CallCenterAgentRequest $request, string $agentUuid)";
+        }
         $errorCode = 403;
         $payload['message'] ='Not authorized';
 
