@@ -25,6 +25,9 @@ class CallCenterAgentRequest extends FormRequest
     public function rules(): array
     {
         $name = Route::currentRouteName();
+        if(App::hasDebugModeEnabled()){
+            Log::debug("current Route Name = $name");
+        }
         $rules =  [
             'domain_uuid' => ['nullable','string'],
             'agent_name' => ['required','string','max:255'],
