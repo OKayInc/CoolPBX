@@ -44,6 +44,9 @@ class XmlCDRController extends Controller
         $filters = [
             "direction" => "inbound",
             "status" => $status,
+            "type" => [
+                "callcenter"
+            ],
         ];
 
         return view('pages.xmlcdr.index', compact("filters"));

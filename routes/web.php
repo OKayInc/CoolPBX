@@ -75,6 +75,7 @@ Route::middleware(['guest'])->group(function () {
 
 Route::middleware(['auth','permission'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/inbound-contacts', [DashboardController::class, 'ajaxInboundContacts'])->name('dashboard.inbound_contacts');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
     // BILLING

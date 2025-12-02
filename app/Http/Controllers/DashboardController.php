@@ -230,7 +230,7 @@ class DashboardController extends Controller
             case '30m':
                 $from = $now - 1800;
                 break;
-            case 'hour':
+            case '60m':
                 $from = $now - 3600;
                 break;
             default: // today
@@ -272,7 +272,7 @@ class DashboardController extends Controller
                     THEN 1 ELSE 0 END), 0) AS missed,
 
                 COALESCE(SUM(CASE
-                    WHEN voicemail_message = true
+                    WHEN destination_number LIKE '*99%'
                     THEN 1 ELSE 0 END), 0) AS voicemail
             ", [$this->threshold, $this->threshold]);
 
@@ -301,12 +301,12 @@ class DashboardController extends Controller
                 ],
                 "Abandoned" => [
                     "value" => (int) $result->abandoned,
-                    "color" => "#DD4B39",
+                    "color" => "#DD3923",
                     "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Short Abandoned" => [
                     "value" => (int) $result->short_abandoned,
-                    "color" => "#F39C12",
+                    "color" => "#E97313",
                     "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Missed" => [
@@ -316,10 +316,28 @@ class DashboardController extends Controller
                 ],
                 "Voicemail" => [
                     "value" => (int) $result->voicemail,
-                    "color" => "#3C8DBC",
+                    "color" => "#F3DD12",
                     "link" => route("xmlcdr.filter_status", ["status" => "voicemail"]),
                 ],
             ],
         ];
+    }
+
+    public function ajaxInboundContacts(Request $request)
+    {
+        $valid = ["15m", "30m", "60m", "today"];
+
+        $range = $request->query("range", "today");
+
+        if(!in_array($range, $valid))
+        {
+            $range = "today";
+        }
+
+        $this->inboundTimeRange = $range;
+
+        $data = $this->getInboundContacts();
+
+        return response()->json($data);
     }
 }

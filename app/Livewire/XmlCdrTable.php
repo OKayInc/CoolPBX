@@ -260,7 +260,7 @@ class XmlCDRTable extends DataTableComponent
                     return match($v)
                     {
                         'answered' => $q->whereNotNull('answer_stamp')->whereNotNull('bridge_uuid'),
-                        'voicemail' => $q->whereNotNull('answer_stamp')->whereNull('bridge_uuid'),
+                        'voicemail' => $q->whereNotNull('destination_number', 'LIKE', '*99%'),
                         'missed' => $q->where('missed_call', true),
                         'cancelled' => $q->where(function ($q) {
                             $q->where(function ($q) {

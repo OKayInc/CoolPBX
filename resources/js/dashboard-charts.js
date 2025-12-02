@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function()
         const labels = JSON.parse(canvas.dataset.labels || "[]");
         const values = JSON.parse(canvas.dataset.values || "[]");
         const colors = JSON.parse(canvas.dataset.colors || "[]");
-        const count = canvas.dataset.count || "";
 
         const config = {
             type: type,
@@ -63,6 +62,8 @@ document.addEventListener("DOMContentLoaded", function()
                         const context = chart.ctx;
                         context.restore();
 
+                        const count = chart.canvas.dataset.count || "";
+
                         if(count)
                         {
                             context.font = "bold 28px sans-serif";
@@ -83,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function()
         }
 
         const chart = new Chart(ctx, config);
+        canvas._chart = chart;
 
         canvas.addEventListener("click", function(event)
         {
@@ -103,4 +105,51 @@ document.addEventListener("DOMContentLoaded", function()
         });
 
     });
+
+    const inboundRange = document.getElementById("inboundRange");
+
+    if(inboundRange)
+    {
+        inboundRange.addEventListener("change", function()
+        {
+            fetch(`/dashboard/inbound-contacts?range=${this.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    const canvas = document.querySelector('canvas.dashboard[data-widget="inbound-contacts"]');
+
+                    if(!canvas)
+                    {
+                        return;
+                    }
+
+                    const chart = canvas._chart;
+                    const metrics = data.metrics;
+
+                    const labels = Object.keys(metrics);
+                    const values = labels.map(k => metrics[k].value);
+                    const colors = labels.map(k => metrics[k].color);
+                    const links  = labels.map(k => metrics[k].link);
+                    const extras = labels.map(k => metrics[k].extra ?? []);
+
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.data.datasets[0].backgroundColor = colors;
+
+                    canvas.dataset.extra = JSON.stringify(extras);
+                    canvas.dataset.links = JSON.stringify(links);
+
+                    canvas.dataset.count = data.count;
+
+                    const subtitle = document.getElementById("inbound_subtitle");
+
+                    if(subtitle)
+                    {
+                        subtitle.textContent = data.subtitle;
+                    }
+
+                    chart.update();
+                })
+                .catch(err => console.error("Error:", err));
+        });
+    }
 });
