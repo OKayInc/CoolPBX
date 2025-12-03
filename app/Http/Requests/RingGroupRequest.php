@@ -6,6 +6,7 @@ use App\Models\RingGroup;
 use App\Rules\UniqueFSDestination;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +31,8 @@ class RingGroupRequest extends FormRequest
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
         }
-        $isCreating = $this->isMethod("post");
+        //$isCreating = $this->isMethod("post");
+        $isCreating = Request::input('ring_group') ? true : false;
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
