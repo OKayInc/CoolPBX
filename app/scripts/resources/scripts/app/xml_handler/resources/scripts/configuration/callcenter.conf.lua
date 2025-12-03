@@ -257,6 +257,7 @@
 				--build the xml string
 					xml:append([[                            <agent ]]);
 					xml:append([[                            	name="]] .. xml.sanitize(agent_uuid) .. [[" ]]);
+					xml:append([[                            	uuid="]] .. xml.sanitize(agent_uuid) .. [[" ]]);
 					xml:append([[                            	label="]] .. xml.sanitize(agent_name) .. [[@]] .. xml.sanitize(domain_name) .. [[" ]]);
 					xml:append([[                            	type="]] .. xml.sanitize(agent_type) .. [[" ]]);
 					xml:append([[                            	contact="]] .. agent_contact .. [[" ]]);
