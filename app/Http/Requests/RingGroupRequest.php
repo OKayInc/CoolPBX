@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\RingGroup;
 use App\Rules\UniqueFSDestination;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class RingGroupRequest extends FormRequest
@@ -24,6 +26,10 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(?string $ringGroupUuid = null): array
     {
+         if(App::hasDebugModeEnabled())
+        {
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
+        }
         $isCreating = $this->isMethod("post");
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
