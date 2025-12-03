@@ -32,7 +32,7 @@ class RingGroupRequest extends FormRequest
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
         }
         //$isCreating = $this->isMethod("post");
-        $isCreating = Request::input('ring_group') ? false : true;
+        $isEditing = Request::input('isEditing');
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
@@ -86,7 +86,7 @@ class RingGroupRequest extends FormRequest
 
         ];
 
-        if (!$isCreating)
+        if ($isEditing)
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
             $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
