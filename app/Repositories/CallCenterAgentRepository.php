@@ -331,6 +331,7 @@ class CallCenterAgentRepository
         $cmd[] = "agent set no_answer_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_no_answer_delay_time;
         $cmd[] = "agent set max_no_answer ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_max_no_answer;
         $cmd[] = "agent set wrap_up_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_wrap_up_time;
+        $cmd[] = "agent set uuid ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->call_center_agent_uuid;
 
         foreach ($cmd as $arg)
         {
