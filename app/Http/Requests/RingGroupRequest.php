@@ -27,12 +27,14 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(?string $ringGroupUuid = null): array
     {
+        $isEditing = Request::input('isEditing');
         if(App::hasDebugModeEnabled())
         {
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing: '.(int)$isEditing);
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
         }
         //$isCreating = $this->isMethod("post");
-        $isEditing = Request::input('isEditing');
+
         $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
