@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-	$json = json_decode(trim($xmlcdr->json ?? ""));
+	$json = json_decode(trim($xmlcdr->json ?? ""), true);
 	$app_name = "";
 	$app_data = "";
 @endphp
@@ -32,14 +32,14 @@
 						<td style="background-color: inherit;">Status</td>
 					</tr>
 					<tr>
-						<td>{{ $json->variables->direction }}</td>
-						<td>{{ $json->variables->caller_id_name }}</td>
-						<td>{{ $json->variables->caller_id_number }}</td>
-						<td>{{ $json->callflow->caller_profile->destination_number }}</td>
-						<td>{{ date("Y-m-d H:i:s", $json->variables->start_epoch) }}</td>
-						<td>{{ date("Y-m-d H:i:s", $json->variables->end_epoch) }}</td>
-						<td>{{ date("G:i:s", $json->variables->duration) }}</td>
-						<td>{{ $json->variables->hangup_cause }}</td>
+						<td>{{ $json["variables"]["direction"] ?? "" }}</td>
+						<td>{{ $json["variables"]["caller_id_name"] ?? "" }}</td>
+						<td>{{ $json["variables"]["caller_id_number"] ?? "" }}</td>
+						<td>{{ collect($json["callflow"]["caller_profile"]["destination_number"] ?? [])->join(' ') }}</td>
+						<td>{{ date("Y-m-d H:i:s", $json["variables"]["start_epoch"]) }}</td>
+						<td>{{ date("Y-m-d H:i:s", $json["variables"]["end_epoch"]) }}</td>
+						<td>{{ date("G:i:s", $json["variables"]["duration"]) }}</td>
+						<td>{{ $json["variables"]["hangup_cause"] ?? "" }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -56,10 +56,10 @@
 						<td style="background-color: inherit;">Duration</td>
 					</tr>
 					<tr>
-						<td>{{ $xmlcdr->destination_number }}</td>
-						<td>{{ date("Y-m-d H:i:s", $xmlcdr->start_epoch) }}</td>
-						<td>{{ date("Y-m-d H:i:s", $xmlcdr->end_epoch) }}</td>
-						<td>{{ date("G:i:s", $xmlcdr->duration) }}</td>
+						<td>{{ $xmlcdr["destination_number"] }}</td>
+						<td>{{ date("Y-m-d H:i:s", $xmlcdr["start_epoch"]) }}</td>
+						<td>{{ date("Y-m-d H:i:s", $xmlcdr["end_epoch"]) }}</td>
+						<td>{{ date("G:i:s", $xmlcdr["duration"]) }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -73,7 +73,7 @@
 						<td style="background-color: inherit;">Name</td>
 						<td style="background-color: inherit;">Value</td>
 					</tr>
-					@foreach($json->channel_data as $key => $value)
+					@foreach($json["channel_data"] as $key => $value)
 						<tr>
 							<td>{{ $key }}</td>
 							<td>{{ $value }}</td>
@@ -82,7 +82,7 @@
 				</tbody>
 			</table>
 
-			@foreach($json->{'call-stats'}->audio as $audio_direction => $stat)
+			@foreach($json["call-stats"]["audio"] ?? [] as $audio_direction => $stat)
 			<table class="table">
 				<tbody>
 					<tr>
@@ -95,7 +95,33 @@
 					@foreach($stat as $key => $value)
 						<tr>
 							<td>{{ $key }}</td>
+							@if(is_array($value))
+							<td>
+								@foreach($value as $vk => $arrays)
+									@if(is_array($arrays))
+									<table>
+										<tr>
+											<td>{{ $vk }}</td>
+											<td>
+												<table>
+												@foreach($arrays as $k => $v)
+													<tr>
+														<td>{{ $k }}</td>
+														<td>{{ $v }}</td>
+													</tr>
+												@endforeach
+												</table>
+											</td>
+										</tr>
+									</table>
+									@else
+										{{ $arrays }}
+									@endif
+								@endforeach
+							</td>
+						@else
 							<td>{{ $value }}</td>
+						@endif
 						</tr>
 					@endforeach
 				</tbody>
@@ -111,9 +137,14 @@
 						<td style="background-color: inherit;">Name</td>
 						<td style="background-color: inherit;">Value</td>
 					</tr>
-					@foreach($json->variables as $key => $value)
+					@foreach($json["variables"] as $key => $value)
 						<tr>
 							<td>{{ $key }}</td>
+							@if(is_array($value))
+								@php
+								$value = implode($value);
+								@endphp
+							@endif
 							<td>{{ urldecode($value) }}</td>
 						</tr>
 					@endforeach
@@ -130,16 +161,16 @@
 						<td style="background-color: inherit;">Value</td>
 					</tr>
 
-					@foreach($json->app_log->application as $key => $value)
+					@foreach($json["app_log"]["application"] ?? [] as $key => $value)
 						@if ($key === "@attributes")
 							@php
-								$app_name = $value->app_name;
-								$app_data = $value->app_data;
+								$app_name = $value["app_name"];
+								$app_data = $value["app_data"];
 							@endphp
 						@else
 							@php
-								$app_name = $value->{'@attributes'}->app_name;
-								$app_data = $value->{'@attributes'}->app_data;
+								$app_name = $value["@attributes"]["app_name"];
+								$app_data = $value["@attributes"]["app_data"];
 							@endphp
 						@endif
 						<tr>
@@ -150,7 +181,7 @@
 				</tbody>
 			</table>
 
-			@foreach($json->callflow as $sectionName => $sectionData)
+			@foreach($json["callflow"] as $sectionName => $sectionData)
 				@if($sectionName === 'extension')
 					<table class="table">
 						<tbody>
@@ -161,7 +192,7 @@
 								<td style="background-color: inherit;">Name</td>
 								<td style="background-color: inherit;">Value</td>
 							</tr>
-							@foreach($sectionData->{'@attributes'} as $name => $value)
+							@foreach($sectionData["@attributes"] as $name => $value)
 								<tr>
 									<td>{{ $name }}</td>
 									<td>{{ $value }}</td>
@@ -179,10 +210,10 @@
 								<td style="background-color: inherit;">Name</td>
 								<td style="background-color: inherit;">Value</td>
 							</tr>
-							@foreach($sectionData->application as $app)
+							@foreach($sectionData["application"] as $app)
 								<tr>
-									<td>{{ $app->{'@attributes'}->app_name }}</td>
-									<td>{{ $app->{'@attributes'}->app_data }}</td>
+									<td>{{ $app["@attributes"]["app_name"] }}</td>
+									<td>{{ $app["@attributes"]["app_data"] }}</td>
 								</tr>
 							@endforeach
 						</tbody>
@@ -206,7 +237,7 @@
 							@foreach($sectionData as $name => $value)
 								<tr>
 									<td>{{ $name }}</td>
-									<td>{{ is_object($value) ? '' : $value }}</td>
+									<td>{{ is_array($value) ? '' : $value }}</td>
 								</tr>
 							@endforeach
 						</tbody>
