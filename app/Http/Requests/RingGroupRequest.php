@@ -27,7 +27,7 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(?string $ringGroupUuid = null): array
     {
-         if(App::hasDebugModeEnabled())
+        if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
         }
@@ -90,8 +90,11 @@ class RingGroupRequest extends FormRequest
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
             $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
-
-            $rules['ring_group_extension'][] = Rule::unique('App\Models\RingGroup','ring_group_extension')->ignore($ringGroup->ring_group_uuid, $ringGroup->getKeyName());
+            if(App::hasDebugModeEnabled())
+            {
+                Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ringGroup: '.print_r($ringGroup, true));
+            }
+            $rule["ring_group_extension"][] = Rule::unique(RingGroup::getTableName(),'ring_group_extension')->ignore($ringGroup->ring_group_uuid, $ringGroup->getKeyName());
         }
         else
         {
