@@ -43,6 +43,7 @@ use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\VariableController;
 use App\Http\Controllers\ViewCallRecordingController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
@@ -214,6 +215,9 @@ Route::middleware(['auth','permission'])->group(function () {
     // ACCESS CONTROL
     Route::resource('/accesscontrol', AccessControlController::class)->name('accesscontrol', 'accesscontrol');
     Route::get('/accesscontrol/{accesscontrol}/copy', [AccessControlController::class, 'copy'])->name('accesscontrol.copy');
+
+    // VARIABLES
+    Route::resource('variables', VariableController::class)->name('variables', 'variables');
 
     // XML CDR
     Route::get('/xmlcdr', [XmlCDRController::class, 'index'])->name('xmlcdr.index');

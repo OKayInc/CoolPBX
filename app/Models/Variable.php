@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Variable extends Model        // Original name VAR,
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_vars';
 	protected $primaryKey = 'var_uuid';
 	public $incrementing = false;
@@ -56,4 +57,7 @@ class Variable extends Model        // Original name VAR,
 	protected $casts = [
 	];
 
+	protected static $stringBooleanFields = [
+		'var_enabled'
+	];
 }
