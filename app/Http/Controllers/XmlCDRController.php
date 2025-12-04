@@ -51,4 +51,9 @@ class XmlCDRController extends Controller
 
         return view('pages.xmlcdr.index', compact("filters"));
     }
+
+    public function details(XmlCDR $xmlcdr)
+    {
+        return view('pages.xmlcdr.details', compact("xmlcdr"));
+    }
 }

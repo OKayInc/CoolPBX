@@ -43,9 +43,4 @@ class ViewCallRecordingController extends Controller
             return $this->audioPlayDownloadService->download($path);
         }
     }
-
-    public function details(XmlCDR $xmlcdr)
-    {
-        return view('pages.callrecordings.details', compact("xmlcdr"));
-    }
 }

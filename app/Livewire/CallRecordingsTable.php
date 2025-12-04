@@ -27,7 +27,7 @@ class CallRecordingsTable extends DataTableComponent
             ->setTableRowUrl(function ($row) use ($canViewDetail)
             {
                 return $canViewDetail
-                    ? route('callrecordings.details', $row->call_recording_uuid)
+                    ? route('xmlcdr.details', $row->call_recording_uuid)
                     : null;
             })
             ->setPaginationEnabled();

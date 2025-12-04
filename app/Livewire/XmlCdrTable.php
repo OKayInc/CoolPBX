@@ -31,8 +31,10 @@ class XmlCDRTable extends DataTableComponent
 
     public function configure(): void
     {
-        $limit = Setting::getSetting('cdr','limit', 'numeric') ?? 100;
         $canEdit = auth()->user()->hasPermission('xml_cdr_edit');
+        $canViewDetail = auth()->user()->hasPermission('xml_cdr_details');
+
+        $limit = Setting::getSetting('cdr','limit', 'numeric') ?? 100;
         $this->setPrimaryKey('xml_cdr_uuid')
             ->setTableAttributes([
                 'class' => 'table table-striped table-hover table-bordered'
@@ -40,6 +42,12 @@ class XmlCDRTable extends DataTableComponent
             ->setSearchDisabled()
             ->setPerPageAccepted([10, 25, 50, 100, 250])
             ->setDefaultPerPage($limit)
+            ->setTableRowUrl(function ($row) use ($canViewDetail)
+            {
+                return $canViewDetail
+                    ? route('xmlcdr.details', $row->xml_cdr_uuid)
+                    : null;
+            })
             ->setPaginationEnabled();
     }
 
@@ -239,9 +247,10 @@ class XmlCDRTable extends DataTableComponent
 
         if(auth()->user()->hasPermission('xml_cdr_tags'))
         {
-            $columns[] = Column::make("Actions", "xml_cdr_uuid")
+            $columns[] = Column::make("Actions", "tags")
             ->format(function ($value, $row) {
-                return '<button class="btn btn-sm btn-primary" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
+                $color = $row->tags ? "primary" : "success";
+                return '<button class="btn btn-sm btn-' . $color . '" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
             })
             ->html();
         }

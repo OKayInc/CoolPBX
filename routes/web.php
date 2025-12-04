@@ -102,7 +102,6 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('/callrecordings', [ViewCallRecordingController::class, 'index'])->name('callrecordings.index', 'callrecordings.index');
     Route::get('/callrecordings/{file}/play', [ViewCallRecordingController::class, 'play'])->name('callrecordings.play', 'callrecordings.play');
     Route::get('/callrecordings/{file}/download', [ViewCallRecordingController::class, 'download'])->name('callrecordings.download', 'callrecordings.download');
-    Route::get('/callrecordings/{xmlcdr}/details', [ViewCallRecordingController::class, 'details'])->name('callrecordings.details');
 
     // DESTINATION
     Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
@@ -223,6 +222,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('/xmlcdr', [XmlCDRController::class, 'index'])->name('xmlcdr.index');
     Route::get('/xmlcdr/{xmlcdr}/play', [XmlCDRController::class, 'play'])->name('xmlcdr.play');
     Route::get('/xmlcdr/{xmlcdr}/download', [XmlCDRController::class, 'download'])->name('xmlcdr.download');
+    Route::get('/xmlcdr/{xmlcdr}/details', [XmlCDRController::class, 'details'])->name('xmlcdr.details');
     Route::get('/xmlcdr/status/{status}', [XmlCDRController::class, 'filterByStatus'])->name('xmlcdr.filter_status');
 
     Route::resource('registrations', RegistrationsController::class)->name('registrations', 'registrations');
