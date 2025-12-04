@@ -172,7 +172,7 @@
 			$caller_id_name = urldecode($row["caller_profile"]["caller_id_name"]);
 			$caller_id_number = urldecode($row["caller_profile"]["caller_id_number"]);
 
-			$call_flow_summary[$x]["destination_number"] = urldecode($row["caller_profile"]["destination_number"]);
+			$call_flow_summary[$x]["destination_number"] = urldecode(is_array($row["caller_profile"]["destination_number"])?'':$row["caller_profile"]["destination_number"];);
 			$tmp_start_stamp = urldecode($row["times"]["profile_created_time"]) / 1000000;
 			if ($x == 0) {
 				$tmp_end_stamp = urldecode($row["times"]["hangup_time"]) / 1000000; 
