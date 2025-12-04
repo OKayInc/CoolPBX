@@ -59,7 +59,7 @@ class UserRequest extends FormRequest
             ],
 			"domain_uuid" => "sometimes|uuid|exists:App\Models\Domain,domain_uuid",
 			"language" => ['bail', 'nullable','min:2','regex:/[a-z]{2,3}\-\w+/i'],   // TODO: Find a better rule
-			"timezone" => ["nullable", 'regex:/^\w+\/\w[\w\-]+\w$/i'],
+			"timezone" => ["nullable",'string','regex:/^(?:(?:[A-Za-z_\-]+(?:\/[A-Za-z_\-]+)*)|(?:Etc\/[A-Za-z0-9+\-]+)|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST))$/i'],
             "contact_uuid" => "nullable|uuid",
 			"user_enabled" => "bail|nullable|string|in:true,false",
 			"api_key" => ["nullable","min:30"],
