@@ -164,7 +164,8 @@
 		$x = 0;
 		if (is_array($array["callflow"])) foreach ($array["callflow"] as $row) {
 			if ($x == 0) {
-				$destination_number = urldecode($row["caller_profile"]["destination_number"]);
+				$temp_destination_number = is_array($row["caller_profile"]["destination_number"])?'':$row["caller_profile"]["destination_number"];
+				$destination_number = urldecode($temp_destination_number);
 				$context = urldecode($row["caller_profile"]["context"]);
 				$network_addr = urldecode($row["caller_profile"]["network_addr"]);
 			}
