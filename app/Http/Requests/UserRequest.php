@@ -21,7 +21,7 @@ class UserRequest extends FormRequest
 
 	public function rules(): array
 	{
-		$isCreating = $this->isMethod("post");
+		$isCreating = $this->user ? false : true;
         $reqLength = DefaultSetting::get('users', 'password_length', 'numeric') ?? 0;
         $reqNumber = DefaultSetting::get('users', 'password_number', 'boolean') ?? false;
         $reqLowcase = DefaultSetting::get('users', 'password_lowercase', 'boolean') ?? false;
@@ -79,9 +79,11 @@ class UserRequest extends FormRequest
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] user: '.print_r($this->user, true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] key user: '.$this->user->getKeyName());
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isCreating: '.(int)$isCreating);
         }
         if ($isCreating){
-            $rule["api_key"][] = Rule::unique('App\Models\User','api_key');
+            $rule["api_key"][] = Rule::unique(User::getTableName(),'api_key');
             $userUnique = DefaultSetting::get('users', 'unique', 'text');
             if (isset($userUnique) && ($userUnique == 'global'))
             {
@@ -98,7 +100,7 @@ class UserRequest extends FormRequest
         }
         else
         {
-            $rule["api_key"][] = Rule::unique('App\Models\User','api_key')->ignore($this->user->user_uuid, $this->user->getKeyName());
+            $rule["api_key"][] = Rule::unique(User::getTableName(),'api_key')->ignore($this->user->user_uuid, $this->user->getKeyName());
         }
 
         return $rule;
