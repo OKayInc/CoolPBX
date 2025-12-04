@@ -79,7 +79,7 @@ class UserRequest extends FormRequest
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] user: '.print_r($this->user, true));
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] key user: '.$this->user->getKeyName());
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] key user: '.$this->user->getKeyName(). ' ' . $this->user->user_uuid);
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isCreating: '.(int)$isCreating);
         }
         if ($isCreating){
