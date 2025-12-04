@@ -27,7 +27,8 @@ class RingGroupRequest extends FormRequest
      */
     public function rules(?string $ringGroupUuid = null): array
     {
-        $isEditing = Request::input('isEditing');
+        $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
+        $isEditing = $ringGroup ?? true : false;
         if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing: '.(int)$isEditing);
@@ -91,7 +92,7 @@ class RingGroupRequest extends FormRequest
         if ($isEditing)
         {
 		// TODO: fix UniqueFSDestination to accept ->ignore()
-            $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
+
             if(App::hasDebugModeEnabled())
             {
                 Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ringGroup: '.print_r($ringGroup, true));
