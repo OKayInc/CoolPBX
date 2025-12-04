@@ -28,7 +28,7 @@ class RingGroupRequest extends FormRequest
     public function rules(?string $ringGroupUuid = null): array
     {
         $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
-        $isEditing = $ringGroup ?? true : false;
+        $isEditing = $ringGroup ? true : false;
         if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing: '.(int)$isEditing);
