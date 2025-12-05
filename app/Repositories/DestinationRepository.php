@@ -11,11 +11,13 @@ class DestinationRepository
 {
     protected $model;
     protected $dialplanService;
+    protected $dialplanRepository;
 
-    public function __construct(Destination $destination, DialplanService $dialplanService)
+    public function __construct(Destination $destination, DialplanService $dialplanService, DialplanRepository $dialplanRepository)
     {
         $this->model = $destination;
         $this->dialplanService = $dialplanService;
+        $this->dialplanRepository = $dialplanRepository;
     }
 
     public function getAll(string $domainUuid): Collection
@@ -46,13 +48,25 @@ class DestinationRepository
     {
         $response = $destination->update($data);
 
-        $this->buildDialplan($destination);
+        if($response)
+        {
+            $destination = $this->findByUuid($destination->destination_uuid);
+
+            $dialplan = $this->buildDialplan($destination);
+
+            if($dialplan)
+            {
+                $this->setDialplan($destination, $dialplan);
+            }
+        }
 
         return $response;
     }
 
     public function delete(Destination $destination): ?bool
     {
+        $this->dialplanRepository->delete($destination->dialplan_uuid);
+
         return $destination->delete();
     }
 
