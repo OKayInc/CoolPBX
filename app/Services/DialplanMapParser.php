@@ -3,21 +3,17 @@
 namespace App\Services;
 
 use App\Models\Dialplan;
+use App\Models\DialplanDetail;
 use Illuminate\Support\Collection;
 
 class DialplanMapParser
 {
     private array $nodes = [];
     private array $edges = [];
-    private int $gridColumns = 4;
-    private int $nodeWidth = 300;
-    private int $nodeHeight = 150;
-    private int $xSpacing = 400;
-    private int $ySpacing = 200;
+    private Collection $dialplanLookup;
 
     public function parseAllDialplans(string $domainUuid): array
     {
-        // Traer todos los dialplans del dominio con sus detalles
         $dialplans = Dialplan::with([
             'dialplanDetails',
             'callflow',
@@ -26,15 +22,17 @@ class DialplanMapParser
             'ringgroup',
             'ivr_menu'
         ])
-        ->where('domain_uuid', $domainUuid)
-        ->where('dialplan_enabled', 'true')
-        ->orderBy('dialplan_order')
-        ->get();
+            ->where('domain_uuid', $domainUuid)
+            ->where('dialplan_enabled', 'true')
+            ->orderBy('dialplan_order')
+            ->get();
 
-        // Crear nodos para cada dialplan
+        $this->dialplanLookup = $dialplans->mapWithKeys(function ($dp) {
+            $cleanNumber = str_replace(['^', '$'], '', $dp->dialplan_number);
+            return ["{$dp->dialplan_context}_{$cleanNumber}" => $dp];
+        });
+
         $this->createNodes($dialplans);
-
-        // Analizar transferencias y crear edges
         $this->analyzeTransfers($dialplans);
 
         return [
@@ -45,59 +43,47 @@ class DialplanMapParser
 
     private function createNodes(Collection $dialplans): void
     {
-        $row = 0;
-        $col = 0;
-
-        foreach ($dialplans as $index => $dialplan) {
-            // Calcular posición en grid
-            $x = $col * $this->xSpacing;
-            $y = $row * $this->ySpacing;
-
-            // Determinar tipo de nodo según sus relaciones
+        foreach ($dialplans as $dialplan) {
             $nodeType = $this->determineNodeType($dialplan);
-            
+
             $this->nodes[] = [
                 'id' => $dialplan->dialplan_uuid,
                 'type' => $nodeType,
-                'position' => ['x' => $x, 'y' => $y],
+                'position' => ['x' => 0, 'y' => 0], 
                 'data' => [
-                    'label' => $dialplan->dialplan_name,
+                    'type' => $nodeType,
+                    'label' => $this->getNodeLabel($dialplan, $nodeType),
                     'number' => $dialplan->dialplan_number,
                     'context' => $dialplan->dialplan_context,
-                    'description' => $dialplan->dialplan_description,
-                    'type' => $nodeType,
-                    'hasCallFlow' => $dialplan->callflow !== null,
-                    'hasQueue' => $dialplan->callcenterqueue !== null,
-                    'hasIVR' => $dialplan->ivr_menu !== null,
-                    'hasRingGroup' => $dialplan->ringgroup !== null,
+                    'isCallFlow' => $dialplan->callflow !== null,
                 ]
             ];
-
-            // Avanzar en el grid
-            $col++;
-            if ($col >= $this->gridColumns) {
-                $col = 0;
-                $row++;
-            }
         }
     }
-
     private function determineNodeType(Dialplan $dialplan): string
     {
-        // Determinar tipo según relaciones
         if ($dialplan->ivr_menu) return 'ivr';
         if ($dialplan->callcenterqueue) return 'queue';
         if ($dialplan->ringgroup) return 'ringgroup';
         if ($dialplan->conferencecenter) return 'conference';
+
         if ($dialplan->callflow) return 'callflow';
-        
+
         return 'default';
+    }
+
+    private function getNodeLabel(Dialplan $dialplan, string $type): string
+    {
+        return match ($type) {
+            'callflow' => "Flow: " . ($dialplan->callflow->call_flow_name ?? 'Control'),
+            'queue' => "Cola: " . ($dialplan->callcenterqueue->queue_name ?? $dialplan->dialplan_name),
+            default => $dialplan->dialplan_name
+        };
     }
 
     private function analyzeTransfers(Collection $dialplans): void
     {
         foreach ($dialplans as $dialplan) {
-            // Analizar cada detail buscando transferencias
             foreach ($dialplan->dialplanDetails as $detail) {
                 if ($this->isTransferAction($detail)) {
                     $this->createEdgeFromTransfer($dialplan, $detail);
@@ -106,78 +92,95 @@ class DialplanMapParser
         }
     }
 
-    private function isTransferAction($detail): bool
+    private function isTransferAction(DialplanDetail $detail): bool
     {
-        return in_array($detail->dialplan_detail_tag, ['action', 'anti-action']) 
-            && in_array($detail->dialplan_detail_type, ['transfer', 'bridge']);
+        return in_array($detail->dialplan_detail_tag, ['action', 'anti-action'])
+            && in_array($detail->dialplan_detail_type, ['transfer', 'bridge', 'lua', 'socket']);
     }
-
-    private function createEdgeFromTransfer(Dialplan $sourceDialplan, $detail): void
+    private function createEdgeFromTransfer(Dialplan $source, DialplanDetail $detail): void
     {
-        // Parsear el destino de la transferencia
-        // Formato típico: "1001 XML default" o "user/1001@default"
         $destination = $this->parseTransferDestination($detail->dialplan_detail_data);
-        
         if (!$destination) return;
 
-        // Buscar el dialplan de destino
-        $targetDialplan = $this->findTargetDialplan(
-            $destination['number'], 
-            $destination['context'],
-            $sourceDialplan->domain_uuid
-        );
+        $target = $this->findTargetInCache($destination['number'], $destination['context']);
+        if (!$target || $source->dialplan_uuid === $target->dialplan_uuid) return;
 
-        if (!$targetDialplan) return;
 
-        // Obtener condiciones aplicables
-        $conditions = $this->extractConditions($sourceDialplan, $detail);
+        $label = $this->generateEdgeLabel($source, $detail);
 
-        // Crear edge
-        $edgeId = "{$sourceDialplan->dialplan_uuid}_{$targetDialplan->dialplan_uuid}_{$detail->dialplan_detail_uuid}";
-        
+        $isAntiAction = $detail->dialplan_detail_tag === 'anti-action';
+
         $this->edges[] = [
-            'id' => $edgeId,
-            'source' => $sourceDialplan->dialplan_uuid,
-            'target' => $targetDialplan->dialplan_uuid,
-            'type' => 'smoothstep',
-            'animated' => $detail->dialplan_detail_tag === 'action',
-            'label' => $this->formatConditionLabel($conditions),
+            'id' => "e_{$detail->dialplan_detail_uuid}",
+            'source' => $source->dialplan_uuid,
+            'target' => $target->dialplan_uuid,
+            'label' => $label,
+            'animated' => !$isAntiAction, 
+            'style' => $isAntiAction ? ['stroke' => '#ff9999', 'strokeDasharray' => '5,5'] : [],
             'data' => [
-                'conditions' => $conditions,
-                'transferType' => $detail->dialplan_detail_type,
-                'isAntiAction' => $detail->dialplan_detail_tag === 'anti-action',
+                'type' => $detail->dialplan_detail_type,
+                'condition_group' => $detail->dialplan_detail_group
             ]
         ];
     }
 
+    private function generateEdgeLabel(Dialplan $dialplan, DialplanDetail $transferDetail): string
+    {
+        if ($dialplan->callflow) {
+            if ($transferDetail->dialplan_detail_tag === 'action') return "Activo (ON)";
+            if ($transferDetail->dialplan_detail_tag === 'anti-action') return "Inactivo (OFF)";
+        }
+
+        if ($transferDetail->dialplan_detail_tag === 'anti-action') {
+            return "Else / False";
+        }
+
+        $conditions = $dialplan->dialplanDetails
+            ->where('dialplan_detail_group', $transferDetail->dialplan_detail_group)
+            ->where('dialplan_detail_tag', 'condition');
+
+        $labels = [];
+        foreach ($conditions as $cond) {
+            $formatted = $this->formatConditionText($cond->dialplan_detail_type, $cond->dialplan_detail_data);
+            if ($formatted) $labels[] = $formatted;
+        }
+
+        return implode("\n", $labels);
+    }
+
+
+    private function formatConditionText(string $type, string $data): ?string
+    {
+        $cleanData = str_replace(['^', '$'], '', $data);
+
+        return match ($type) {
+            'destination_number' => null, 
+            'caller_id_number' => "CID: {$cleanData}",
+            'context' => null, 
+            'wday' => "Days: {$cleanData}", 
+            'mday' => "Day Month: {$cleanData}",
+            'mon' => "Month: {$cleanData}",
+            'hour' => "Hour: {$cleanData}",
+            'minute' => "Minute: {$cleanData}",
+            default => "{$type}: {$cleanData}"
+        };
+    }
+
     private function parseTransferDestination(string $data): ?array
     {
-        // Formato: "1001 XML default" o "user/1001@default"
-        
-        // Patrón 1: "NUMBER XML CONTEXT"
         if (preg_match('/^([^\s]+)\s+XML\s+([^\s]+)/', $data, $matches)) {
-            return [
-                'number' => $matches[1],
-                'context' => $matches[2]
-            ];
+            return ['number' => $matches[1], 'context' => $matches[2]];
         }
-
-        // Patrón 2: "user/NUMBER@CONTEXT"
-        if (preg_match('/user\/([^@]+)@([^\s]+)/', $data, $matches)) {
-            return [
-                'number' => $matches[1],
-                'context' => $matches[2]
-            ];
-        }
-
-        // Patrón 3: solo número (usar context default)
         if (preg_match('/^\d+$/', $data)) {
-            return [
-                'number' => $data,
-                'context' => 'default'
-            ];
+            return ['number' => $data, 'context' => 'default'];
         }
+        return null;
+    }
 
+    private function findTargetInCache(string $number, string $context): ?Dialplan
+    {
+        $key = "{$context}_{$number}";
+        if ($this->dialplanLookup->has($key)) return $this->dialplanLookup->get($key);
         return null;
     }
 
@@ -185,7 +188,7 @@ class DialplanMapParser
     {
         return Dialplan::where('domain_uuid', $domainUuid)
             ->where('dialplan_context', $context)
-            ->where(function($query) use ($number) {
+            ->where(function ($query) use ($number) {
                 $query->where('dialplan_number', $number)
                     ->orWhere('dialplan_destination', 'like', "%{$number}%");
             })
@@ -196,7 +199,6 @@ class DialplanMapParser
     {
         $conditions = [];
 
-        // Buscar condiciones en el mismo grupo
         $groupConditions = $dialplan->dialplanDetails()
             ->where('dialplan_detail_group', $detail->dialplan_detail_group)
             ->where('dialplan_detail_tag', 'condition')
@@ -209,7 +211,6 @@ class DialplanMapParser
             }
         }
 
-        // Añadir info de CallFlow si existe
         if ($dialplan->callflow) {
             $conditions[] = "CallFlow: {$dialplan->callflow->call_flow_name}";
         }
@@ -222,7 +223,7 @@ class DialplanMapParser
         $type = $condition->dialplan_detail_type;
         $data = $condition->dialplan_detail_data;
 
-        return match($type) {
+        return match ($type) {
             'destination_number' => "Destino: {$data}",
             'caller_id_number' => "Caller ID: {$data}",
             'network_addr' => "Red: {$data}",

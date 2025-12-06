@@ -1,7 +1,7 @@
 <div>
     <dialplan-builder
         initial-data='@json($flowData)'
-        readonly="true"
+        readonly="false"
         style="height: 800px;"
     ></dialplan-builder>
 </div>
