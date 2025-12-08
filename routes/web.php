@@ -254,9 +254,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('voicemails', VoicemailController::class);
 
     route::resource('/time_conditions',TimeConditionController::class)->name('time_conditions', 'time_conditions');
-
-    Route::prefix('voicemails/{voicemailUuid}')->name('voicemails.')->group(function () {
     Route::resource('/call_forward', CallForwardController::class)->name('call_forward', 'call_forward');
+    
+    Route::prefix('voicemails/{voicemailUuid}')->name('voicemails.')->group(function () {
 
         Route::prefix('messages')->name('messages.')->group(function () {
             Route::get('/', [VoicemailController::class, 'messages'])
