@@ -40,10 +40,13 @@ use App\Http\Controllers\MusicOnHoldController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
+use App\Http\Controllers\VoicemailController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\VoicemailGreetingController;
+use App\Http\Controllers\VoicemailMessageController;
 use App\Http\Controllers\VariableController;
 use App\Http\Controllers\ViewCallRecordingController;
 use App\Http\Middleware\Authenticate;
@@ -75,7 +78,7 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/login/okta/callback', [AuthController::class, 'handleProviderCallback']);
 });
 
-Route::middleware(['auth','permission'])->group(function () {
+Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/inbound-contacts', [DashboardController::class, 'ajaxInboundContacts'])->name('dashboard.inbound_contacts');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -187,7 +190,7 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/menus', MenuController::class)->name('menus', 'menus');
 
     // MENU ITEM
-//    Route::resource('/menuitems', MenuItemController::class)->name('menuitems', 'menuitems');
+    //    Route::resource('/menuitems', MenuItemController::class)->name('menuitems', 'menuitems');
     Route::get('/menu/{menu}/menuitem/{menuitem}/edit', [MenuItemController::class, 'edit'])->name('menuitems.edit');
     Route::get('/menu/{menu}/menuitems', [MenuItemController::class, 'index'])->name('menuitems.index');
     Route::put('/menu/{menu}/menuitem/{menuitem}', [MenuItemController::class, 'update'])->name('menuitems.update');
@@ -245,17 +248,57 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
-    Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
+    Route::get('/call_center_agent_status', [CallCenterAgentController::class, 'showStatus'])->name('callCenterAgentStatus');
 
+    Route::resource('voicemails', VoicemailController::class);
+
+    Route::prefix('voicemails/{voicemailUuid}')->name('voicemails.')->group(function () {
     Route::resource('/call_forward', CallForwardController::class)->name('call_forward', 'call_forward');
 
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [VoicemailController::class, 'messages'])
+                ->name('index');
+
+            Route::get('/{voicemailMessageUuid}/play', [VoicemailMessageController::class, 'play'])
+                ->name('play');
+
+            Route::get('/{voicemailMessageUuid}/download', [VoicemailMessageController::class, 'download'])
+                ->name('download');
+
+            Route::post('/{voicemailMessageUuid}/mark-read', [VoicemailMessageController::class, 'markAsRead'])
+                ->name('mark-read');
+        });
+    });
+
+    Route::prefix('voicemails/{voicemailId}')->name('voicemails.')->group(function () {
+
+        Route::prefix('greetings')->name('greetings.')->group(function () {
+            Route::get('/', [VoicemailController::class, 'greetings'])
+                ->name('index');
+
+            Route::get('/create', [VoicemailGreetingController::class, 'create'])
+                ->name('create');
+
+            Route::get('/{greetingUuid}/play', [VoicemailGreetingController::class, 'play'])
+                ->name('play');
+
+            Route::get('/{greetingUuid}/download', [VoicemailGreetingController::class, 'download'])
+                ->name('download');
+
+            Route::post('/upload', [VoicemailGreetingController::class, 'upload'])
+                ->name('upload');
+
+            Route::post('/{greetingUuid}/set-active', [VoicemailGreetingController::class, 'setActive'])
+                ->name('set-active');
+        });
+    });
 });
 
-Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding){
+Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {
     $xml = new ModXMLCURLController;
     $allowedMethods = ['configuration', 'directory', 'dialplan', 'languages'];
 
-    if(!in_array($binding, $allowedMethods)){
+    if (!in_array($binding, $allowedMethods)) {
         return response('Method not allowed', 403)->header('Content-Type', 'text/xml');
     }
 

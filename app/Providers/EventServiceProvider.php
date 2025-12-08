@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\VoicemailMessage;
+use App\Observers\VoicemailMessageObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -21,6 +23,10 @@ class EventServiceProvider extends ServiceProvider
         \SocialiteProviders\Manager\SocialiteWasCalled::class => [
             'SocialiteProviders\\Okta\\OktaExtendSocialite@handle',
         ],
+    ];
+
+    protected $observers = [
+        VoicemailMessage::class => [VoicemailMessageObserver::class],
     ];
 
     /**
