@@ -75,8 +75,8 @@ class DialplanMapParser
     private function getNodeLabel(Dialplan $dialplan, string $type): string
     {
         return match ($type) {
-            'callflow' => "Flow: " . ($dialplan->callflow->call_flow_name ?? 'Control'),
-            'queue' => "Cola: " . ($dialplan->callcenterqueue->queue_name ?? $dialplan->dialplan_name),
+            'callflow' => "Call Flow: " . ($dialplan->callflow->call_flow_name ?? 'Control'),
+            'queue' => "Queue: " . ($dialplan->callcenterqueue->queue_name ?? $dialplan->dialplan_name),
             default => $dialplan->dialplan_name
         };
     }
