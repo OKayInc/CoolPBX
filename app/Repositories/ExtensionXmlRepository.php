@@ -61,6 +61,9 @@ class ExtensionXmlRepository
     {
         return Extension::where('extensions.domain_uuid', $domainUuid)
             ->where('extensions.enabled', '!=', 'false')
+            ->with(['followMe.destinations' => function ($query) {
+                $query->orderBy('follow_me_order', 'asc');
+            }])
             ->leftJoin('v_voicemails', function($join) {
                 $join->on('extensions.domain_uuid', '=', 'v_voicemails.domain_uuid')
                      ->on(DB::raw("COALESCE(NULLIF(extensions.number_alias,''), extensions.extension)"), 
@@ -154,6 +157,8 @@ class ExtensionXmlRepository
         
         $this->addExtensionVariables($xml, $extension);
         
+        $this->addFollowMeVariables($xml, $extension);
+        
         $xml .= "    </variables>\n";
         $xml .= "  </user>\n";
         $xml .= "</include>\n";
@@ -200,6 +205,60 @@ class ExtensionXmlRepository
         }
     }
     
+    protected function addFollowMeVariables(&$xml, $extension): void
+    {
+        if (empty($extension->follow_me_uuid) || !$extension->followMe) {
+            return;
+        }
+        
+        if (!empty($extension->follow_me_enabled)) {
+            $xml .= "      <variable name=\"follow_me_enabled\" value=\"{$extension->follow_me_enabled}\"/>\n";
+        }
+        
+        if (!empty($extension->follow_me_uuid)) {
+            $xml .= "      <variable name=\"follow_me_uuid\" value=\"{$extension->follow_me_uuid}\"/>\n";
+        }
+        
+        $followMe = $extension->followMe;
+        
+        if (!empty($followMe->cid_name_prefix)) {
+            $xml .= "      <variable name=\"cid_name_prefix\" value=\"{$followMe->cid_name_prefix}\"/>\n";
+        }
+        
+        if (!empty($followMe->cid_number_prefix)) {
+            $xml .= "      <variable name=\"cid_number_prefix\" value=\"{$followMe->cid_number_prefix}\"/>\n";
+        }
+        
+        if (!empty($followMe->follow_me_ignore_busy)) {
+            $xml .= "      <variable name=\"follow_me_ignore_busy\" value=\"{$followMe->follow_me_ignore_busy}\"/>\n";
+        }
+        
+        if ($followMe->destinations && $followMe->destinations->count() > 0) {
+            $destinations = $followMe->destinations->sortBy('follow_me_order');
+            
+            foreach ($destinations as $index => $dest) {
+                $order = $index + 1;
+                
+                $xml .= "      <variable name=\"follow_me_destination_{$order}\" value=\"{$dest->follow_me_destination}\"/>\n";
+                $xml .= "      <variable name=\"follow_me_delay_{$order}\" value=\"{$dest->follow_me_delay}\"/>\n";
+                $xml .= "      <variable name=\"follow_me_timeout_{$order}\" value=\"{$dest->follow_me_timeout}\"/>\n";
+                
+                if (!empty($dest->follow_me_prompt)) {
+                    $xml .= "      <variable name=\"follow_me_prompt_{$order}\" value=\"{$dest->follow_me_prompt}\"/>\n";
+                }
+            }
+            
+            $destinationsList = $destinations->pluck('follow_me_destination')->implode('|');
+            $delaysList = $destinations->pluck('follow_me_delay')->implode('|');
+            $timeoutsList = $destinations->pluck('follow_me_timeout')->implode('|');
+            
+            if (!empty($destinationsList)) {
+                $xml .= "      <variable name=\"follow_me_destinations\" value=\"{$destinationsList}\"/>\n";
+                $xml .= "      <variable name=\"follow_me_delays\" value=\"{$delaysList}\"/>\n";
+                $xml .= "      <variable name=\"follow_me_timeouts\" value=\"{$timeoutsList}\"/>\n";
+            }
+        }
+    }
 
     protected function writeExtensionXmlFile($extension, string $xml): void
     {
