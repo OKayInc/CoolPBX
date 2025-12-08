@@ -114,7 +114,7 @@ class CallForwardForm extends Component
                         'uuid' => $dest->follow_me_destination_uuid,
                         'destination' => $dest->follow_me_destination,
                         'delay' => $dest->follow_me_delay ?? 0,
-                        'timeout' => strlen(trim()$dest->follow_me_timeout)): $dest->follow_me_timeout ? 30,
+                        'timeout' => !is_null($dest->follow_me_timeout) ? $dest->follow_me_timeout : 30,
                         'prompt' => $dest->follow_me_prompt,
                     ];
                 })->toArray();
