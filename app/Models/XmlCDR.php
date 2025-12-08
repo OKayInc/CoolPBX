@@ -617,18 +617,14 @@ class XmlCDR extends Model
                     {
                         $call_result = 'answered';
                     }
-                    else if(!empty($this->answer_stamp) && 
-			(!property_exists($this, 'bride_uuid') || empty($this->bridge_uuid))
-			)
+                    else if(!empty($this->answer_stamp) && (!property_exists($this, 'bridge_uuid') || empty($this->bridge_uuid)))
                     {
                         $call_result = 'voicemail';
                     }
-                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && 
-			(property_exists($this, 'bride_uuid') && empty($this->bridge_uuid))
-			&& $this->sip_hangup_disposition != 'send_refuse')
-			{
+                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && (property_exists($this, 'bridge_uuid') && empty($this->bridge_uuid)) && $this->sip_hangup_disposition != 'send_refuse')
+			        {
                         $call_result = 'cancelled';
-		    }
+		            }
                     else
                     {
                         $call_result = 'failed';
@@ -644,9 +640,7 @@ class XmlCDR extends Model
                     {
                         $call_result = 'answered';
                     }
-                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && 
-			(property_exists($this, 'bride_uuid') && !empty($this->bridge_uuid))
-			&& $this->sip_hangup_disposition != 'send_refuse')
+                    else if((property_exists($this, 'answer_stamp') && empty($this->answer_stamp)) && (property_exists($this, 'bridge_uuid') && !empty($this->bridge_uuid)) && $this->sip_hangup_disposition != 'send_refuse')
                     {
                         $call_result = 'cancelled';
                     }
@@ -705,11 +699,18 @@ class XmlCDR extends Model
         );
     }
 
-	public function domain(): BelongsTo {
+	public function domain(): BelongsTo
+    {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}
 
-	public function extension(): BelongsTo {
+	public function extension(): BelongsTo
+    {
 		return $this->belongsTo(Extension::class, 'extension_uuid', 'extension_uuid');
+	}
+
+	public function agent(): BelongsTo
+    {
+		return $this->belongsTo(CallCenterAgent::class, 'call_center_agent_uuid', 'cc_agent');
 	}
 }

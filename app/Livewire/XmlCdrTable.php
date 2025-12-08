@@ -31,8 +31,10 @@ class XmlCDRTable extends DataTableComponent
 
     public function configure(): void
     {
-        $limit = Setting::getSetting('cdr','limit', 'numeric') ?? 100;
         $canEdit = auth()->user()->hasPermission('xml_cdr_edit');
+        $canViewDetail = auth()->user()->hasPermission('xml_cdr_details');
+
+        $limit = Setting::getSetting('cdr','limit', 'numeric') ?? 100;
         $this->setPrimaryKey('xml_cdr_uuid')
             ->setTableAttributes([
                 'class' => 'table table-striped table-hover table-bordered'
@@ -40,6 +42,12 @@ class XmlCDRTable extends DataTableComponent
             ->setSearchDisabled()
             ->setPerPageAccepted([10, 25, 50, 100, 250])
             ->setDefaultPerPage($limit)
+            ->setTableRowUrl(function ($row) use ($canViewDetail)
+            {
+                return $canViewDetail
+                    ? route('xmlcdr.details', $row->xml_cdr_uuid)
+                    : null;
+            })
             ->setPaginationEnabled();
     }
 
@@ -151,17 +159,10 @@ class XmlCDRTable extends DataTableComponent
                 ->format(function ($value, $row, Column $column) {
                     if($row->record_type == "call")
                     {
-                        $play = route('xmlcdr.play', $row->xml_cdr_uuid);
-                        $download = route('xmlcdr.download', $row->xml_cdr_uuid);
-
-                        $recording = "
-                        <div class='progress-bar' style='background-color: #0d6efd; width: 0; height: 3px; position: relative; margin: 5px 0;'></div>
-                        <audio id='recording_audio_{$row->xml_cdr_uuid}' style='display: none;' preload='none' src='{$play}' type='audio/wav'></audio>
-                        <button type='button' id='recording_button_{$row->xml_cdr_uuid}' alt='Play / Pause' title='Play / Pause' class='btn btn-secondary btn-play-audio'><i class='fas fa-play'></i></button>
-                        <a href='{$download}' target='_self'><button alt='Download' title='Download' class='btn btn-secondary'><i class='fas fa-download'></i></button></a>
-                        ";
-
-                        return $recording;
+                        return view('components.buttons-audio', [
+                            'urlPlay' => route('xmlcdr.play', $row->xml_cdr_uuid),
+                            'urlDownload' => route('xmlcdr.download', $row->xml_cdr_uuid),
+                        ])->render();
                     }
                 })
                 ->html()
@@ -246,9 +247,10 @@ class XmlCDRTable extends DataTableComponent
 
         if(auth()->user()->hasPermission('xml_cdr_tags'))
         {
-            $columns[] = Column::make("Actions", "xml_cdr_uuid")
+            $columns[] = Column::make("Actions", "tags")
             ->format(function ($value, $row) {
-                return '<button class="btn btn-sm btn-primary" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
+                $color = $row->tags ? "primary" : "success";
+                return '<button class="btn btn-sm btn-' . $color . '" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
             })
             ->html();
         }
@@ -267,7 +269,7 @@ class XmlCDRTable extends DataTableComponent
                     return match($v)
                     {
                         'answered' => $q->whereNotNull('answer_stamp')->whereNotNull('bridge_uuid'),
-                        'voicemail' => $q->whereNotNull('answer_stamp')->whereNull('bridge_uuid'),
+                        'voicemail' => $q->whereNotNull('destination_number', 'LIKE', '*99%'),
                         'missed' => $q->where('missed_call', true),
                         'cancelled' => $q->where(function ($q) {
                             $q->where(function ($q) {
@@ -319,6 +321,17 @@ class XmlCDRTable extends DataTableComponent
                 })
                 ->when($this->filters['order_field'] ?? null, fn($q, $v) => $q->orderBy($this->filters['order_field'], $this->filters['order_sort'] ?? 'asc'))
                 ->when($this->filters['tags'] ?? null, fn($q, $v) => $q->where('tags', 'like', "%{$v}%"))
+                ->when($this->filters['type'] ?? [], function ($q, $v) {
+                    foreach($this->filters['type'] as $v)
+                    {
+                        match($v)
+                        {
+                            'callcenter' => $q->where('cc_side', 'member'),
+                            'conference' => $q->whereNotNull('conference_uuid'),
+                            default => null
+                        };
+                    }
+                })
                 ->with("extension")
                 ->orderBy("start_epoch", "desc");
         	if(App::hasDebugModeEnabled()){

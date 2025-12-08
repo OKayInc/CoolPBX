@@ -7,11 +7,13 @@ use App\Models\CallCenterQueue;
 use App\Models\CallCenterTier;
 use App\Models\Dialplan;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\CallCenterQueueRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+
 
 class CallCenterQueueRepository
 {
@@ -20,6 +22,19 @@ class CallCenterQueueRepository
     public function __construct(CallCenterQueue $model)
     {
         $this->model = $model;
+    }
+    public function mine(string $agentUuid)
+    {
+        $answer = [];
+        $agent = CallCenterAgent::findOrFail($agentUuid);
+        foreach (auth()->user()->agents as $currentAgent)
+        {
+            if ($currentAgent->call_center_agent_uuid == $agent->call_center_agent_uuid){
+                $answer = $currentAgent->queues->toResourceCollection();
+                break;
+            }
+        }
+        return $answer;
     }
 
     public function getAllByDomain(string $domainUuid): Collection
@@ -32,6 +47,12 @@ class CallCenterQueueRepository
     public function findByUuid(string $uuid): ?CallCenterQueue
     {
         return $this->model->where('call_center_queue_uuid', $uuid)->first();
+    }
+
+    public function getDialplanEnabled(string $dialplanUuid): ?string
+    {
+        $dialplan = Dialplan::where('dialplan_uuid', $dialplanUuid)->first();
+        return $dialplan ? $dialplan->dialplan_enabled : 'true';
     }
 
     public function findByName(string $name, string $domainUuid): ?CallCenterQueue
@@ -108,7 +129,7 @@ class CallCenterQueueRepository
 
             $queue = $this->model->create(['dialplan_uuid' => $dialplanUuid] + $filteredData);
 
-            $this->createDialplan($queue, $dialplanUuid);
+            $this->createDialplan($queue, $dialplanUuid,$filteredData);
 
             if (!empty($tiers)) {
                 $this->syncTiers($queue->call_center_queue_uuid, $queue->domain_uuid, $tiers);
@@ -142,7 +163,7 @@ class CallCenterQueueRepository
             $queue->update($filteredData);
             $queue->refresh();
 
-            $this->updateDialplan($queue);
+            $this->updateDialplan($queue, $filteredData);
 
             if (!empty($tiers)) {
                 $this->syncTiers($queue->call_center_queue_uuid, $queue->domain_uuid, $tiers);
@@ -210,6 +231,7 @@ class CallCenterQueueRepository
         $filteredData['queue_announce_frequency'] = $data['queue_announce_frequency'] ?? ($existingQueue->queue_announce_frequency ?? null);
         $filteredData['queue_cc_exit_keys'] = $data['queue_cc_exit_keys'] ?? ($existingQueue->queue_cc_exit_keys ?? null);
         $filteredData['queue_description'] = $data['queue_description'] ?? ($existingQueue->queue_description ?? null);
+        $filteredData['queue_enabled'] = $data['queue_enabled'];
 
         if ($user->hasPermission('call_center_outbound_caller_id_name')) {
             $filteredData['queue_outbound_caller_id_name'] = $data['queue_outbound_caller_id_name'] ?? ($existingQueue->queue_outbound_caller_id_name ?? null);
@@ -387,24 +409,24 @@ class CallCenterQueueRepository
         ];
     }
 
-    public function getQueueMembers(string $queueUuid): Collection
-    {
-        return DB::table('call_center_queue_members as qm')
-            ->join('call_center_agents as a', 'qm.agent_uuid', '=', 'a.call_center_agent_uuid')
-            ->where('qm.queue_uuid', $queueUuid)
-            ->select([
-                'a.call_center_agent_uuid',
-                'a.agent_name',
-                'a.agent_id',
-                'a.agent_status',
-                'qm.tier_position',
-                'qm.tier_level'
-            ])
-            ->orderBy('qm.tier_position')
-            ->get();
-    }
+    // public function getQueueMembers(string $queueUuid): Collection
+    // {
+    //     return DB::table('call_center_queue_members as qm')
+    //         ->join('call_center_agents as a', 'qm.agent_uuid', '=', 'a.call_center_agent_uuid')
+    //         ->where('qm.queue_uuid', $queueUuid)
+    //         ->select([
+    //             'a.call_center_agent_uuid',
+    //             'a.agent_name',
+    //             'a.agent_id',
+    //             'a.agent_status',
+    //             'qm.tier_position',
+    //             'qm.tier_level'
+    //         ])
+    //         ->orderBy('qm.tier_position')
+    //         ->get();
+    // }
 
-    protected function createDialplan(CallCenterQueue $queue, string $dialplanUuid): void
+    protected function createDialplan(CallCenterQueue $queue, string $dialplanUuid, $filteredData): void
     {
         $domainName = Session::get('domain_name');
         $dialplanXml = $this->buildDialplanXml($queue, $domainName);
@@ -417,7 +439,7 @@ class CallCenterQueueRepository
             'dialplan_continue' => 'false',
             'dialplan_xml' => $dialplanXml,
             'dialplan_order' => '230',
-            'dialplan_enabled' => 'true',
+            'dialplan_enabled' => $filteredData['queue_enabled'] ?? 'true',
             'dialplan_description' => $queue->queue_description,
             'app_uuid' => '95788e50-9500-079e-2807-fd530b0ea370',
             'dialplan_uuid' => $dialplanUuid,
@@ -426,7 +448,6 @@ class CallCenterQueueRepository
         $dialplan->update(['dialplan_uuid' => $dialplanUuid]);
         $dialplan->refresh();
     }
-
     protected function buildDialplanXml(CallCenterQueue $queue, string $domainName): string
     {
         $xml = "<extension name=\"{$queue->queue_name}\" continue=\"\" uuid=\"" . Str::uuid() . "\">\n";
@@ -470,7 +491,7 @@ class CallCenterQueueRepository
             $xml .= "		<action application=\"set\" data=\"cc_exit_keys={$queue->queue_cc_exit_keys}\"/>\n";
         }
 
-        $xml .= "		<action application=\"lua\" data=\"callcenter {$queue->queue_extension}@{$domainName}\"/>\n";
+        $xml .= "		<action application=\"lua\" data=\"app.lua callcenter {$queue->queue_extension}@{$domainName}\"/>\n";
 
         if (!empty($queue->queue_timeout_action) && $queue->queue_timeout_action != 'hangup') {
             $timeoutParts = explode(':', $queue->queue_timeout_action);
@@ -485,21 +506,22 @@ class CallCenterQueueRepository
         return $xml;
     }
 
-    protected function updateDialplan(CallCenterQueue $queue): void
+    protected function updateDialplan(CallCenterQueue $queue, $filteredData): void
     {
         $domainName = Session::get('domain_name');
         $dialplanXml = $this->buildDialplanXml($queue, $domainName);
 
         if ($queue->dialplan_uuid) {
-            Dialplan::where('dialplan_uuid', $queue->dialplan_uuid)
+             Dialplan::where('dialplan_uuid', $queue->dialplan_uuid)
                 ->update([
                     'dialplan_name' => $queue->queue_name,
                     'dialplan_number' => $queue->queue_extension,
                     'dialplan_xml' => $dialplanXml,
-                    'dialplan_description' => $queue->queue_description
+                    'dialplan_description' => $queue->queue_description,
+                    'dialplan_enabled' => $filteredData['queue_enabled'] ?? 'true'
                 ]);
         } else {
-            $this->createDialplan($queue, $queue->dialplan_uuid);
+            $this->createDialplan($queue, $queue->dialplan_uuid, $filteredData);
         }
     }
 

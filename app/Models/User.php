@@ -70,6 +70,10 @@ class User extends Authenticatable
 		'password' => 'hashed',
 	];
 
+    public function agents(): HasMany {
+		return $this->hasMany(CallCenterAgent::class, 'user_uuid', 'user_uuid');
+	}
+
 	public function contacts(): HasMany {
 		return $this->hasMany(Contact::class, 'contact_uuid', 'contact_uuid');
 	}

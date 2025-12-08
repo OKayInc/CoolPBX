@@ -85,7 +85,7 @@ class CallCenterQueue extends Model
 		return $this->HasOne(DialplanDetail::class, 'dialplan_uuid', 'dialplan_uuid');
 	}
 
-    public function callcenteragents()
+    public function agents()
     {
         return $this->belongsToMany(CallCenterAgent::class, 'v_call_center_tiers', 'call_center_queue_uuid', 'call_center_agent_uuid')
             ->using(CallCenterTier::class)

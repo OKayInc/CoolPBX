@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Extension;
 use App\Http\Requests\ExtensionRequest;
+use App\Models\Extension;
 use App\Repositories\ExtensionRepository;
 use Illuminate\Http\Request;
 
 class ExtensionAPIController extends Controller
 {
-	protected $extensionRepository;
+	protected ExtensionRepository $extensionRepository;
 
 	public function __construct(ExtensionRepository $extensionRepository)
 	{
@@ -49,13 +49,5 @@ class ExtensionAPIController extends Controller
 	{
 		$d = $this->extensionRepository->delete($extension);
         return response()->json($d);
-	}
-
-	public function switch(Request $request)
-	{
-		ExtensionService::switchByUuid($request->domain_uuid);
-
-		$url = url()->previous();
-		return redirect($url);
 	}
 }

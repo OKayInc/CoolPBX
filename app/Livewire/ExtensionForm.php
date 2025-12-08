@@ -87,7 +87,7 @@ class ExtensionForm extends Component
     public $voicemail_file;
     public $voicemail_local_after_email = false;
 
-    public $emergency_destination;
+    public $emergency_destination = null;
 
     public $destinations;
 
@@ -130,6 +130,9 @@ class ExtensionForm extends Component
     public function mount($extensions = null)
     {
         $this->loadAvailableData();
+
+        $this->emergency_destination = collect();
+        $this->destinations = collect();
 
         if ($extensions) {
             $this->extension = $extensions->extension;
@@ -203,7 +206,7 @@ class ExtensionForm extends Component
 
         $this->availableDomains = Domain::select('domain_uuid', 'domain_name')->get()->toArray();
 
-        if(!$this->extensions) {
+        if (!$this->extensions) {
             $this->selectedDomain = Session::get('domain_uuid');
         }
     }
@@ -214,7 +217,6 @@ class ExtensionForm extends Component
             $this->emergency_destination = Destination::where('domain_uuid', Session::get('domain_uuid'))
                 ->where('destination_type', 'inbound')
                 ->where('destination_type_emergency', 1)
-                ->get()
                 ->orderBy('destination_number', 'asc')
                 ->get();
         }
@@ -359,11 +361,9 @@ class ExtensionForm extends Component
         try {
             $newExtension = $this->extensionRepository->copy($this->extensions->extension_uuid, $this->copyExtensionNumber, $this->copyNumberAlias);
             $this->closeCopyModal();
-            if ($newExtension === false)
-            {
+            if ($newExtension === false) {
                 session()->flash('error', 'The extension or the alias number are not unique.');
-            }
-            else {
+            } else {
                 session()->flash('success', 'Extension copied successfully');
             }
             redirect()->route('extensions.index');

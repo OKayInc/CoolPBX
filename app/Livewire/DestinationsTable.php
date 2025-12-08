@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Destination;
+use App\Repositories\DestinationRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -101,8 +102,7 @@ class DestinationsTable extends DataTableComponent
         session()->flash('success', 'The destinations were successfully disabled.');
     }
 
-
-    public function bulkDelete()
+    public function bulkDelete(DestinationRepository $destinationRepository)
     {
         if (!auth()->user()->hasPermission('destination_delete'))
         {
@@ -116,7 +116,15 @@ class DestinationsTable extends DataTableComponent
         {
             DB::beginTransaction();
 
-            Destination::whereIn('destination_uuid', $selectedRows)->delete();
+            foreach($selectedRows as $destination_uuid)
+            {
+                $trashedDestination = Destination::find($destination_uuid);
+
+                if($trashedDestination)
+                {
+                    $destinationRepository->delete($trashedDestination);
+                }
+            }
 
             DB::commit();
 

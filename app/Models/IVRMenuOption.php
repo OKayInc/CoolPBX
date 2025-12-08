@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class IVRMenuOption extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_ivr_menu_options';
 	protected $primaryKey = 'ivr_menu_option_uuid';
 	public $incrementing = false;
@@ -54,6 +55,10 @@ class IVRMenuOption extends Model
      * @var array<string, string>
      */
 	protected $casts = [
+	];
+
+	protected static $stringBooleanFields = [
+		'ivr_menu_option_enabled'
 	];
 
     public function domain(): BelongsTo {

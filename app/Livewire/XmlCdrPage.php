@@ -35,15 +35,17 @@ class XmlCdrPage extends Component
         $this->reset(["showModal", "xml_cdr_uuid", "tags"]);
     }
 
-    public function mount()
+    public function mount($filters = [])
     {
         $this->filters = $this->initFilters();
+
+        $this->filters = array_merge($this->filters, $filters);
     }
 
     private function initFilters()
     {
         return [
-            "caller_destination" => null,
+            "type" => [],
         ];
     }
 

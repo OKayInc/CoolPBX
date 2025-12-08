@@ -2,18 +2,21 @@
 
 namespace App\Repositories;
 
+use App\Facades\FreeSwitch;
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
-use App\Models\User;
 use App\Models\Domain;
+use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CallCenterAgentRepository
 {
-    protected $callCenterAgent;
+    protected CallCenterAgent $callCenterAgent;
     protected $user;
 
     public function __construct(
@@ -24,19 +27,27 @@ class CallCenterAgentRepository
         $this->user = $user;
     }
 
+    public function mine()
+    {
+        return auth()->user()->agents->toResourceCollection();
+    }
+
     public function all()
     {
         return $this->callCenterAgent->all();
     }
-
+    /*
     public function mine()
     {
         $user = auth()->user();
         return $this->callCenterAgent->where('domain_uuid', $user->domain_uuid)->get();
     }
-
+*/
     public function findByUuid(string $agentUuid, bool $withRelations = false): ?CallCenterAgent
     {
+        if(App::hasDebugModeEnabled()){
+            Log::debug("public function findByUuid(string $agentUuid, bool $withRelations = false)");
+        }
         $query = $this->callCenterAgent->where('call_center_agent_uuid', $agentUuid);
 
         if ($withRelations) {
@@ -85,6 +96,7 @@ class CallCenterAgentRepository
             }
 
             DB::commit();
+            $this->updateSwitch($agent);
             return $agent;
         } catch (Exception $e) {
             DB::rollBack();
@@ -110,8 +122,11 @@ class CallCenterAgentRepository
             }
 
             DB::commit();
+            $this->updateSwitch($agent);
             return $agent->fresh();
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             DB::rollBack();
             throw $e;
         }
@@ -127,6 +142,7 @@ class CallCenterAgentRepository
                 throw new Exception("Call center agent not found");
             }
 
+            $this->deleteSwitch($agent);
             $agent->delete();
 
             DB::commit();
@@ -273,5 +289,60 @@ class CallCenterAgentRepository
                 $agentData[$key] = $value;
             }
         }
+    }
+
+    public function updateStatusByAgentName(string $agentName, string $newStatus): CallCenterAgent
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = auth()->user();
+
+            $agent = $this->callCenterAgent
+                ->where('agent_name', $agentName)
+                ->where('domain_uuid', $user->domain_uuid)
+                ->first();
+
+            if (!$agent) {
+                throw new Exception("Agent not found or you don't have permission to update it");
+            }
+
+            $agent->update(['agent_status' => $newStatus]);
+
+            if ($agent->user_uuid) {
+                $this->updateUserStatus($agent->user_uuid, $newStatus);
+            }
+
+            DB::commit();
+            return $agent->fresh();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    private function updateSwitch(callCenterAgent $callCenterAgent)
+    {
+        $cmd[] = "agent add ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_type;
+        $cmd[] = "agent set contact ".$callCenterAgent->ccall_center_agent_uuid." ".$callCenterAgent->agent_contact;
+        $cmd[] = "agent set status ".$callCenterAgent->call_center_agent_uuid." '".$callCenterAgent->agent_status."'";
+        $cmd[] = "agent set reject_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_reject_delay_time;
+        $cmd[] = "agent set busy_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_busy_delay_time;
+        $cmd[] = "agent set no_answer_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_no_answer_delay_time;
+        $cmd[] = "agent set max_no_answer ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_max_no_answer;
+        $cmd[] = "agent set wrap_up_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_wrap_up_time;
+        $cmd[] = "agent set uuid ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->call_center_agent_uuid;
+
+        foreach ($cmd as $arg)
+        {
+            $answer = FreeSwitch::execute('callcenter_config', $arg);
+            usleep(200);
+        }
+    }
+
+    private function deleteSwitch(callCenterAgent $callCenterAgent)
+    {
+        $cmd = "agent del ".$callCenterAgent->uuid;
+        $answer = FreeSwitch::execute('callcenter_config', $arg);
     }
 }

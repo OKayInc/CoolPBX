@@ -3,6 +3,10 @@
 @section('content')
 <div class="container-fluid">
     <div class="mt-3">
+        <div class="card-header">
+            <h2>Call Center Stats</h2>
+        </div>
+        <br>
         <div class="card-body">
             <div class="row">
                 <x-widget-metric
@@ -29,20 +33,35 @@
             <div class="row mt-4">
                 <x-widget-doughnut
                     type="doughnut"
+                    widget="active-agents"
                     :labels="array_keys($stats['active_agents']['metrics'])"
                     :values="array_column($stats['active_agents']['metrics'], 'value')"
                     :colors="array_column($stats['active_agents']['metrics'], 'color')"
+                    :extra="array_column($stats['active_agents']['metrics'], 'extra')"
+                    :links="array_column($stats['active_agents']['metrics'], 'link')"
                     :count="$stats['active_agents']['count']"
                     :title="$stats['active_agents']['title']"
                 />
                 <x-widget-doughnut
                     type="doughnut"
+                    widget="inbound-contacts"
                     :labels="array_keys($stats['inbound_contacts']['metrics'])"
                     :values="array_column($stats['inbound_contacts']['metrics'], 'value')"
                     :colors="array_column($stats['inbound_contacts']['metrics'], 'color')"
+                    :extra="array_column($stats['inbound_contacts']['metrics'], 'extra')"
+                    :links="array_column($stats['inbound_contacts']['metrics'], 'link')"
                     :count="$stats['inbound_contacts']['count']"
                     :title="$stats['inbound_contacts']['title']"
-                />
+                >
+                    <x-slot name="controls">
+                        <select id="inboundRange" class="form-select form-select-sm">
+                            <option value="15m">15 min</option>
+                            <option value="30m">30 min</option>
+                            <option value="60m">60 min</option>
+                            <option value="today" selected>Today</option>
+                        </select>
+                    </x-slot>
+                </x-widget-doughnut>
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ use App\Models\ExtensionSetting;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -137,5 +138,22 @@ class Extension extends Model
 				->orWhere('voicemail_id', $this->extension);
 		})
 			->first();
+	}
+
+	protected function fullName(): Attribute
+	{
+		return Attribute::make(
+			get: function () {
+				if (empty($this->domain)) {
+					return null;
+				}
+				return $this->extension . '@' . $this->domain->domain_name;
+			}
+		);
+	}
+
+	public function followMe(): HasOne
+	{
+		return $this->hasOne(FollowMe::class, 'follow_me_uuid', 'follow_me_uuid');
 	}
 }
