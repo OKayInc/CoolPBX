@@ -257,12 +257,74 @@ if (!function_exists('currency_convert')) {
 }
 
 if (!function_exists('getPaymentGatewayConfig')) {
-	function getPaymentGatewayConfig($paymentGateway)
-	{
-		$paymentGateways = config('paymentgateways');
+    function getPaymentGatewayConfig($paymentGateway)
+    {
+        $paymentGateways = config('paymentgateways');
 
-		return $paymentGateways[$paymentGateway];
-	}
+        return $paymentGateways[$paymentGateway];
+    }
+}
+
+if (!function_exists('format_string')) {
+    function format_string($format, $data)
+    {
+        if (empty($format)) {
+            return $data;
+        }
+
+        $x = 0;
+        $result = '';
+
+        $format_count = substr_count($format, 'x') + substr_count($format, 'X');
+        $format_count += substr_count($format, 'R') + substr_count($format, 'r');
+
+        if ($format_count == strlen($data)) {
+            $format_length = strlen($format);
+
+            for ($i = 0; $i < $format_length; $i++) {
+                $char = substr($format, $i, 1);
+                $char_lower = strtolower($char);
+
+                if ($char_lower === 'x') {
+                    $result .= substr($data, $x, 1);
+                    $x++;
+                } elseif ($char_lower === 'r') {
+                    $x++;
+                } else {
+                    $result .= $char;
+                }
+            }
+        }
+
+        return !empty($result) ? $result : $data;
+    }
+}
+
+
+if (!function_exists('format_phone')) {
+    function format_phone($phone_number)
+    {
+        if (is_numeric(trim($phone_number ?? '', ' +'))) {
+            $phoneFormats = session('format.phone');
+
+            if (!empty($phoneFormats) && is_array($phoneFormats)) {
+                $phone_number = trim($phone_number, ' +');
+
+                foreach ($phoneFormats as $format) {
+                    $format_count = substr_count($format, 'x');
+                    $format_count += substr_count($format, 'R');
+                    $format_count += substr_count($format, 'r');
+
+                    if ($format_count == strlen($phone_number)) {
+                        $phone_number = format_string($format, $phone_number);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $phone_number;
+    }
 }
 
 if (!function_exists('is_windows')) {

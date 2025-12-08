@@ -151,4 +151,9 @@ class Extension extends Model
 			}
 		);
 	}
+
+	public function followMe(): HasOne
+	{
+		return $this->hasOne(FollowMe::class, 'follow_me_uuid', 'follow_me_uuid');
+	}
 }

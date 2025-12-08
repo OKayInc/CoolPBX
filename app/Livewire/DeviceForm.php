@@ -374,7 +374,6 @@ class DeviceForm extends Component
             session()->flash('success', 'Device copied successfully.');
             return redirect()->route('devices.edit', $copiedDevice->device_uuid);
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error copying device: ' . $e->getMessage());
         }
     }
@@ -428,7 +427,6 @@ class DeviceForm extends Component
                 return redirect()->route('devices.edit', $device->device_uuid);
             }
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error saving device: ' . $e->getMessage());
         }
     }

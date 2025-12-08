@@ -28,6 +28,7 @@ class FollowMeDestination extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'follow_me_destination_uuid',
         'domain_uuid',
         'follow_me_uuid',
         'follow_me_destination',
