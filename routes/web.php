@@ -16,6 +16,8 @@ use App\Http\Controllers\BillingInvoiceController;
 use App\Http\Controllers\BridgeController;
 use App\Http\Controllers\CallBlockController;
 use App\Http\Controllers\CallForwardController;
+use App\Http\Controllers\CallCenterAgentController;
+use App\Http\Controllers\CallCenterQueueController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -24,6 +26,9 @@ use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
+use App\Http\Controllers\EmailQueueController;
+use App\Http\Controllers\FaxController;
+use App\Http\Controllers\IVRMenuController;
 use App\Http\Controllers\LcrController;
 use App\Http\Controllers\UserGroupController;
 use App\Http\Controllers\ModFormatCDRController;
@@ -32,12 +37,15 @@ use App\Http\Controllers\ModXMLCURLController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RegistrationsController;
 use App\Http\Controllers\MusicOnHoldController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\UserActivationController;
+use App\Http\Controllers\VariableController;
+use App\Http\Controllers\ViewCallRecordingController;
 use App\Http\Middleware\Authenticate;
 use App\Models\AccessControl;
 use App\Models\Destination;
@@ -69,6 +77,7 @@ Route::middleware(['guest'])->group(function () {
 
 Route::middleware(['auth','permission'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/inbound-contacts', [DashboardController::class, 'ajaxInboundContacts'])->name('dashboard.inbound_contacts');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
     // BILLING
@@ -90,6 +99,11 @@ Route::middleware(['auth','permission'])->group(function () {
     // BRIDGE
     Route::resource('/bridges', BridgeController::class)->name('bridges', 'bridges');
 
+    //CALL RECORDINGS
+    Route::get('/callrecordings', [ViewCallRecordingController::class, 'index'])->name('callrecordings.index', 'callrecordings.index');
+    Route::get('/callrecordings/{file}/play', [ViewCallRecordingController::class, 'play'])->name('callrecordings.play', 'callrecordings.play');
+    Route::get('/callrecordings/{file}/download', [ViewCallRecordingController::class, 'download'])->name('callrecordings.download', 'callrecordings.download');
+
     // DESTINATION
     Route::get('destinations/import', [DestinationController::class, 'import'])->name('destinations.import');
     Route::get('/destinations/export', [DestinationController::class, 'export'])->name('destinations.export', 'destinations.export');
@@ -110,6 +124,10 @@ Route::middleware(['auth','permission'])->group(function () {
     });
     Route::get('/domains/switch/{domain}', [DomainController::class, 'switchByUuid'])->name('domain.switchuuid');
 
+    // FAX
+    Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
+    Route::get('/faxes/{fax}/send', [FaxController::class, 'send'])->name('faxes.send');
+
     // GROUP
     Route::resource('/groups', GroupController::class)->name('groups', 'groups');
     Route::get('/groups/{group}/copy', [GroupController::class, 'copy'])->name('groups.copy');
@@ -117,6 +135,7 @@ Route::middleware(['auth','permission'])->group(function () {
     // PERMISSION
     //Route::resource('/permissions', PermissionController::class)->name('permissions', 'permissions');
     #Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions', [GroupPermissionController::class, 'index'])->name('permissions.all');
     Route::get('/groups/{groupUuid}/permissions', [GroupPermissionController::class, 'index'])->name('permissions.index');
     //Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
     //Route::get('/permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
@@ -126,6 +145,9 @@ Route::middleware(['auth','permission'])->group(function () {
     #Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     //Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
     //Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+
+    Route::get('/permissions/create', [GroupPermissionController::class, 'create'])->name('permissions.create');
+    Route::get('/permissions/{permissionUuid}/edit', [GroupPermissionController::class, 'edit'])->name('permissions.edit');
 
     // GATEWAY
     Route::resource('/gateways', GateWayController::class)->name('gateways', 'gateways');
@@ -143,6 +165,9 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::post('/lcr/import', [LcrController::class, 'import'])->name('lcr.import', 'lcr.import');
     Route::post('/lcr/checkrate', [LcrController::class, 'checkrate'])->name('lcr.checkrate');
     Route::resource('/lcr', LcrController::class)->name('lcr', 'lcr');
+
+    // IVR MENU
+    Route::resource('/ivr_menu', IVRMenuController::class)->name('ivr_menu', 'ivr_menu');
 
     // MODULES
     Route::get('/modules/{module}/start', [ModuleController::class, 'start'])->name('modules.start');
@@ -191,10 +216,15 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::resource('/accesscontrol', AccessControlController::class)->name('accesscontrol', 'accesscontrol');
     Route::get('/accesscontrol/{accesscontrol}/copy', [AccessControlController::class, 'copy'])->name('accesscontrol.copy');
 
+    // VARIABLES
+    Route::resource('variables', VariableController::class)->name('variables', 'variables');
+
     // XML CDR
     Route::get('/xmlcdr', [XmlCDRController::class, 'index'])->name('xmlcdr.index');
     Route::get('/xmlcdr/{xmlcdr}/play', [XmlCDRController::class, 'play'])->name('xmlcdr.play');
     Route::get('/xmlcdr/{xmlcdr}/download', [XmlCDRController::class, 'download'])->name('xmlcdr.download');
+    Route::get('/xmlcdr/{xmlcdr}/details', [XmlCDRController::class, 'details'])->name('xmlcdr.details');
+    Route::get('/xmlcdr/status/{status}', [XmlCDRController::class, 'filterByStatus'])->name('xmlcdr.filter_status');
 
     Route::resource('registrations', RegistrationsController::class)->name('registrations', 'registrations');
 
@@ -211,7 +241,11 @@ Route::middleware(['auth','permission'])->group(function () {
     Route::get('devices/import', [DeviceController::class, 'import'])->name('devices.import');
     Route::get('devices/export', [DeviceController::class, 'export'])->name('devices.export');
 
+    Route::resource('/email-queues', EmailQueueController::class);
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
+    Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
+    Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
+    Route::get('/call_center_agent_status', [CallCenterAgentController::class,'showStatus'])->name('callCenterAgentStatus');
 
     Route::resource('/call_forward', CallForwardController::class)->name('call_forward', 'call_forward');
 

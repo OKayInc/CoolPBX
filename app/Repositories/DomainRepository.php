@@ -246,7 +246,6 @@ class DomainRepository
 
                             $array['dialplans'][$x]['dialplan_details'][$y]['domain_uuid'] = $domain_uuid;
                             $array['dialplans'][$x]['dialplan_details'][$y]['dialplan_uuid'] = $dialplan_uuid;
-                            $ref_dialplan_uuid = $modelo->dialplan_uuid;
                             $array['dialplans'][$x]['dialplan_details'][$y]['dialplan_detail_tag'] = 'condition';
                             $array['dialplans'][$x]['dialplan_details'][$y]['dialplan_detail_order'] = $order;
                             $array['dialplans'][$x]['dialplan_details'][$y]['dialplan_detail_type'] = $row['@attributes']['field'];
@@ -377,19 +376,15 @@ class DomainRepository
                         {
                             $newInsertedDialplanDetail = DialplanDetail::create($newDialplanDetail);
                         }
-			if (is_object($this->dialplanRepository))
-			{
-	                        $xmlPayload = $this->dialplanRepository->buildXML($newInsertedDialplan);
-	                        if(App::hasDebugModeEnabled())
-        	                {
-                	            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] $xmlPayload: '.$xmlPayload);
-                        	}
-	                        $newInsertedDialplan->update(['xml' => $xmlPayload]);
-			}
-			else
-			{
-               	            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] Constructor called with null dialplanRepository, no XML to create');
-			}
+
+                        if (is_object($this->dialplanRepository))
+                        {
+                            $this->dialplanRepository->buildXML($newInsertedDialplan);
+                        }
+                        else
+                        {
+                            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] Constructor called with null dialplanRepository, no XML to create');
+                        }
 
                     }   // app_uuid_exists
                 }

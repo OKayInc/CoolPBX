@@ -24,7 +24,7 @@ class ContactRelationRequest extends FormRequest
         return [
             'relations' => 'nullable|array',
             'relations.*.relation_label' => 'nullable|string|max:100',
-            'relations.*.relation_contact_uuid' => 'nullable|uuid|exists:contacts,contact_uuid',
+            'relations.*.relation_contact_uuid' => 'nullable',
             'relations.*.contact_name' => 'nullable|string|max:255',
         ];
     }

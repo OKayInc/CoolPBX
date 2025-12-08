@@ -16,48 +16,50 @@ use Illuminate\Support\Facades\Log;
 class GroupPermissionController extends Controller
 {
     //
-	protected ?int $telegram_id = null;
+    protected ?int $telegram_id = null;
     protected PermissionRepository $permissionRepository;
 
     public function __construct(PermissionRepository $permissionRepository)
     {
         $this->permissionRepository = $permissionRepository;
+        // $this->middleware('permission:group_permission_edit')->except(['update']);
     }
 
-	public function setTelegramUser(?int $telegram_id){
-		$this->telegram_id = $telegram_id;
-	}
+    public function setTelegramUser(?int $telegram_id)
+    {
+        $this->telegram_id = $telegram_id;
+    }
 
-	public function allowed(string $permissionName): bool {
-		$result = false;
+    public function allowed(string $permissionName): bool
+    {
+        $result = false;
 
-		if (!empty($this->telegram_id)){
-			$session_id = md5($this->telegram_id);
-			Log::debug('$session_id: '.$session_id);
-			\OKayInc\StatelessSession::start($session_id);
-			$coolpbx_user = \OKayInc\StatelessSession::get('coolpbx_user');
-			$coolpbx_domain = \OKayInc\StatelessSession::get('coolpbx_domain');
-			$user_uuid = \OKayInc\StatelessSession::get('user_uuid');
-			Auth::loginUsingId($user_uuid, true);
-		}
+        if (!empty($this->telegram_id)) {
+            $session_id = md5($this->telegram_id);
+            Log::debug('$session_id: ' . $session_id);
+            \OKayInc\StatelessSession::start($session_id);
+            $coolpbx_user = \OKayInc\StatelessSession::get('coolpbx_user');
+            $coolpbx_domain = \OKayInc\StatelessSession::get('coolpbx_domain');
+            $user_uuid = \OKayInc\StatelessSession::get('user_uuid');
+            Auth::loginUsingId($user_uuid, true);
+        }
 
-		if (Auth::check()){
-			Log::debug('Authenticated');
-			$user = User::find($user_uuid);
-			if (count($user->groups) > 0){
-				foreach ($user->groups as $group){
-					Log::debug('$group->group_name: ' .$group->group_name);
-					$g = Group::find($group->group_uuid);
-					$permissions = $g->permissions()->where('v_permissions.permission_name', $permissionName)->get();
-					if (count($permissions) > 0)
-						$result = true;
+        if (Auth::check()) {
+            Log::debug('Authenticated');
+            $user = User::find($user_uuid);
+            if (count($user->groups) > 0) {
+                foreach ($user->groups as $group) {
+                    Log::debug('$group->group_name: ' . $group->group_name);
+                    $g = Group::find($group->group_uuid);
+                    $permissions = $g->permissions()->where('v_permissions.permission_name', $permissionName)->get();
+                    if (count($permissions) > 0)
+                        $result = true;
+                }
+            }
+        }
 
-				}
-			}
-		}
-
-		return $result;
-	}
+        return $result;
+    }
 
     public function index(GroupPermissionRequest $request, $groupUuid = null)
     {
@@ -68,8 +70,8 @@ class GroupPermissionController extends Controller
 
         $group = $groupUuid ? Group::findOrFail($groupUuid) : null;
 
-        $permissions = $this->permissionRepository->getFilteredPermissions($search, $groupUuid, $filter);
-        
+        $permissions = $this->permissionRepository->getFilteredPermissions('', $groupUuid, $filter);
+
         $permissionsByApp = $this->permissionRepository->getUniqueApplicationNames($permissions);
 
         return view('pages.permission.index', compact(
@@ -119,5 +121,18 @@ class GroupPermissionController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function create()
+    {
+        return view('pages.permission.form');
+    }
+
+    public function edit($permissionUuid)
+    {
+        $permission = Permission::where('permission_uuid', $permissionUuid)->firstOrFail();
+        $permissionUuid = $permission->permission_uuid;
+
+        return view('pages.permission.form', compact('permission', 'permissionUuid'));
     }
 }

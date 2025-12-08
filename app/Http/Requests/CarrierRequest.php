@@ -34,7 +34,7 @@ class CarrierRequest extends FormRequest
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] method: '.$this->getMethod());
         }
-
+/**
         if ($carrier_uuid || $this->route('id'))
         {
    	    	$carrier = Carrier::find($carrier_uuid ?? $this->route('id'));
@@ -45,7 +45,7 @@ class CarrierRequest extends FormRequest
         {
             $rule['domain_name'][] = Rule::unique('App\Models\Carrier','carrier_name');
         }
-
+**/
         return $rules;
 	}
 }

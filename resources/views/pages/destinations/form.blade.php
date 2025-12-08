@@ -150,14 +150,13 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="destination_caller_id_name" class="form-label">Caller ID Name </label>
+                            <label for="destination_caller_id_name" class="form-label">Caller ID Name</label>
                             <input
                                 type="text"
                                 class="form-control @error('destination_caller_id_name') is-invalid @enderror"
                                 id="destination_caller_id_name"
                                 name="destination_caller_id_name"
                                 value="{{ old('destination_caller_id_name', $destination->destination_caller_id_name ?? '') }}"
-                                required
                             >
                             @error('destination_caller_id_name')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -178,7 +177,6 @@
                                 id="destination_caller_id_number"
                                 name="destination_caller_id_number"
                                 value="{{ old('destination_caller_id_number', $destination->destination_caller_id_number ?? '') }}"
-                                required
                             >
                             @error('destination_caller_id_number')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -243,7 +241,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_actions" class="form-label">Action</label>
-                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" />
+                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" required/>
                             @error('destination_actions')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -367,7 +365,6 @@
                                 name="destination_cid_name_prefix"
                                 value="{{ old('destination_cid_name_prefix', $destination->destination_cid_name_prefix ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_cid_name_prefix')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -417,7 +414,6 @@
                                 name="destination_distinctive_ring"
                                 value="{{ old('destination_distinctive_ring', $destination->destination_distinctive_ring ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_distinctive_ring')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -439,7 +435,6 @@
                                 name="destination_accountcode"
                                 value="{{ old('destination_accountcode', $destination->destination_accountcode ?? '') }}"
                                 maxlength="255"
-                                required
                             >
                             @error('destination_accountcode')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>

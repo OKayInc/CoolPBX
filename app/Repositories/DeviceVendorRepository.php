@@ -6,12 +6,14 @@ use App\Models\DeviceVendor;
 use App\Models\DeviceVendorFunction;
 use App\Models\DeviceVendorFunctionGroup;
 use App\Models\Group;
+use App\Traits\GetTableName;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Exception;
 
 class DeviceVendorRepository
 {
+    use GetTableName;
     protected $deviceVendor;
     protected $deviceVendorFunction;
     protected $deviceVendorFunctionGroup;
@@ -214,8 +216,8 @@ class DeviceVendorRepository
 
     public function getFunctionGroups(string $deviceVendorFunctionUuid, string $deviceVendorUuid): array
     {
-        $deviceVendorFunctionGroupsTable = DeviceVendorFunctionGroup::getTable();
-        $groupsTable = Group::getTable();
+        $deviceVendorFunctionGroupsTable = DeviceVendorFunctionGroup::getTableName();
+        $groupsTable = Group::getTableName();
 
         return DB::table($deviceVendorFunctionGroupsTable . ' as fg')
             ->join($groupsTable . ' as g', 'fg.group_uuid', '=', 'g.group_uuid')

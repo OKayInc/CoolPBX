@@ -121,7 +121,7 @@ class ContactAttachmentForm extends Component
         }
 
         session()->flash('message', 'Attachment saved successfully.');
-        redirect()->route('contacts.edit', ['contact' => $this->contactUuid]);
+        redirect()->route('contacts.index');
     }
 
     public function render()

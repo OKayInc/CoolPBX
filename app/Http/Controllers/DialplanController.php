@@ -39,7 +39,7 @@ class DialplanController extends Controller
         $domains = $this->dialplanRepository->getAllDomains();
         $types = $this->dialplanRepository->getTypesList();
         $dialplan_default_context = $this->dialplanRepository->getDefaultContext(
-            request()->input('app_id'),
+            request()->input('app_uuid'),
             Session::get('domain_name')
         );
 
@@ -61,7 +61,7 @@ class DialplanController extends Controller
 		$domains = Domain::all();
 		$dialplan->load("dialplanDetails");
 		$types = $this->dialplanRepository->getTypesList();
-		$dialplan_default_context = (request()->input('app_id') == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : Session::get('domain_name');
+		$dialplan_default_context = (request()->input('app_uuid') == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : Session::get('domain_name');
 
 		return view("pages.dialplans.form", compact("dialplan", "domains", "types", "dialplan_default_context"));
 	}

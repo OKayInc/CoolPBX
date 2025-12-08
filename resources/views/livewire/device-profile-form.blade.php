@@ -111,7 +111,7 @@
                                                             <tr>
                                                                 <th>Category</th>
                                                                 <th>ID</th>
-                                                                <th>Vendor</th>
+                                                                {{-- <th>Vendor</th> --}}
                                                                 <th>Type</th>
                                                                 @if ($showKeySubtype)
                                                                     <th>Subtype</th>
@@ -148,19 +148,8 @@
                                                                     </td>
                                                                     <td>
                                                                         <select class="form-control form-control-sm"
-                                                                            wire:model="profileKeys.{{ $index }}.profile_key_vendor">
-                                                                            <option value="">Select Vendor</option>
-                                                                            @foreach ($vendorFunctions as $vendor)
-                                                                                <option
-                                                                                    value="{{ $vendor['vendor_name'] }}">
-                                                                                    {{ $vendor['vendor_name'] }}
-                                                                                </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </td>
-                                                                    <td>
-                                                                        <select class="form-control form-control-sm"
-                                                                            wire:model="profileKeys.{{ $index }}.profile_key_type">
+                                                                            wire:model="profileKeys.{{ $index }}.profile_key_type"
+                                                                            wire:change= "updateVendorFromType({{ $index }})">
                                                                             <option value="">Select Function</option>
                                                                             @foreach ($this->groupedVendorFunctions as $vendor => $functions)
                                                                                 <optgroup label="{{ ucfirst($vendor) }}">

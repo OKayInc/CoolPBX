@@ -26,6 +26,15 @@ class CallCenterTier extends Pivot
 	const CREATED_AT = 'insert_date';
 	const UPDATED_AT = 'update_date';
 
+	protected $fillable = [
+		'domain_uuid',
+		'call_center_agent_uuid',
+		'queue_name',
+		'agent_name',
+		'tier_level',
+		'tier_position',
+	];
+
 	public function domain(): BelongsTo {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}

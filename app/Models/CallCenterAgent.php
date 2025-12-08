@@ -64,16 +64,26 @@ class CallCenterAgent extends Model
 	protected $casts = [
 	];
 
-	public function domain(): BelongsTo {
+	public function domain(): BelongsTo
+    {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}
 
-	public function user(): HasOne {
+	public function user(): HasOne
+    {
 		return $this->HasOne(User::class, 'user_uuid', 'user_uuid');
 	}
 
-	public function callcenterqueues(): BelongsToMany {
-		return $this->belongsToMany(CallCenterQueue::class, 'v_call_center_tiers', 'call_center_agent_uuid', 'call_center_queue_uuid');
-//		$this->belongsToMany(Group::class)->using(UserGroup::class);
-	}
+    public function queues()
+    {
+        return $this->belongsToMany(CallCenterQueue::class, 'v_call_center_tiers', 'call_center_agent_uuid', 'call_center_queue_uuid')
+            ->using(CallCenterTier::class)
+            ->withPivot('call_center_tier_uuid','tier_level','tier_position')
+            ->withTimestamps();
+    }
+
+    public function xmlcdr(): hasMany
+    {
+        return $this->hasMany(CallCenterAgent::class, 'cc_agent', 'call_center_agent_uuid');
+    }
 }

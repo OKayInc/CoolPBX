@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Facades\FreeSwitch;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CallCenterAgentRequest;
+use App\Http\Requests\UpdateAgentStatusRequest;
+use App\Models\CallCenterAgent;
+use App\Repositories\CallCenterAgentRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+
+class CallCenterAgentAPIController extends Controller
+{
+	protected CallCenterAgentRepository $callCenterAgentRepository;
+
+	public function __construct(CallCenterAgentRepository $callCenterAgentRepository)
+	{
+		$this->callCenterAgentRepository = $callCenterAgentRepository;
+	}
+
+	public function mine()
+	{
+		return response()->json(["data" => $this->callCenterAgentRepository->mine()]);
+	}
+
+	public function index()
+	{
+		return response()->json($this->callCenterAgentRepository->all());
+	}
+
+	// TODO:
+	public function store(CallCenterAgentRequest $request)
+	{
+		$newCallCenterAgent = $this->callCenterAgentRepository->create($request->validated());
+		return response()->json($newCallCenterAgent);
+	}
+
+	public function show(CallCenterAgent $agent)
+	{
+		$d = $this->callCenterAgentRepository->findByUuid($agent->domain_uuid, true);
+		return response()->json($d);
+	}
+
+	public function update(CallCenterAgentRequest $request, string $agentUuid)
+	{
+        if(App::hasDebugModeEnabled()){
+            Log::debug("public function update(CallCenterAgentRequest $request, string $agentUuid)");
+        }
+        $errorCode = 403;
+        $payload['message'] ='Not authorized';
+
+        $agent = $this->callCenterAgentRepository->findByUuid($agentUuid);
+        if ($agent)
+        {
+            foreach ($this->callCenterAgentRepository->mine() as $myAgent)
+            {
+                if ($myAgent->call_center_agent_uuid == $agent->call_center_agent_uuid)
+                {
+                    $d = $this->callCenterAgentRepository->update($agent->call_center_agent_uuid, $request->validated());
+                    $errorCode = 200;
+                    $payload['message'] ='Agent updated successfully';
+                    $payload['data'] = $d;
+                    break;
+                }
+            }
+        }
+        else {
+            $payload['message'] ='Agent not found';
+            $errorCode = 404;
+        }
+
+		return response()->json($payload, $errorCode);
+	}
+
+	public function destroy(CallCenterAgent $agent)
+	{
+		$d = $this->callCenterAgentRepository->delete($agent);
+		return response()->json($d);
+	}
+
+	public function updateMyStatus(UpdateAgentStatusRequest $request)
+	{
+		try {
+			$agent = $this->callCenterAgentRepository->updateStatusByAgentName(
+				$request->input('agent_name'),
+				$request->input('status')
+			);
+
+			return response()->json([
+				'success' => true,
+				'message' => 'Agent status updated successfully',
+				'data' => $agent
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'message' => $e->getMessage()
+			], 400);
+		}
+	}
+}

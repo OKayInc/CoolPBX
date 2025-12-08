@@ -12,66 +12,88 @@ use Illuminate\Support\Str;
 class GatewayRepository
 {
     protected $model;
-    
+
     public function __construct()
     {
         $this->model = new Gateway();
     }
-    
+
 
     public function getAll(): Collection
     {
         return $this->model->all();
     }
-    
+
 
     public function findByUuid(string $uuid): ?Gateway
     {
         return $this->model->where('gateway_uuid', $uuid)->first();
     }
-    
+
     public function create(array $data): Gateway
     {
-        if(Auth::check() && !isset($data['insert_user'])) {
+        if (Auth::check() && !isset($data['insert_user'])) {
             $data['insert_user'] = Auth::user()->user_uuid;
         }
 
         return $this->model->create($data);
     }
-    
+
 
     public function update(Gateway $gateway, array $data): bool
     {
-        if(Auth::check() && !isset($data['update_user'])) {
+        if (Auth::check() && !isset($data['update_user'])) {
             $data['update_user'] = Auth::user()->user_uuid;
         }
         return $gateway->update($data);
     }
-    
+
     public function delete(Gateway $gateway): ?bool
     {
         return $gateway->delete();
     }
-    
+
     public function copy(Gateway $gateway): Gateway
     {
         $newGateway = $gateway->replicate();
         $newGateway->gateway_uuid = Str::uuid();
         $newGateway->description = $newGateway->description . ' (Copy)';
         $newGateway->save();
-        
+
         return $newGateway;
     }
-    
+
 
     public function getAllDomains(): Collection
     {
         return Domain::all();
     }
-    
+
 
     public function getAllSipProfiles(): Collection
     {
         return SipProfile::all();
+    }
+
+    public function getDestinationsByDomain(string $domainUuid):mixed
+    {
+        return $this->model
+            ->join('v_domains as d', 'v_gateways.domain_uuid', '=', 'd.domain_uuid')
+            ->select(
+                'v_gateways.gateway_uuid as destination',
+                'v_gateways.gateway as name',
+                'd.domain_name',
+                'v_gateways.description'
+            )
+            ->where('v_gateways.domain_uuid', $domainUuid)
+            ->where('v_gateways.enabled', 'true')
+            ->orderBy('v_gateways.gateway', 'asc')
+            ->get()
+            ->map(function ($g) {
+                return [
+                    'value' => "sofia/gateway/{$g->destination}",
+                    'label' => "{$g->name}@{$g->domain_name} {$g->description}",
+                ];
+            });
     }
 }

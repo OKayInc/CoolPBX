@@ -2,7 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Models\RingGroup;
+use App\Rules\UniqueFSDestination;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class RingGroupRequest extends FormRequest
 {
@@ -19,9 +25,18 @@ class RingGroupRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules(?string $ringGroupUuid = null): array
     {
-        return [
+        $ringGroup = RingGroup::find($ringGroupUuid ?? $this->route('id'));
+        $isEditing = $ringGroup ? true : false;
+        if(App::hasDebugModeEnabled())
+        {
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing: '.(int)$isEditing);
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
+        }
+        //$isCreating = $this->isMethod("post");
+
+        $rules =  [
             'ring_group_name' => 'required|string|max:255',
             'ring_group_extension' => [
                 'required',
@@ -29,23 +44,23 @@ class RingGroupRequest extends FormRequest
                 'max:255',
             ],
             'ring_group_greeting' => 'nullable|string|max:255',
-            'ring_group_strategy' => 'nullable|in:simultaneous,sequence,enterprise,rollover,random',
-            'ring_group_call_timeout' => 'nullable|numeric|min:5|max:300',
+            'ring_group_strategy' => 'required|in:simultaneous,sequence,enterprise,rollover,random',
+            'ring_group_call_timeout' => 'required|numeric|integer|min:1',
             'ring_group_caller_id_name' => 'nullable|string|max:255',
-            'ring_group_caller_id_number' => 'nullable|numeric',
+            'ring_group_caller_id_number' => 'nullable|numeric|integer',
             'ring_group_cid_name_prefix' => 'nullable|string|max:255',
-            'ring_group_cid_number_prefix' => 'nullable|numeric',
+            'ring_group_cid_number_prefix' => 'nullable|numeric|integer',
             'ring_group_distinctive_ring' => 'nullable|string|max:255',
             'ring_group_ringback' => 'nullable|string|max:255',
-            'ring_group_call_forward_enabled' => 'bail|nullable',
-            'ring_group_follow_me_enabled' => 'bail|nullable',
+            'ring_group_call_forward_enabled' => 'nullable|string|in:true,false',
+            'ring_group_follow_me_enabled' => 'nullable|string|in:true,false',
             'ring_group_missed_call_app' => 'nullable|in:email,text',
             'ring_group_missed_call_data' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
-            'ring_group_forward_enabled' => 'bail|nullable',
+            'ring_group_forward_enabled' => 'nullable|string|in:true,false',
             'ring_group_forward_destination' => [
                 'nullable',
                 'string',
@@ -54,7 +69,7 @@ class RingGroupRequest extends FormRequest
             'ring_group_forward_toll_allow' => 'nullable|string|max:255',
             'ring_group_timeout_action' => 'nullable|string|max:255',
             'ring_group_context' => 'nullable|string|max:255',
-            'ring_group_enabled' => 'bail|nullable',
+            'ring_group_enabled' => 'nullable|string|in:true,false',
             'ring_group_description' => 'nullable|string|max:500',
 
             'ring_group_destinations' => 'nullable|array|max:50',
@@ -63,15 +78,32 @@ class RingGroupRequest extends FormRequest
                 'string',
                 'max:255'
             ],
-            'ring_group_destinations.*.destination_delay' => 'nullable|numeric|min:0|max:300',
-            'ring_group_destinations.*.domain_uuid' => 'nullable|string|exists:v_domains,domain_uuid',
+            'ring_group_destinations.*.destination_delay' => 'nullable|numeric|integer|min:0|max:300',
+            'ring_group_destinations.*.domain_uuid' => 'nullable|string|exists:App\Models\Domain,domain_uuid',
             'ring_group_destinations.*.ring_group_uuid' => 'nullable|string',
-            'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|min:5|max:300',
+            'ring_group_destinations.*.destination_timeout' => 'nullable|numeric|integer|min:5',
             'ring_group_destinations.*.destination_prompt' => 'boolean',
-            'ring_group_destinations.*.destination_enabled' => 'nullable',
+            'ring_group_destinations.*.destination_enabled' => 'nullable|string|in:true,false',
 
             'ring_group_users' => 'nullable|array',
 
         ];
+
+        if ($isEditing)
+        {
+		// TODO: fix UniqueFSDestination to accept ->ignore()
+
+            if(App::hasDebugModeEnabled())
+            {
+                Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ringGroup: '.print_r($ringGroup, true));
+            }
+            $rule["ring_group_extension"][] = Rule::unique(RingGroup::getTableName(),'ring_group_extension')->ignore($ringGroup->ring_group_uuid, $ringGroup->getKeyName());
+        }
+        else
+        {
+            $rules['ring_group_extension'][] = new UniqueFSDestination();
+        }
+
+        return $rules;
     }
 }

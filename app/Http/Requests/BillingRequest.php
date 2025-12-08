@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidPricingList;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,9 +27,9 @@ class BillingRequest extends FormRequest
 			"force_postpaid_full_payment" => 'bail|nullable|in:true,false',
 			'pay_days' => 'bail|required_if:credit_type,postpaid|numeric|min:0|nullable',
 			'balance' => 'bail|nullable|numeric',
-			'auto_topup_charge' => 'bail|nullable|integer|min:0',
-			'auto_topup_minimum_balance' => 'bail|nullable|integer|min:0',
-			'lcr_profile' => 'bail|nullable|string',
+			'auto_topup_charge' => 'bail|nullable|integer|min:0|required_with:auto_topup_minimum_balance',
+			'auto_topup_minimum_balance' => 'bail|nullable|integer|min:0|required_with:auto_topup_charge',
+			'lcr_profile' => ['bail','nullable','string', new ValidPricingList(config('freeswitch.SELLING_PRICING_LIST'))],  //TODO: for now nullable, later required
 			'max_rate' => 'bail|nullable|numeric|min:0',
 			'referred_by_uuid' => 'bail|nullable|uuid|exists:App\Models\Contact,contact_uuid',
 			'referred_depth' => 'bail|nullable|numeric|min:0',

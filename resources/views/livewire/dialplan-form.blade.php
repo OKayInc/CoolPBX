@@ -12,7 +12,7 @@
 			<div class="card-body">
 				<form wire:submit.prevent="save">
 
-					<input type="hidden" name="app_uuid" value="{{ old('app_uuid', $dialplan->app_uuid ?? '') }}">
+					<input type="hidden" name="app_uuid" wire:model="app_uuid">
 
 					<div class="card-body">
 						<div class="row">

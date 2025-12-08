@@ -84,7 +84,7 @@ class CarrierForm extends Component
 
         $this->loadPermissions();
 
-        if (empty($this->carrierGateways) && $this->canAddCarrierGateways)
+        if ($carrier && empty($this->carrierGateways) && $this->canAddCarrierGateways)
         {
             $this->addCarrierGateway();
         }

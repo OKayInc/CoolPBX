@@ -326,3 +326,120 @@ if (!function_exists('format_phone')) {
         return $phone_number;
     }
 }
+
+if (!function_exists('is_windows')) {
+    function is_windows(): bool
+    {
+        return stripos(PHP_OS, 'WIN') === 0;
+    }
+}
+
+if (!function_exists('correct_path')) {
+	function correct_path($p) {
+		if (is_windows()) {
+			return str_replace('/', '\\', $p);
+		}
+		return $p;
+	}
+}
+
+//define function gs_cmd
+if (!function_exists('gs_cmd')) {
+	function gs_cmd($args) {
+		if (is_windows()) {
+			return 'gswin32c '.$args;
+		}
+		return 'gs '.$args;
+	}
+}
+
+//define function fax_split dtmf
+if (!function_exists('fax_split_dtmf')) {
+	function fax_split_dtmf(&$fax_number, &$fax_dtmf){
+		$tmp = array();
+		$fax_dtmf = '';
+		if (preg_match('/^\s*(.*?)\s*\((.*)\)\s*$/', $fax_number, $tmp)){
+			$fax_number = $tmp[1];
+			$fax_dtmf = $tmp[2];
+		}
+	}
+}
+
+if (!function_exists('format_string')) {
+    function format_string($format, $data) {
+        //nothing to do so return
+        if(empty($format))
+            return $data;
+
+        //preset values
+        $x=0;
+        $tmp = '';
+
+        //count the characters
+        $format_count = substr_count($format, 'x');
+        $format_count = $format_count + substr_count($format, 'R');
+        $format_count = $format_count + substr_count($format, 'r');
+
+        //format the string if it matches
+        if ($format_count == strlen($data)) {
+            for ($i = 0; $i <= strlen($format); $i++) {
+                $tmp_format = strtolower(substr($format, $i, 1));
+                if ($tmp_format == 'x') {
+                    $tmp .= substr($data, $x, 1);
+                    $x++;
+                }
+                elseif ($tmp_format == 'r') {
+                    $x++;
+                }
+                else {
+                    $tmp .= $tmp_format;
+                }
+            }
+        }
+        if (empty($tmp)) {
+            return $data;
+        }
+        else {
+            return $tmp;
+        }
+    }
+}
+
+if (!function_exists('format_phone')) {
+    function format_phone($phone_number) {
+        if (is_numeric(trim($phone_number ?? '', ' +'))) {
+            $formatPhone = Setting::getSetting("format", "phone");
+            if (!empty($formatPhone)) {
+                $phone_number = trim($phone_number, ' +');
+                foreach ($formatPhone as &$format) {
+                    $format_count = substr_count($format, 'x');
+                    $format_count = $format_count + substr_count($format, 'R');
+                    $format_count = $format_count + substr_count($format, 'r');
+                    if ($format_count == strlen($phone_number)) {
+                        //format the number
+                        $phone_number = format_string($format, $phone_number);
+                    }
+                }
+            }
+        }
+        return $phone_number;
+    }
+}
+
+if (!function_exists('escape')) {
+    function escape($string) {
+        if (is_string($string)) {
+            return htmlentities($string, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        elseif (is_numeric($string)) {
+            return $string;
+        }
+        else {
+            $string = (array) $string;
+            if (isset($string[0])) {
+                return htmlentities($string[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            }
+        }
+        return false;
+    }
+}

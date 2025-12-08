@@ -180,7 +180,11 @@ class FreeSwitchConnectionManager implements FreeSwitchConnectionManagerInterfac
         foreach ($cmd_array as &$value) {
             fputs($this->fp, $value . "\n");
         }
-        fputs($this->fp, "\n"); //second line feed to end the headers
+        fputs($this->fp, "\n");
+        if (!str_ends_with($cmd, "\n\n")) {
+            fputs($this->fp, "\n");
+        }
+
 
         $event = $this->es_read_event();
 
@@ -197,9 +201,8 @@ class FreeSwitchConnectionManager implements FreeSwitchConnectionManagerInterfac
         }
 
         $cmd = 'api ' . $command;
-        if (!empty($param))
-        {
-            $cmd .= ' '.trim($param);
+        if (!empty($param)) {
+            $cmd .= ' ' . trim($param);
         }
         return $this->es_request($cmd);
     }
@@ -212,9 +215,8 @@ class FreeSwitchConnectionManager implements FreeSwitchConnectionManagerInterfac
 
         // Parse command and params
         $line = trim($command);
-        if (!empty($param))
-        {
-            $line .= ' '.trim($param);
+        if (!empty($param)) {
+            $line .= ' ' . trim($param);
         }
         list($command, $param) = explode(' ', $line, 2);
 
@@ -240,7 +242,6 @@ class FreeSwitchConnectionManager implements FreeSwitchConnectionManagerInterfac
                 ])
                 ->withOptions($options)
                 ->get($url);
-
         } catch (ConnectionException $e) {
             if (App::hasDebugModeEnabled()) {
                 Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] Error: ' . $e->getMessage());

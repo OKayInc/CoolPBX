@@ -28,7 +28,7 @@
             </div>
 
             <div class="card-body">
-                <livewire:ringgroup-table />
+                <livewire:ring-group-table />
             </div>
         </div>
     </div>

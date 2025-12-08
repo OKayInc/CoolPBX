@@ -17,10 +17,13 @@ class UserResource extends JsonResource
     {
 
         return [
+            'user_uuid' => $this->user_uuid,
+            'contact_uuid' => $this->contact_uuid,
             'username' => $this->username,
             'user_email' => $this->user_email,
             'user_status' => $this->user_status,
             'api_key' => $this->api_key,
+            'user_enabled' => $this->user_enabled,
         ];
     }
 }

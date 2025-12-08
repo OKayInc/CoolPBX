@@ -14,7 +14,12 @@
                             <div class="col-md-6">
                                 <label for="phone_number_{{ $index }}" class="form-label">Phone Number</label>
                                 <input type="text" wire:model="phones.{{ $index }}.phone_number"
-                                    class="form-control" placeholder="Phone number">
+                                    class="form-control @error('phones.' .$index .'.phone_number') is-invalid @enderror" placeholder="Phone number">
+                                @error('phones.' . $index .'.phone_number')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
                             <div class="col-md-4">
                                 <label for="phone_label">Label</label>
@@ -35,19 +40,37 @@
                             <div class="col-md-6">
                                 <label for="phone_speed_dial" class="form-label">Speed Dial</label>
                                 <input type="text" wire:model="phones.{{ $index }}.phone_speed_dial"
-                                    class="form-control" placeholder="Speed Dial">
+                                    class="form-control @error('phones.' .$index .'.phone_speed_dial') is-invalid
+                                    @enderror" placeholder="Speed Dial">
+                                @error('phones.' . $index .'.phone_speed_dial')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label for="phone_country_code" class="form-label">Country Code</label>
                                 <input type="text" wire:model="phones.{{ $index }}.phone_country_code"
-                                    class="form-control" placeholder="Country Code">
+                                    class="form-control @error('phones.' .$index .'.phone_country_code') is-invalid
+                                    @enderror" placeholder="Country Code">
+                                @error('phones.' . $index .'.phone_country_code')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-6">
                                 <label for="phone_extension_{{ $index }}" class="form-label">Extension</label>
                                 <input type="text" wire:model="phones.{{ $index }}.phone_extension"
-                                    class="form-control" placeholder="Extension">
+                                    class="form-control @error('phones.' .$index .'.phone_extension') is-invalid
+                                    @enderror" placeholder="Extension">
+                                @error('phones.' . $index .'.phone_extension')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div> 
+                                @enderror
                             </div>
 
                             <div class="col-md-6 ">
@@ -55,7 +78,8 @@
                                     <input class="form-check-input" type="checkbox"
                                         wire:model="phones.{{ $index }}.phone_primary"
                                         id="phone_primary_{{ $index }}">
-                                    <label class="form-check-label" for="phone_primary_{{ $index }}">
+                                    <label class="form-check-label @error('phones.' .$index .'.phone_primary') is-invalid
+                                    @enderror" for="phone_primary_{{ $index }}">
                                         Primary</label>
                                 </div>
                             </div>

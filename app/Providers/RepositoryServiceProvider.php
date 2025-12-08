@@ -39,6 +39,8 @@ use App\Repositories\PermissionRepository;
 use App\Repositories\SipProfileRepository;
 use App\Repositories\StreamRepository;
 use App\Repositories\ExtensionRepository;
+use App\Services\CallCenterAgentStatusService;
+use App\Services\CallCenterNotifyService;
 use App\Repositories\PhraseRepository;
 use App\Repositories\RecordingRepository;
 use Illuminate\Support\ServiceProvider;
@@ -117,7 +119,7 @@ class RepositoryServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->bind(MenuItemRepository::class, function ($app){
+        $this->app->bind(MenuItemRepository::class, function ($app) {
             return new MenuItemRepository(
                 $app->make(MenuItem::class)
             );
@@ -132,6 +134,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DialplanRepository::class, function ($app) {
             return new DialplanRepository(
                 $app->make(Dialplan::class),
+            $app->make(DialplanRepository::class),
             );
         });
 
@@ -154,6 +157,13 @@ class RepositoryServiceProvider extends ServiceProvider
         });
 
     
+        $this->app->singleton(CallCenterAgentStatusService::class, function ($app) {
+            return new CallCenterAgentStatusService(
+                $app->make(CallCenterNotifyService::class)
+            );
+        });
+
+        $this->app->singleton(CallCenterNotifyService::class);
     }
 
     /**

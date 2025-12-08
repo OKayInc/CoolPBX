@@ -17,10 +17,12 @@
         "livewire/livewire": "*",
         "okayinc/stateless-session": "^0.0.10",
         "rappasoft/laravel-livewire-tables": "^3.7",
+        "setasign/fpdi-tcpdf": "^2.3",
         "socialiteproviders/okta": "^4.4",
         "spatie/livewire-filepond": "^1.4",
         "staudenmeir/laravel-cte": "^1.12",
-        "stripe/stripe-php": "^17.5"
+        "stripe/stripe-php": "^17.5",
+        "tecnickcom/tcpdf": "^6.10"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

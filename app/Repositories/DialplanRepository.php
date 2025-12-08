@@ -284,7 +284,7 @@ class DialplanRepository
         ];
     }
 
-    public function buildXML(Dialplan $dialplan): string
+    public function buildXML(Dialplan $dialplan): void
     {
         $xml = new \XMLWriter();
         $xml->openMemory();
@@ -341,12 +341,14 @@ class DialplanRepository
 
         $xml->endElement();
 
-        return $xml->outputMemory();
+        Dialplan::where('dialplan_uuid', $dialplan->dialplan_uuid)->update([
+            'dialplan_xml' => $xml->outputMemory()
+        ]);
     }
 
 
-    public function getDefaultContext(?string $appId = null, ?string $domainName = null): string
+    public function getDefaultContext(?string $appUuid = null, ?string $domainName = null): string
     {
-        return ($appId == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : $domainName;
+        return ($appUuid == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : $domainName;
     }
 }
