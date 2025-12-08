@@ -56,7 +56,7 @@ class CallForwardForm extends Component
     public function mount($extensionUuid = null)
     {
         $this->extensionUuid = $extensionUuid;
-        
+
         if (!$this->extensionUuid) {
             session()->flash('error', 'Extension UUID is required.');
             return redirect()->route('extensions.index');
@@ -114,7 +114,7 @@ class CallForwardForm extends Component
                         'uuid' => $dest->follow_me_destination_uuid,
                         'destination' => $dest->follow_me_destination,
                         'delay' => $dest->follow_me_delay ?? 0,
-                        'timeout' => $dest->follow_me_timeout ?? 30,
+                        'timeout' => !is_null($dest->follow_me_timeout) ? $dest->follow_me_timeout : 30,
                         'prompt' => $dest->follow_me_prompt,
                     ];
                 })->toArray();
@@ -134,7 +134,7 @@ class CallForwardForm extends Component
     protected function fillDestinationsToMax(int $maxCount)
     {
         $currentCount = count($this->destinations);
-        
+
         for ($i = $currentCount; $i < $maxCount; $i++) {
             $this->destinations[] = [
                 'uuid' => null,
@@ -148,9 +148,9 @@ class CallForwardForm extends Component
 
     protected function updateUIState()
     {
-        $this->showFollowMeSettings = 
-            $this->follow_me_enabled === 'true' && 
-            $this->do_not_disturb === 'false' && 
+        $this->showFollowMeSettings =
+            $this->follow_me_enabled === 'true' &&
+            $this->do_not_disturb === 'false' &&
             $this->forward_all_enabled === 'false';
     }
 
@@ -270,10 +270,10 @@ class CallForwardForm extends Component
 
 
             session()->flash('success', 'Call forward settings updated successfully.');
-            
+
             $this->loadExtension();
             $this->updateUIState();
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Error updating call forward settings: ' . $e->getMessage());
             throw $e;
@@ -295,13 +295,13 @@ class CallForwardForm extends Component
         $this->follow_me_ignore_busy = 'false';
         $this->cid_name_prefix = '';
         $this->cid_number_prefix = '';
-        
+
         $maxDestinations = Setting::getSetting('follow_me', 'max_destinations', 'numeric') ?? 5;
         $this->destinations = [];
         $this->fillDestinationsToMax($maxDestinations);
-        
+
         $this->updateUIState();
-        
+
         session()->flash('info', 'Settings reset to defaults. Click Save to apply changes.');
     }
 
