@@ -16,6 +16,17 @@ class UserRepository
         $this->model = $user;
     }
 
+    public function mine()
+    {
+        return auth()->user();
+    }
+
+    public function all()
+    {
+        return $this->getAll();
+    }
+
+    // TODO: find all getAlls and transform them to all()
     public function getAll()
     {
         return $this->model->all();

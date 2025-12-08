@@ -284,7 +284,7 @@ class DialplanRepository
         ];
     }
 
-    public function buildXML(Dialplan $dialplan): string
+    public function buildXML(Dialplan $dialplan): void
     {
         $xml = new \XMLWriter();
         $xml->openMemory();
@@ -341,7 +341,9 @@ class DialplanRepository
 
         $xml->endElement();
 
-        return $xml->outputMemory();
+        Dialplan::where('dialplan_uuid', $dialplan->dialplan_uuid)->update([
+            'dialplan_xml' => $xml->outputMemory()
+        ]);
     }
 
 

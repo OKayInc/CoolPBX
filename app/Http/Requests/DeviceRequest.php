@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidMacAddress;
+use App\Rules\ResolvableHostname;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class DeviceRequest extends FormRequest
@@ -32,11 +35,11 @@ class DeviceRequest extends FormRequest
             'device_mac_address' => [
                 'required',
                 'string',
-                'mac_address',
                 'max:17',
+                new ValidMacAddress(config('freeswitch.STRICT_MAC_ADDREDSS')),
                 Rule::unique('v_devices', 'device_mac_address')->ignore($this->device_uuid, 'device_uuid'),
             ],
-            'device_label' => 'nullable|string|max:255',
+            'device_label' => 'required|string|max:255',
             'device_username' => 'nullable|string|max:255',
             'device_password' => 'nullable|string|max:255',
             'device_vendor' => 'nullable|string|max:255',
@@ -52,21 +55,21 @@ class DeviceRequest extends FormRequest
             'deviceLines' => 'nullable|array',
             'deviceLines.*.device_line_uuid' => 'nullable|uuid',
             'deviceLines.*.line_number' => 'nullable|integer|min:1',
-            'deviceLines.*.server_address' => 'nullable|string|max:255',
-            'deviceLines.*.outbound_proxy_primary' => 'nullable|string|max:255',
-            'deviceLines.*.outbound_proxy_secondary' => 'nullable|string|max:255',
-            'deviceLines.*.server_address_primary' => 'nullable|string|max:255',
-            'deviceLines.*.server_address_secondary' => 'nullable|string|max:255',
+            'deviceLines.*.server_address' => ['nullable','string','max:255','required_without_all:.outbound_proxy_primary'],
+            'deviceLines.*.outbound_proxy_primary' => ['nullable','string','max:255'],
+            'deviceLines.*.outbound_proxy_secondary' => ['nullable', 'string', 'max:255'],
+            'deviceLines.*.server_address_primary' => ['nullable', 'string', 'max:255'],
+            'deviceLines.*.server_address_secondary' => ['nullable', 'string', 'max:255'],
             'deviceLines.*.label' => 'nullable|string|max:255',
             'deviceLines.*.display_name' => 'nullable|string|max:255',
-            'deviceLines.*.user_id' => 'nullable|string|max:255',
+            'deviceLines.*.user_id' => 'required|string|max:255',
             'deviceLines.*.auth_id' => 'nullable|string|max:255',
             'deviceLines.*.password' => 'nullable|string|max:255',
             'deviceLines.*.shared_line' => 'nullable|string|max:255',
             'deviceLines.*.enabled' => 'nullable',
-            'deviceLines.*.sip_port' => 'nullable|integer|min:1|max:65535',
-            'deviceLines.*.sip_transport' => 'nullable|string|in:udp,tcp,tls',
-            'deviceLines.*.register_expires' => 'nullable|integer|min:60',
+            'deviceLines.*.sip_port' => 'required|integer|min:1|max:65535',
+            'deviceLines.*.sip_transport' => 'required|string|in:udp,tcp,tls',
+            'deviceLines.*.register_expires' => 'required|integer|min:60',
 
             'deviceKeys' => 'nullable|array',
             'deviceKeys.*.device_key_category' => 'nullable|string|max:255',
@@ -88,6 +91,13 @@ class DeviceRequest extends FormRequest
             'deviceSettings.*.device_setting_enabled' => 'nullable',
             'deviceSettings.*.device_setting_description' => 'nullable|string',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'device_mac_address' => Str::lower($this->device_mac_address),
+        ]);
     }
 
 }

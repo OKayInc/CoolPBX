@@ -24,12 +24,14 @@ class SwitchDestinations extends Component
     public $selected;
     public $options;
     protected GatewayRepository $gatewayRepository;
+    public $controlType;
 
-    public function __construct($name = "", $selected = null, $bridgeType = null, $callCenterType = null, $conferenceCenterType = null, $extensionType = null, $ivrMenuType = null, $switchType = null, $timeConditionType = null, $toneType = null, $ringGroupType = null, $voiceMailType = null, $gatewayType = null)
+    public function __construct($name = "", $selected = null, $bridgeType = null, $callCenterType = null, $conferenceCenterType = null, $extensionType = null, $ivrMenuType = null, $switchType = null, $timeConditionType = null, $toneType = null, $ringGroupType = null, $voiceMailType = null, $gatewayType = null, $controlType='select')
     {
         $this->name = $name;
         $this->selected = $selected;
         $this->gatewayRepository = new GatewayRepository();
+        $this->controlType = $controlType;
 
         if (!empty($bridgeType)) {
             $bridges = Bridge::where("domain_uuid", Session::get("domain_uuid"))

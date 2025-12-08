@@ -21,12 +21,26 @@ class UserRequest extends FormRequest
 
 	public function rules(): array
 	{
-		$isCreating = $this->isMethod("post");
+		$isCreating = $this->user ? false : true;
         $reqLength = DefaultSetting::get('users', 'password_length', 'numeric') ?? 0;
         $reqNumber = DefaultSetting::get('users', 'password_number', 'boolean') ?? false;
         $reqLowcase = DefaultSetting::get('users', 'password_lowercase', 'boolean') ?? false;
         $reqUpcase = DefaultSetting::get('users', 'password_uppercase', 'boolean') ?? false;
         $reqSpecial = DefaultSetting::get('users', 'password_special', 'boolean') ?? false;
+
+        $passwordRule = Password::min($reqLength > 0 ? $reqLength : 1);
+
+        if ($reqNumber)
+        {
+            $passwordRule->numbers();
+        }
+
+        if ($reqSpecial)
+        {
+            $passwordRule->symbols();
+        }
+
+        $passwordRule->uncompromised();
 
 		$rule =  [
 			"username" => [
@@ -41,32 +55,15 @@ class UserRequest extends FormRequest
                 ($isCreating ? "required" : "nullable"),
                 "string",
                 "confirmed",
-                "Password::uncompromised()",
+                $passwordRule,
             ],
 			"domain_uuid" => "sometimes|uuid|exists:App\Models\Domain,domain_uuid",
 			"language" => ['bail', 'nullable','min:2','regex:/[a-z]{2,3}\-\w+/i'],   // TODO: Find a better rule
-			"timezone" => ["nullable", 'regex:/^\w+\/\w[\w\-]+\w$/i'],
+			"timezone" => ["nullable",'string','regex:/^(?:(?:[A-Za-z_\-]+(?:\/[A-Za-z_\-]+)*)|(?:Etc\/[A-Za-z0-9+\-]+)|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST))$/i'],
             "contact_uuid" => "nullable|uuid",
-			"user_enabled" => "bail|nullable|stromg|in:true,false",
+			"user_enabled" => "bail|nullable|string|in:true,false",
 			"api_key" => ["nullable","min:30"],
 		];
-
-        if ($reqLength > 0)
-        {
-            //$rule["password"][] = "min:".$reqLength;
-            $rule["password"][] = "Password::min($reqLength)";
-        }
-        else
-        {
-            $rule["password"][] = "Password::min(1)";
-        }
-
-
-        if ($reqNumber)
-        {
-            //$rule["password"][] = 'regex:/(?=.*[\d])/';
-            $rule["password"][] = "Password::numbers()";
-        }
 
         if ($reqLowcase)
         {
@@ -78,19 +75,15 @@ class UserRequest extends FormRequest
             $rule["password"][] = 'regex:/(?=.*[A-Z])/';
         }
 
-        if ($reqSpecial)
-        {
-            //$rule["password"][] = 'regex:/(?=.*[\W])/';
-            $rule["password"][] = "Password::symbols()";
-        }
-
         if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] user: '.print_r($this->user, true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] key user: '.$this->user->getKeyName(). ' ' . $this->user->user_uuid);
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isCreating: '.(int)$isCreating);
         }
         if ($isCreating){
-            $rule["api_key"][] = Rule::unique('App\Models\User','api_key');
+            $rule["api_key"][] = Rule::unique(User::getTableName(),'api_key');
             $userUnique = DefaultSetting::get('users', 'unique', 'text');
             if (isset($userUnique) && ($userUnique == 'global'))
             {
@@ -107,7 +100,7 @@ class UserRequest extends FormRequest
         }
         else
         {
-            $rule["api_key"][] = Rule::unique('App\Models\User','api_key')->ignore($this->user->user_uuid, $this->user->getKeyName());
+            $rule["api_key"][] = Rule::unique(User::getTableName(),'api_key')->ignore($this->user->user_uuid, $this->user->getKeyName());
         }
 
         return $rule;

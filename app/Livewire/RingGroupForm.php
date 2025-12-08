@@ -71,7 +71,7 @@ class RingGroupForm extends Component
     public function rules()
     {
         $request = new RingGroupRequest();
-        return $request->rules();
+        return $request->rules($this->ringGroupUuid);
     }
 
     public function mount($ringGroupUuid = null)
@@ -194,7 +194,7 @@ class RingGroupForm extends Component
 
     public function addEmptyDestinations()
     {
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $this->ring_group_destinations[] = [
                 'ring_group_destination_uuid' => '',
                 'destination_number' => '',
@@ -354,7 +354,6 @@ class RingGroupForm extends Component
                 }
 
                 return redirect()->route('ring_groups.index');
-                session()->flash('message', 'Create successfully.');
             }
         } catch (\Exception $e) {
             session()->flash('error', 'Error' . $e->getMessage());

@@ -119,6 +119,7 @@ class CallCenterQueueForm extends Component
             $this->loadTiers();
         } else {
             $this->call_center_queue_uuid = Str::uuid()->toString();
+            $this->queue_enabled = 'true';
             $this->initializeEmptyTiers();
         }
     }
@@ -502,20 +503,20 @@ class CallCenterQueueForm extends Component
         $this->modalAgent['tier_position'] = $this->getNextPosition($this->modalAgent['tier_level']);
     }
 
-    public function loadQueue()
+    private function loadQueue(): void
     {
         try {
             $queue = $this->repository->findByUuid($this->call_center_queue_uuid);
 
             if (!$queue) {
                 session()->flash('error', 'Queue not found.');
-                return redirect()->route('call_center_queues.index');
+                return;
             }
 
             $this->queue_name = $queue->queue_name;
             $this->queue_extension = $queue->queue_extension;
             $this->queue_strategy = $queue->queue_strategy ?? 'longest-idle-agent';
-            $this->queue_description = $queue->queue_description;
+            $this->queue_description = $queue->queue_description ?? '';
             $this->queue_moh_sound = $queue->queue_moh_sound ?? 'local_stream://moh';
             $this->queue_record_template = $queue->queue_record_template ?? 'false';
             $this->queue_time_base_score = $queue->queue_time_base_score ?? 'system';
@@ -529,7 +530,12 @@ class CallCenterQueueForm extends Component
             $this->queue_max_wait_time = $queue->queue_max_wait_time ?? '0';
             $this->queue_max_wait_time_with_no_agent = $queue->queue_max_wait_time_with_no_agent ?? '0';
             $this->queue_max_wait_time_with_no_agent_time_reached = $queue->queue_max_wait_time_with_no_agent_time_reached ?? '5';
-            $this->queue_enabled = $queue->queue_enabled ?? 'true';
+
+            $dialplanEnabled = $queue->dialplan_uuid
+                ? $this->repository->getDialplanEnabled($queue->dialplan_uuid)
+                : 'true';
+            $this->queue_enabled = ($dialplanEnabled === 'true' || $dialplanEnabled === '1' || $dialplanEnabled === 1 || $dialplanEnabled === true);
+
             $this->domain_uuid = $queue->domain_uuid;
             $this->queue_announce_sound = $queue->queue_announce_sound ?? '';
             $this->queue_announce_frequency = $queue->queue_announce_frequency ?? '';
@@ -542,7 +548,6 @@ class CallCenterQueueForm extends Component
             session()->flash('error', 'Error loading queue: ' . $e->getMessage());
         }
     }
-
     public function updatedQueueName()
     {
         $this->checkForDuplicates();
@@ -611,7 +616,7 @@ class CallCenterQueueForm extends Component
                 'queue_max_wait_time' => $this->queue_max_wait_time,
                 'queue_max_wait_time_with_no_agent' => $this->queue_max_wait_time_with_no_agent,
                 'queue_max_wait_time_with_no_agent_time_reached' => $this->queue_max_wait_time_with_no_agent_time_reached,
-                'queue_enabled' => $this->queue_enabled,
+                'queue_enabled' => $this->queue_enabled ? 'true' : 'false',
                 'queue_announce_sound' => $this->queue_announce_sound,
                 'queue_announce_frequency' => $this->queue_announce_frequency,
                 'queue_cc_exit_keys' => $this->queue_cc_exit_keys,
@@ -626,7 +631,6 @@ class CallCenterQueueForm extends Component
             } else {
                 $queue = $this->repository->create($data, $this->tiers);
             }
-
 
             session()->flash('success', $this->isEditing ? 'Queue updated successfully.' : 'Queue created successfully.');
             return redirect()->route('call_center_queues.index');
@@ -725,6 +729,10 @@ class CallCenterQueueForm extends Component
             Log::error('Error loading queue' . $th->getMessage());
             session()->flash('error', '' . $th->getMessage());
         }
+    }
+    public function updatedQueueEnabled($value)
+    {
+        $this->queue_enabled = (bool) $value;
     }
 
     public function render()

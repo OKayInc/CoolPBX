@@ -345,9 +345,12 @@ class RingGroupRepository
             'dialplan_number' => $ringGroup->ring_group_extension,
             'dialplan_context' => $ringGroup->ring_group_context,
             'dialplan_xml' => $dialplanXml,
+            'dialplan_order' => 101,
+            'dialplan_continue' => 'false', 
             'dialplan_enabled' => $ringGroup->ring_group_enabled,
             'dialplan_description' => $ringGroup->ring_group_description,
             'dialplan_uuid' => $dialplanUuid,
+            'app_uuid' => env('RING_GROUPS_APP_UUID')
         ]);
 
         $dialplan->update(['dialplan_uuid' => $dialplanUuid]);
@@ -373,6 +376,7 @@ class RingGroupRepository
                 'dialplan_xml' => $dialplanXml,
                 'dialplan_enabled' => $ringGroup->ring_group_enabled,
                 'dialplan_description' => $ringGroup->ring_group_description,
+                'app_uuid' => env('RING_GROUPS_APP_UUID')
             ]);
         }
 

@@ -14,45 +14,50 @@ use Laravel\Sanctum\HasApiTokens;
 
 class VoicemailGreeting extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
-	protected $table = 'v_voicemail_greetings';
-	protected $primaryKey = 'voicemail_greeting_uuid';
-	public $incrementing = false;
-	protected $keyType = 'string';	// TODO, check if UUID is valid
-	const CREATED_AT = 'insert_date';
-	const UPDATED_AT = 'update_date';
+    use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+    protected $table = 'v_voicemail_greetings';
+    protected $primaryKey = 'voicemail_greeting_uuid';
+    public $incrementing = false;
+    protected $keyType = 'string';    // TODO, check if UUID is valid
+    const CREATED_AT = 'insert_date';
+    const UPDATED_AT = 'update_date';
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-	protected $fillable = [
+    protected $fillable = [
+        'domain_uuid',
         'voicemail_id',     // TODO: check if this the foreign key
         'greeting_id',
         'greeting_name',
         'greeting_filename',
         'greeting_description',
         'greeting_base64',
-	];
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
-	protected $hidden = [
-	];
+    protected $hidden = [];
 
     /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
      */
-	protected $casts = [
-	];
+    protected $casts = [];
 
-	public function domain(): BelongsTo {
-		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
-	}
+    public function domain(): BelongsTo
+    {
+        return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
+    }
+
+    public function voicemail():BelongsTo
+    {
+        return $this->belongsTo(Voicemail::class, 'voicemail_id', 'voicemail_id') ;
+    }
 }

@@ -35,14 +35,14 @@ class SoundsService
      * 
      * @return array
      */
-    public function getAllSounds(): array
+    public function getAllSounds(string $language = 'en', string $dialect = 'us', string $voice = 'callie'): array
     {
         $sounds = [];
 
         $sounds['miscellaneous'] = $this->getMiscellaneousSounds();
         $sounds['recordings'] = $this->getRecordings();
         $sounds['phrases'] = $this->getPhrases();
-        $sounds['sounds'] = $this->getSoundFiles('en', 'us', 'callie');
+        $sounds['sounds'] = $this->getSoundFiles($language, $dialect, $voice);
 
 
         return $sounds;
@@ -125,7 +125,18 @@ class SoundsService
 
     protected function getSoundFiles($language, $dialect, $voice): array
     {
-        return $this->soundFileRepository->getAllSoundFiles($language, $dialect, $voice);
+        $soundFiles = $this->soundFileRepository->getAllSoundFiles($language, $dialect, $voice);
+        
+        return collect($soundFiles)->map(function ($soundFile) {
+            $pathParts = explode('/', $soundFile);
+            $fileName = end($pathParts);
+            $nameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
+            
+            return [
+                'name' => $nameWithoutExtension,
+                'value' => $soundFile
+            ];
+        })->toArray();
     }
     
     /**

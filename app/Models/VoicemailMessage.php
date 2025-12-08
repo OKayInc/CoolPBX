@@ -28,6 +28,7 @@ class VoicemailMessage extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'voicemail_uuid',
         'domain_uuid',
         'created_epoch',
         'read_epoch',

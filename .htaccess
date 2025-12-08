@@ -18,4 +18,8 @@ Redirect	301	/app/phrases/phrases.php			/phrases
 Redirect	301	/app/modules/modules.php			/modules
 Redirect	301	/app/devices/devices.php			/devices
 Redirect	301	/app/call_block/call_block.php			/callblocks
-Redirect	301	/app/billing/billing.php				/billing
+Redirect	301	/app/billing/billing.php			/billing
+Redirect	301	/app/call_centers/call_center_queues.php	/call_center_queues
+Redirect	301	/app/destinations/destinations.php		/destinations
+Redirect	301	/app/registrations/registrations.php		/registrations
+Redirect	301	/app/ring_groups/ring_groups.php		/ring_groups

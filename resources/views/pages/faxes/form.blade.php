@@ -33,7 +33,6 @@
 document.addEventListener('DOMContentLoaded', function()
 {
     const btn_toogle_advanced = document.getElementById('btn_toogle_advanced');
-    const btn_add_sender = document.getElementById('btn_add_sender');
 
     if(btn_toogle_advanced)
     {

@@ -412,7 +412,7 @@
                                     <div class="form-group mb-3">
                                         <label for="ring_group_ringback" class="form-label">Ring Back</label>
 
-                                        <x-switch-ringback name="ring_group_ringback" :selected="$ring_group_ringback"
+                                        <x-switch-ring-back name="ring_group_ringback" :selected="$ring_group_ringback"
                                             wire:model="ring_group_ringback"
                                             class="form-select @error('ring_group_ringback') is-invalid @enderror" />
 
@@ -635,4 +635,11 @@
         </div>
     @endif
 </div>
+@if ($errors->any())
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+@endif
 </div>

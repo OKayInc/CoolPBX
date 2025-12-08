@@ -126,6 +126,12 @@ class DeviceForm extends Component
         $this->domain_uuid = $user->domain_uuid;
         $this->device_enabled = true;
 
+        if (is_null($this->domain_uuid)) {
+            session()->flash('error', 'Por favor seleccione un dominio antes de continuar.');
+            return redirect()->route('devices.index');
+        }
+
+
         if ($user->hasPermission('device_password')) {
             $passwordLength = Setting::getSetting('device', 'password_length', 'numeric');
             $this->device_password = generatePassword($passwordLength, 1);
@@ -167,27 +173,48 @@ class DeviceForm extends Component
         $this->outboundProxyPrimary = [];
         $this->outboundProxySecondary = [];
 
+
         if (null !== Setting::getSetting('provision', 'server_address_primary') && null !== Setting::getSetting('provision', 'server_address_primary', 'text')) {
-            $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')->get()->toArray();
+            $this->deviceLinesServerPrimary = DeviceLine::select('server_address_primary')
+                ->whereNotNull('server_address_primary')
+                ->where('server_address_primary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
         if (null !== Setting::getSetting('provision', 'server_address_secondary') && null !== Setting::getSetting('provision', 'server_address_secondary', 'text')) {
-            $this->deviceLinesServerSecondary = DeviceLine::select('server_address_secondary')->get()->toArray();
+            $this->deviceLinesServerSecondary = DeviceLine::select('server_address_secondary')
+                ->whereNotNull('server_address_secondary')
+                ->where('server_address_secondary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
 
         if (null !== Setting::getSetting('provision', 'outbound_proxy_primary') && null !== Setting::getSetting('provision', 'outbound_proxy_primary', 'text')) {
-            $this->outboundProxyPrimary = DeviceLine::select('outbound_proxy_primary')->get()->toArray();
+            $this->outboundProxyPrimary = DeviceLine::select('outbound_proxy_primary')
+                ->whereNotNull('outbound_proxy_primary')
+                ->where('outbound_proxy_primary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
         if (null !== Setting::getSetting('provision', 'outbound_proxy_secondary') && null !== Setting::getSetting('provision', 'outbound_proxy_secondary', 'text')) {
-            $this->outboundProxySecondary = DeviceLine::select('outbound_proxy_secondary')->get()->toArray();
+            $this->outboundProxySecondary = DeviceLine::select('outbound_proxy_secondary')
+                ->whereNotNull('outbound_proxy_secondary')
+                ->where('outbound_proxy_secondary', '!=', '')
+                ->distinct()
+                ->get()
+                ->toArray();
         }
     }
 
     public function updatedDeviceMacAddress()
     {
         if ($this->device_mac_address) {
-            $normalizedMac = $this->deviceRepository->normalizeMacAddress($this->device_mac_address);
+            $this->device_mac_address = preg_replace('/[^a-fA-F0-9]/', '', $this->device_mac_address);
 
-            $this->device_mac_address = format_mac($normalizedMac, ':', 'upper');
+            $this->device_mac_address = strtolower($this->device_mac_address);
 
             $this->duplicateMacDomain = $this->deviceRepository->checkDuplicateMacAddress(
                 $this->device_mac_address,
@@ -202,7 +229,6 @@ class DeviceForm extends Component
             }
         }
     }
-
     public function updatedDeviceUuidAlternate()
     {
         if ($this->device_uuid_alternate) {
@@ -348,13 +374,17 @@ class DeviceForm extends Component
             session()->flash('success', 'Device copied successfully.');
             return redirect()->route('devices.edit', $copiedDevice->device_uuid);
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error copying device: ' . $e->getMessage());
         }
     }
 
     public function save()
     {
+        if (is_null($this->domain_uuid)) {
+            session()->flash('error', 'Por favor seleccione un dominio antes de continuar.');
+            return redirect()->route('devices.index');
+        }
+
         $this->validate();
 
         try {
@@ -397,7 +427,6 @@ class DeviceForm extends Component
                 return redirect()->route('devices.edit', $device->device_uuid);
             }
         } catch (\Exception $e) {
-            throw $e;
             session()->flash('error', 'Error saving device: ' . $e->getMessage());
         }
     }

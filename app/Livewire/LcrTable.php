@@ -202,6 +202,10 @@ class LcrTable extends DataTableComponent
         {
             $query->where("carrier_uuid", $this->carrier->carrier_uuid);
         }
+	else
+	{
+            $query->whereNull("carrier_uuid");
+	}
 
         return $query;
     }
