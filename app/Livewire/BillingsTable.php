@@ -57,7 +57,7 @@ class BillingsTable extends DataTableComponent
     {
         if (!auth()->user()->hasPermission('billing_delete'))
         {
-            session()->flash('error', 'You do not have permission to delete billings.');
+            session()->flash('error', 'You do not have permission to delete billing.');
             return;
         }
 
@@ -86,7 +86,7 @@ class BillingsTable extends DataTableComponent
     {
         if (!auth()->user()->hasPermission('billing_add'))
         {
-            session()->flash('error', 'You do not have permission to copy billings.');
+            session()->flash('error', 'You do not have permission to copy billing.');
             return;
         }
 

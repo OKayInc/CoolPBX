@@ -58,6 +58,6 @@ class BillingDealController extends Controller
     {
         $this->billingDealRepository->delete($billingDeal);
 
-        return redirect()->route('billings.deals.index');
+        return redirect()->route('billing.deals.index');
     }
 }

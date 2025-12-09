@@ -30,7 +30,7 @@ class BillingsDealsTable extends DataTableComponent
             ->setTableRowUrl(function ($row) use ($canEdit)
             {
                 return $canEdit
-                    ? route('billings.deals.edit', $row->billing_deal_uuid)
+                    ? route('billing.deals.edit', $row->billing_deal_uuid)
                     : null;
             })
             ->setPaginationEnabled();

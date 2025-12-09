@@ -10,7 +10,7 @@
 
             <div class="card-tools">
                 <div class="d-flex gap-2" role="billing" aria-label="Billing deals actions">
-                    <a href="{{ route('billings.deals.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('billing.deals.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> {{__('Add')}}
                     </a>
                 </div>
