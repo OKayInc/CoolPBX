@@ -57,7 +57,7 @@ class BillingsDealsTable extends DataTableComponent
     {
         if (!auth()->user()->hasPermission('billing_deal_delete'))
         {
-            session()->flash('error', 'You do not have permission to delete billings.');
+            session()->flash('error', 'You do not have permission to delete billing.');
             return;
         }
 
