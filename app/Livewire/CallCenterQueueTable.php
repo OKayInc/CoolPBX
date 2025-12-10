@@ -15,6 +15,12 @@ class CallCenterQueueTable extends DataTableComponent
 {
     protected $model = CallCenterQueue::class;
     public bool $showAll = false;
+    public bool $actionView = false;
+
+    public function mount()
+    {
+        $this->actionView = (request('action') == 'view');
+    }
 
     public function configure(): void
     {
@@ -31,7 +37,8 @@ class CallCenterQueueTable extends DataTableComponent
 
         if ($canEdit) {
             $tableConfig->setTableRowUrl(function ($row) use ($canEdit) {
-                return route('call_center_queues.edit', $row->call_center_queue_uuid);
+                $route = $this->actionView ? 'callCenterQueueAgents' : 'call_center_queues.edit';
+                return route($route, $row->call_center_queue_uuid);
             });
         }
 
@@ -99,12 +106,16 @@ class CallCenterQueueTable extends DataTableComponent
     public function bulkActions(): array
     {
         $actions = [];
-        if (auth()->user()->hasPermission('call_center_queue_delete')) {
-            $actions['bulkDelete'] = 'Delete';
-        }
 
-        if (auth()->user()->hasPermission('call_center_queue_add')) {
-            $actions['bulkCopy'] = 'Copy';
+        if(!$this->actionView)
+        {
+            if (auth()->user()->hasPermission('call_center_queue_delete')) {
+                $actions['bulkDelete'] = 'Delete';
+            }
+
+            if (auth()->user()->hasPermission('call_center_queue_add')) {
+                $actions['bulkCopy'] = 'Copy';
+            }
         }
 
         return $actions;
@@ -126,7 +137,7 @@ class CallCenterQueueTable extends DataTableComponent
         } catch (\Throwable $th) {
             throw $th;
         }
-    } 
+    }
 
     public function bulkCopy()
     {
@@ -136,7 +147,7 @@ class CallCenterQueueTable extends DataTableComponent
             DB::beginTransaction();
 
             $queues = CallCenterQueue::whereIn('call_center_queue_uuid', $selectRows)
-                ->with('callcenteragents') 
+                ->with('callcenteragents')
                 ->get();
 
 
