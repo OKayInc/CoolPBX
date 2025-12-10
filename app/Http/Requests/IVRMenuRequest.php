@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\IVRMenu;
 use App\Rules\ValidContext;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 
@@ -17,6 +19,12 @@ class IVRMenuRequest extends FormRequest
 
     public function rules(): array
     {
+        if(App::hasDebugModeEnabled())
+        {
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] IVRMenu: '.print_r($this, true));
+        }
+
         return [
             'ivr_menu_name'   => [  'bail',
                                     'required',
