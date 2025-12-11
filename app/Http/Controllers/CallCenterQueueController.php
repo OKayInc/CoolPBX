@@ -45,53 +45,38 @@ class CallCenterQueueController extends Controller
     }
 
     //convert the string to a named array
-	private function str_to_named_array($tmp_str, $tmp_delimiter)
+    private function str_to_named_array($tmp_str, $tmp_delimiter)
     {
-		$tmp_array = explode("\n", $tmp_str);
+        $lines = explode("\n", $tmp_str);
+
+        if(empty($lines))
+        {
+            return [];
+        }
+
+        $fieldNames = explode($tmp_delimiter, array_shift($lines));
 
         $result = [];
 
-    	if(trim(strtoupper($tmp_array[0])) != "+OK")
+        foreach($lines as $line)
         {
-			$tmp_field_name_array = explode($tmp_delimiter, $tmp_array[0]);
-
-        	$x = 0;
-
-        	if(!empty($tmp_array))
+            if($line !== '' && strtoupper($line) !== '+OK')
             {
-                foreach($tmp_array as $row)
+                $values = explode($tmp_delimiter, $line);
+
+                $row = [];
+
+                foreach($fieldNames as $i => $name)
                 {
-                    if($x > 0)
-                    {
-                        $tmp_field_value_array = explode($tmp_delimiter, $tmp_array[$x]);
-
-                        $y = 0;
-
-                        if(!empty($tmp_field_value_array))
-                        {
-                            foreach($tmp_field_value_array as $tmp_value)
-                            {
-                                $tmp_name = $tmp_field_name_array[$y];
-
-                                if(trim(strtoupper($tmp_value)) != "+OK")
-                                {
-                                    $result[$x][$tmp_name] = $tmp_value;
-                                }
-
-                                $y++;
-                            }
-                        }
-                    }
-
-                    $x++;
+                    $row[$name] = $values[$i] ?? null;
                 }
+
+                $result[] = $row;
             }
+        }
 
-            unset($row);
-		}
-
-		return $result;
-	}
+        return $result;
+    }
 
     public function getAgentsStatus(CallCenterQueue $callCenterQueue)
     {
