@@ -96,7 +96,7 @@ class CallCenterQueueController extends Controller
     public function getAgentsStatus(CallCenterQueue $callCenterQueue)
     {
         //send the event socket command and get the response
-        $command = "api callcenter_config queue list tiers " . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
+        $command = "callcenter_config queue list tiers " . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
         $event_socket_str = FreeSwitch::execute($command);
         $result = $this->str_to_named_array($event_socket_str, '|');
 
@@ -135,7 +135,7 @@ class CallCenterQueueController extends Controller
         }
 
         //send the event socket command and get the response
-        $command = 'api callcenter_config queue list agents ' . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
+        $command = 'callcenter_config queue list agents ' . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
         $event_socket_str = FreeSwitch::execute($command);
         $agent_result = $this->str_to_named_array($event_socket_str, '|');
 
