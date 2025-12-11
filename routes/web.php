@@ -19,6 +19,7 @@ use App\Http\Controllers\CallBlockController;
 use App\Http\Controllers\CallForwardController;
 use App\Http\Controllers\CallCenterAgentController;
 use App\Http\Controllers\CallCenterQueueController;
+use App\Http\Controllers\CallFlowController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -295,6 +296,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
                 ->name('set-active');
         });
     });
+
+    Route::resource('/call_flows', CallFlowController::class)->name('call_flows', 'call_flows');
+
 });
 
 Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {
