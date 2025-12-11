@@ -141,7 +141,7 @@ class CallCenterQueueController extends Controller
 
         if(App::hasDebugModeEnabled())
         {
-            Log::debug('CallCenterQueueController > list agents: ', $event_socket_str);
+            Log::debug('CallCenterQueueController > list agents: ', [$event_socket_str]);
         }
 
         //get the agents from the database
