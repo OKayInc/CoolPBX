@@ -250,7 +250,7 @@ class XmlCDRTable extends DataTableComponent
             $columns[] = Column::make("Actions", "tags")
             ->format(function ($value, $row) {
                 $color = $row->tags ? "primary" : "success";
-                return '<button class="btn btn-sm btn-' . $color . '" wire:click="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
+                return '<button class="btn btn-sm btn-' . $color . '" wire:click.stop="editTags(\'' . $row->xml_cdr_uuid . '\')"><i class="fa-solid fa-tag"></i></button>';
             })
             ->html();
         }
