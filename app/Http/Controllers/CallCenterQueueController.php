@@ -7,6 +7,8 @@ use App\Models\CallCenterAgent;
 use App\Models\CallCenterQueue;
 use App\Repositories\CallCenterQueueRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
@@ -98,12 +100,22 @@ class CallCenterQueueController extends Controller
         $event_socket_str = FreeSwitch::execute($command);
         $result = $this->str_to_named_array($event_socket_str, '|');
 
+        if(App::hasDebugModeEnabled())
+        {
+            Log::debug('CallCenterQueueController > list tiers: ', $event_socket_str);
+        }
+
         //prepare the result for array_multisort
         $tier_result = [];
         $x = 0;
 
         if(is_array($result))
         {
+            if(App::hasDebugModeEnabled())
+            {
+                Log::debug('CallCenterQueueController > result loop: ', var_dump($result));
+            }
+
             foreach($result as $row)
             {
                 $tier_result[$x]['level'] = $row['level'];
@@ -127,6 +139,11 @@ class CallCenterQueueController extends Controller
         $event_socket_str = FreeSwitch::execute($command);
         $agent_result = $this->str_to_named_array($event_socket_str, '|');
 
+        if(App::hasDebugModeEnabled())
+        {
+            Log::debug('CallCenterQueueController > list agents: ', $event_socket_str);
+        }
+
         //get the agents from the database
         if(empty(Session::get("agents")) || !is_array(Session::get("agents")))
         {
@@ -148,7 +165,7 @@ class CallCenterQueueController extends Controller
                 $tier_level = $tier_row['level'];
                 $tier_position = $tier_row['position'];
 
-                if(empty($agent_result))
+                if(!empty($agent_result))
                 {
                     foreach($agent_result as $agent_row)
                     {
