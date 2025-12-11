@@ -248,8 +248,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('/email_queues', EmailQueueController::class);
     Route::resource('ring_groups', RingGroupController::class)->name('ringgroups', 'ringgroups');
     Route::resource('/call_center_queues', CallCenterQueueController::class)->except('show');
-    Route::get('/call_center_queues/{callCenterQeueue}/agents', [CallCenterQueueController::class, 'showAgents'])->name('callCenterQueueAgents');
-    Route::get('/call_center_queues/{callCenterQeueue}/agents_temp', [CallCenterQueueController::class, 'getAgentsStatus'])->name('callCenterQueueAgentsStatus');
+    Route::get('/call_center_queues/{callCenterQueue}/agents', [CallCenterQueueController::class, 'showAgents'])->name('callCenterQueueAgents');
+    Route::get('/call_center_queues/{callCenterQueue}/agents_temp', [CallCenterQueueController::class, 'getAgentsStatus'])->name('callCenterQueueAgentsStatus');
     Route::resource('/call_center_agent', CallCenterAgentController::class)->except('show');
     Route::get('/call_center_agent_status', [CallCenterAgentController::class, 'showStatus'])->name('callCenterAgentStatus');
 
