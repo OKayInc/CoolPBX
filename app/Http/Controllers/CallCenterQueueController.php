@@ -102,7 +102,7 @@ class CallCenterQueueController extends Controller
 
         if(App::hasDebugModeEnabled())
         {
-            Log::debug('CallCenterQueueController > list tiers: ', $event_socket_str);
+            Log::debug('CallCenterQueueController > list tiers: ', [$event_socket_str]);
         }
 
         //prepare the result for array_multisort
@@ -113,7 +113,7 @@ class CallCenterQueueController extends Controller
         {
             if(App::hasDebugModeEnabled())
             {
-                Log::debug('CallCenterQueueController > result loop: ', var_dump($result));
+                Log::debug('CallCenterQueueController > result loop: ', $result);
             }
 
             foreach($result as $row)
