@@ -19,25 +19,27 @@ class IVRMenuRequest extends FormRequest
 
     public function rules(): array
     {
+        $ivrMenu = $this->route('ivr_menu');
+        $ivrMenuUuid = $ivrMenu instanceof \App\Models\IVRMenu ? $ivrMenu->ivr_menu_uuid : null;
+
         if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] IVRMenu: '.print_r($this, true));
         }
 
-        return [
+        $rules =  [
             'ivr_menu_name'   => [  'bail',
                                     'required',
                                     'string',
                                     'max:255',
-                                    Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')
                                   ],
             'ivr_menu_extension'   => [
                                     'bail',
                                     'required',
                                     'string',
                                     'max:255',
-                                    Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->where('domain_uuid', Session::get('domain_uuid'))],
+                                    ],
             'ivr_menu_parent_uuid'   => 'bail|nullable|string|max:255|uuid|exists:App\Models\IVRMenu,ivr_menu_uuid',
             'ivr_menu_language'   => 'bail|nullable|string|max:255',
             'ivr_menu_dialect'   => 'bail|nullable|string|max:255',
@@ -67,5 +69,20 @@ class IVRMenuRequest extends FormRequest
             'ivr_menu_enabled'   => 'bail|bool',
             'ivr_menu_description'   => 'bail|nullable|string|max:255',
         ];
+
+        if (!is_null($ivrMenuUuid))
+        {
+            // Editing
+            $rules['ivr_menu_name'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->ignore($ivrMenu, $ivrMenu->getKeyName());
+            $rules['ivr_menu_extension'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->where('domain_uuid', Session::get('domain_uuid'))->ignore($ivrMenu, $ivrMenu->getKeyName());
+
+        }
+        else{
+            // Creating
+            $rules['ivr_menu_name'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name');
+            $rules['ivr_menu_extension'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->where('domain_uuid', Session::get('domain_uuid'));
+        }
+
+        return $rules;
     }
 }
