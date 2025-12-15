@@ -5,8 +5,10 @@ namespace App\Livewire;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\CallFlow;
+use App\Models\Dialplan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CallFlowTable extends DataTableComponent
 {
@@ -123,6 +125,34 @@ class CallFlowTable extends DataTableComponent
             $this->dispatch('refresh');
 
             session()->flash('message', 'Devices deleted successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function bulkCopy()
+    {
+        $selectRows = $this->getSelected();
+
+        try {
+            DB::beginTransaction();
+
+            $callFlows = CallFlow::whereIn('call_flow_uuid', $selectRows)->get();
+
+            foreach ($callFlows as $callFlow) {
+                $newCallFlow = $callFlow->replicate();
+                $newCallFlow->call_flow_uuid = Str::uuid()->toString();
+                $newCallFlow->call_flow_name = $newCallFlow->call_flow_name . ' (Copy)';
+                $newCallFlow->save();
+            }
+
+            DB::commit();
+
+            $this->clearSelected();
+            $this->dispatch('refresh');
+
+            session()->flash('message', 'Call Flows copied successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;

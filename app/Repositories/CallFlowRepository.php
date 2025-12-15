@@ -7,6 +7,7 @@ use App\Models\CallFlow;
 use App\Models\Dialplan;
 use App\Models\Domain;
 use App\Models\User;
+use App\Services\CallFlowPresenceService;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -20,15 +21,18 @@ class CallFlowRepository
     protected CallFlow $callFlow;
     protected Dialplan $dialplan;
     protected User $user;
+    protected CallFlowPresenceService $presenceService;
 
     public function __construct(
         CallFlow $callFlow,
         Dialplan $dialplan,
-        User $user
+        User $user,
+        CallFlowPresenceService $presenceService
     ) {
         $this->callFlow = $callFlow;
         $this->dialplan = $dialplan;
         $this->user = $user;
+        $this->presenceService = $presenceService;
     }
 
     public function mine()
@@ -107,7 +111,6 @@ class CallFlowRepository
         try {
             DB::beginTransaction();
 
-            // Validate duplicates
             if ($this->findByExtension($callFlowData['call_flow_extension'], $callFlowData['domain_uuid'])) {
                 throw new Exception("Extension already exists");
             }
@@ -116,30 +119,25 @@ class CallFlowRepository
                 throw new Exception("Feature code already exists");
             }
 
-            // Set default context if not provided
             if (empty($callFlowData['call_flow_context'])) {
                 $domain = Domain::where('domain_uuid', $callFlowData['domain_uuid'])->first();
                 $callFlowData['call_flow_context'] = $domain->domain_name ?? auth()->user()->domain->domain_name;
             }
 
-            // Parse destination data
             $callFlowData = $this->parseDestinations($callFlowData);
 
-            // Apply permissions
             $filteredData = $this->applyCallFlowPermissions($callFlowData);
 
-            // Create call flow
             $callFlow = $this->callFlow->create($filteredData);
 
-            // Create associated dialplan
-            $this->createDialplan($callFlow);
+            $this->createDialplan($callFlow, $callFlowData['dialplan_uuid']);
 
             DB::commit();
 
-            // Update FreeSWITCH
             $this->updateSwitch($callFlow);
             $this->sendPresenceEvent($callFlow);
             $this->clearCache($callFlow->call_flow_context);
+
 
             return $callFlow;
         } catch (Exception $e) {
@@ -158,7 +156,6 @@ class CallFlowRepository
                 throw new Exception("Call flow not found");
             }
 
-            // Validate duplicates (excluding current)
             if (isset($callFlowData['call_flow_extension'])) {
                 if ($this->findByExtension($callFlowData['call_flow_extension'], $callFlow->domain_uuid, $callFlowUuid)) {
                     throw new Exception("Extension already exists");
@@ -171,21 +168,16 @@ class CallFlowRepository
                 }
             }
 
-            // Parse destination data
             $callFlowData = $this->parseDestinations($callFlowData);
 
-            // Apply permissions
             $filteredData = $this->applyCallFlowPermissions($callFlowData, $callFlow);
 
-            // Update call flow
             $callFlow->update($filteredData);
 
-            // Update associated dialplan
             $this->updateDialplan($callFlow);
 
             DB::commit();
 
-            // Update FreeSWITCH
             $this->updateSwitch($callFlow);
             $this->sendPresenceEvent($callFlow);
             $this->clearCache($callFlow->call_flow_context);
@@ -209,17 +201,14 @@ class CallFlowRepository
 
             $context = $callFlow->call_flow_context;
 
-            // Delete associated dialplan
             if ($callFlow->dialplan) {
                 $callFlow->dialplan->delete();
             }
 
-            // Delete call flow
             $callFlow->delete();
 
             DB::commit();
 
-            // Clear cache
             $this->clearCache($context);
         } catch (Exception $e) {
             DB::rollBack();
@@ -235,7 +224,7 @@ class CallFlowRepository
     public function getAvailableStatuses(): array
     {
         return [
-            'true' => 'Active',
+            'true' => 'Active', 
             'false' => 'Inactive'
         ];
     }
@@ -269,7 +258,6 @@ class CallFlowRepository
 
             DB::commit();
 
-            // Send presence update
             $this->sendPresenceEvent($callFlow);
 
             return $callFlow->fresh();
@@ -281,7 +269,6 @@ class CallFlowRepository
 
     private function parseDestinations(array $callFlowData): array
     {
-        // Parse main destination
         if (isset($callFlowData['call_flow_destination'])) {
             $destination = explode(':', $callFlowData['call_flow_destination'], 2);
             $callFlowData['call_flow_app'] = $destination[0] ?? '';
@@ -289,7 +276,6 @@ class CallFlowRepository
             unset($callFlowData['call_flow_destination']);
         }
 
-        // Parse alternate destination
         if (isset($callFlowData['call_flow_alternate_destination'])) {
             $alternateDestination = explode(':', $callFlowData['call_flow_alternate_destination'], 2);
             $callFlowData['call_flow_alternate_app'] = $alternateDestination[0] ?? '';
@@ -341,11 +327,11 @@ class CallFlowRepository
         });
     }
 
-    private function createDialplan(CallFlow $callFlow): void
+    private function createDialplan(CallFlow $callFlow, string $dialplanUuid): void
     {
         $dialplanXml = $this->buildDialplanXml($callFlow);
 
-        $this->dialplan->create([
+        $dialplan = $this->dialplan->create([
             'dialplan_uuid' => $callFlow->dialplan_uuid,
             'domain_uuid' => $callFlow->domain_uuid,
             'dialplan_name' => $callFlow->call_flow_name,
@@ -358,12 +344,14 @@ class CallFlowRepository
             'dialplan_description' => $callFlow->call_flow_description,
             'app_uuid' => 'b1b70f85-6b42-429b-8c5a-60c8b02b7d14',
         ]);
+
+        $dialplan->update(['dialplan_uuid' => $dialplanUuid]);
     }
 
     private function updateDialplan(CallFlow $callFlow): void
     {
         if (!$callFlow->dialplan) {
-            $this->createDialplan($callFlow);
+            $this->createDialplan($callFlow, $callFlow->dialplan_uuid);
             return;
         }
 
@@ -381,9 +369,8 @@ class CallFlowRepository
 
     private function buildDialplanXml(CallFlow $callFlow): string
     {
-        // Escape special characters
         $destinationExtension = str_replace(['*', '+'], ['\*', '\+'], $callFlow->call_flow_extension);
-        
+
         $destinationFeature = $callFlow->call_flow_feature_code;
         if (substr($destinationFeature, 0, 5) != 'flow+') {
             $destinationFeature = '(?:flow+)?' . $destinationFeature;
@@ -409,31 +396,24 @@ class CallFlowRepository
 
     private function updateSwitch(CallFlow $callFlow): void
     {
-        // Reload XML for dialplan changes
-        FreeSwitch::execute('reloadxml', '');
+        try {
+            FreeSwitch::execute('reloadxml');
+        } catch (\Exception $e) {
+            Log::error('Error reloading FreeSWITCH XML: ' . $e->getMessage());
+        }
     }
 
     private function sendPresenceEvent(CallFlow $callFlow): void
     {
         $domain = $callFlow->domain->domain_name ?? auth()->user()->domain->domain_name;
-        
-        $event = "sendevent PRESENCE_IN\n";
-        $event .= "proto: flow\n";
-        $event .= "event_type: presence\n";
-        $event .= "alt_event_type: dialog\n";
-        $event .= "Presence-Call-Direction: outbound\n";
-        $event .= "state: Active (1 waiting)\n";
-        $event .= "from: flow+" . $callFlow->call_flow_feature_code . "@" . $domain . "\n";
-        $event .= "login: flow+" . $callFlow->call_flow_feature_code . "@" . $domain . "\n";
-        $event .= "unique-id: " . $callFlow->call_flow_uuid . "\n";
-        
-        if ($callFlow->call_flow_status == "true") {
-            $event .= "answer-state: confirmed\n";
-        } else {
-            $event .= "answer-state: terminated\n";
-        }
+        $isActive = $callFlow->call_flow_status === 'true';
 
-        FreeSwitch::api($event);
+        $this->presenceService->sendCallFlowPresence(
+            $callFlow->call_flow_feature_code,
+            $domain,
+            $callFlow->call_flow_uuid,
+            $isActive
+        );
     }
 
     private function clearCache(string $context): void

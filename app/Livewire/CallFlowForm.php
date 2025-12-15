@@ -63,7 +63,6 @@ class CallFlowForm extends Component
     public function rules()
     {
         $rules = [
-            'domain_uuid' => 'required|uuid',
             'call_flow_name' => 'required|string|max:255',
             'call_flow_extension' => 'required|string|max:255',
             'call_flow_feature_code' => 'required|string|max:255',
@@ -107,7 +106,7 @@ class CallFlowForm extends Component
             return redirect()->route('call_flows.index');
         }
 
-        $this->domain_uuid = $this->callFlow->domain_uuid;
+        $this->domain_uuid = Session::get('domain_uuid');
         $this->dialplan_uuid = $this->callFlow->dialplan_uuid;
         $this->call_flow_name = $this->callFlow->call_flow_name;
         $this->call_flow_extension = $this->callFlow->call_flow_extension;
@@ -122,7 +121,6 @@ class CallFlowForm extends Component
         $this->call_flow_enabled = $this->callFlow->call_flow_enabled;
         $this->call_flow_description = $this->callFlow->call_flow_description;
 
-        // Combine app:data for destinations
         if ($this->callFlow->call_flow_app && $this->callFlow->call_flow_data) {
             $this->call_flow_destination = $this->callFlow->call_flow_app . ':' . $this->callFlow->call_flow_data;
         }
@@ -153,13 +151,11 @@ class CallFlowForm extends Component
 
         $this->availableStatuses = $this->callFlowRepository->getAvailableStatuses();
 
-        // Load recordings
         $this->recordings = Recording::where('domain_uuid', $user->domain_uuid)
             ->orderBy('recording_name', 'asc')
             ->get()
             ->toArray();
 
-        // Load phrases
         $this->phrases = Phrase::where('domain_uuid', $user->domain_uuid)
             ->orderBy('phrase_name', 'asc')
             ->get()
@@ -196,7 +192,6 @@ class CallFlowForm extends Component
     public function updatedDomainUuid()
     {
         if ($this->domain_uuid) {
-            // Reload recordings and phrases for new domain
             $this->recordings = Recording::where('domain_uuid', $this->domain_uuid)
                 ->orderBy('recording_name', 'asc')
                 ->get()
@@ -216,13 +211,12 @@ class CallFlowForm extends Component
 
     public function save()
     {
-        // Validar sound principal
+
         if (!empty($this->call_flow_sound) && !$this->soundsService->validateSound($this->call_flow_sound)) {
             $this->addError('call_flow_sound', 'Invalid sound selected.');
             return;
         }
 
-        // Validar sound alternativo
         if (!empty($this->call_flow_alternate_sound) && !$this->soundsService->validateSound($this->call_flow_alternate_sound)) {
             $this->addError('call_flow_alternate_sound', 'Invalid alternate sound selected.');
             return;
@@ -231,7 +225,6 @@ class CallFlowForm extends Component
 
         $this->validate();
 
-        // Check for duplicates
         if ($this->duplicateExtension) {
             session()->flash('error', "Extension {$this->call_flow_extension} is already used by {$this->duplicateExtension}");
             return;

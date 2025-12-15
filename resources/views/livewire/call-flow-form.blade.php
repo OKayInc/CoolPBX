@@ -125,7 +125,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="call_flow_label" class="form-label">Status Label</label>
+                                <label for="call_flow_label" class="form-label">Destination Label</label>
                                 <input type="text" wire:model="call_flow_label"
                                     class="form-control @error('call_flow_label') is-invalid @enderror"
                                     id="call_flow_label" placeholder="e.g., Office Hours">
@@ -138,7 +138,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="call_flow_sound" class="form-label">Sound/Announcement</label>
                                 <select wire:model="call_flow_sound" class="form-select" id="call_flow_sound">
-                                    <option value="">-- None --</option>
+                                    <option value="">None</option>
 
                                     @if (count($recordings) > 0)
                                         <optgroup label="Recordings">
@@ -190,7 +190,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="call_flow_alternate_label" class="form-label">Alternate Status
+                                <label for="call_flow_alternate_label" class="form-label">Alternate Label
                                     Label</label>
                                 <input type="text" wire:model="call_flow_alternate_label"
                                     class="form-control @error('call_flow_alternate_label') is-invalid @enderror"
@@ -301,7 +301,7 @@
                                     </div>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-check-circle me-1"></i>
-                                        {{ $isEditing ? 'Update Call Flow' : 'Create Call Flow' }}
+                                        {{ $isEditing ? 'Update' : 'Create' }}
                                     </button>
                                 </div>
                             </div>
