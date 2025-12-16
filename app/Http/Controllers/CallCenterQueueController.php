@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\CallCenterQueue;
 use App\Repositories\CallCenterQueueRepository;
-use App\Services\FreeSwitch\FreeSwitchCallCenterAgentsService;
+use App\Services\FreeSwitch\FreeSwitchCallCenterStatusService;
 
 class CallCenterQueueController extends Controller
 {
     protected CallCenterQueueRepository $callCenterQueueRepository;
-    protected FreeSwitchCallCenterAgentsService $freeSwitchCallCenterAgentsService;
+    protected FreeSwitchCallCenterStatusService $freeSwitchCallCenterStatusService;
 
-    public function __construct(CallCenterQueueRepository $callCenterQueueRepository, FreeSwitchCallCenterAgentsService $freeSwitchCallCenterAgentsService)
+    public function __construct(CallCenterQueueRepository $callCenterQueueRepository, FreeSwitchCallCenterStatusService $freeSwitchCallCenterStatusService)
     {
         $this->callCenterQueueRepository = $callCenterQueueRepository;
-        $this->freeSwitchCallCenterAgentsService = $freeSwitchCallCenterAgentsService;
+        $this->freeSwitchCallCenterStatusService = $freeSwitchCallCenterStatusService;
     }
 
     public function index()
@@ -37,8 +37,12 @@ class CallCenterQueueController extends Controller
 
     public function showAgents(CallCenterQueue $callCenterQueue)
     {
-        $agents = $this->freeSwitchCallCenterAgentsService->getAgentsStatus($callCenterQueue);
+        $agents = $this->freeSwitchCallCenterStatusService->getAgentsStatus($callCenterQueue);
+        $members_status = $this->freeSwitchCallCenterStatusService->getMembersStatus($callCenterQueue);
 
-        return view("pages.callCenterQueue.agents", compact("callCenterQueue", "agents"));
+        $status = $members_status["status"];
+        $members = $members_status["members"];
+
+        return view("pages.callCenterQueue.agents", compact("callCenterQueue", "agents", "members", "status"));
     }
 }

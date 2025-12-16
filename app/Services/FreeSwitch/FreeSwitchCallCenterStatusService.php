@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
-class FreeSwitchCallCenterAgentsService
+class FreeSwitchCallCenterStatusService
 {
     protected FreeSwitchService $freeSwitchService;
 
@@ -188,6 +188,107 @@ class FreeSwitchCallCenterAgentsService
 						}
 					}
 				}
+			}
+        }
+        catch(\Exception $e)
+        {
+            throw $e;
+
+            if(App::hasDebugModeEnabled())
+            {
+                Log::error('[' . __CLASS__ . '][' . __METHOD__ . ']: ' . $e->getMessage());
+            }
+        }
+        finally
+        {
+            return $data;
+        }
+    }
+
+	public function getMembersStatus(CallCenterQueue $callCenterQueue)
+    {
+		$data = [
+			"status" => [],
+			"members" => [],
+		];
+
+		try
+		{
+			//send the event socket command and get the response
+			$command = "callcenter_config queue list members " . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
+			$event_socket_str = $this->freeSwitchService->execute($command);
+			$result = $this->str_to_named_array($event_socket_str, '|');
+
+			if(App::hasDebugModeEnabled())
+			{
+				Log::debug('CallCenterQueueController > list members: ', [$event_socket_str]);
+			}
+
+			$q_waiting = 0;
+			$q_trying = 0;
+			$q_answered = 0;
+
+			foreach($result as $row)
+			{
+				$state = $row["state"];
+				$q_trying += ($state == "Trying") ? 1 : 0;
+				$q_waiting += ($state == "Waiting") ? 1 : 0;
+				$q_answered += ($state == "Answered") ? 1 : 0;
+			}
+
+			$data["status"] = [
+				"waiting" => $q_waiting,
+				"trying" => $q_trying,
+				"answered" => $q_answered,
+			];
+
+			foreach($result as $row)
+			{
+				$queue = $row['queue'];
+				$system = $row['system'] ?? null;
+				$uuid = $row['uuid'];
+				$session_uuid = $row['session_uuid'];
+				$caller_number = $row['cid_number'];
+				$caller_name = $row['cid_name'];
+				$system_epoch = $row['system_epoch'];
+				$joined_epoch = $row['joined_epoch'];
+				$rejoined_epoch = $row['rejoined_epoch'];
+				$bridge_epoch = $row['bridge_epoch'];
+				$abandoned_epoch = $row['abandoned_epoch'];
+				$base_score = $row['base_score'];
+				$skill_score = $row['skill_score'];
+				$serving_agent = $row['serving_agent'];
+				$serving_system = $row['serving_system'];
+				$state = $row['state'];
+				$joined_seconds = time() - $joined_epoch;
+				$joined_length_hour = floor($joined_seconds/3600);
+				$joined_length_min = floor($joined_seconds/60 - ($joined_length_hour * 60));
+				$joined_length_sec = $joined_seconds - (($joined_length_hour * 3600) + ($joined_length_min * 60));
+				$joined_length_min = sprintf("%02d", $joined_length_min);
+				$joined_length_sec = sprintf("%02d", $joined_length_sec);
+				$joined_length = $joined_length_hour.':'.$joined_length_min.':'.$joined_length_sec;
+
+				//get the serving agent name
+				$serving_agent_name = '';
+
+				if(!empty(Session::get('agents')))
+				{
+					foreach(Session::get('agents') as $agent)
+					{
+						if($agent['call_center_agent_uuid'] == $serving_agent)
+						{
+							$serving_agent_name = $agent['agent_name'];
+						}
+					}
+				}
+
+				$data["members"][] = [
+					"joined_length" => $joined_length,
+					"caller_name" => $caller_name,
+					"caller_number" => $caller_number,
+					"state" => $state,
+					"serving_agent_name" => $serving_agent_name,
+				];
 			}
         }
         catch(\Exception $e)
