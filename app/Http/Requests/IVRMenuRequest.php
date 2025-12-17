@@ -19,13 +19,8 @@ class IVRMenuRequest extends FormRequest
 
     public function rules(): array
     {
-<<<<<<< HEAD
-	$ivrMenu = IVRMenu::find($this->route('ivr_menu'));
-        $isEditing = $ivrMenu ? true : false;
-=======
         $ivrMenu = $this->route('ivr_menu');
         $ivrMenuUuid = $ivrMenu instanceof \App\Models\IVRMenu ? $ivrMenu->ivr_menu_uuid : null;
->>>>>>> refs/remotes/origin/coolpbx-2
 
         if(App::hasDebugModeEnabled())
         {
