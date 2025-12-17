@@ -23,6 +23,6 @@ Redirect	301	/app/call_centers/call_center_queues.php	    /call_center_queues
 Redirect	301	/app/destinations/destinations.php		        /destinations
 Redirect	301	/app/registrations/registrations.php		    /registrations
 Redirect	301	/app/ring_groups/ring_groups.php		        /ring_groups
-Redirect    301 /app/call_centers/call_center_agent_status.php  /call_center_agent_status
-Redirect    301 /app/ivr_menus/ivr_menus.php                    /ivr_menu
-Redirect    301 app/call_center_active/call_center_queue.php    /call_center_queues?action=view
+Redirect	301	/app/call_centers/call_center_agent_status.php  /call_center_agent_status
+Redirect	301	/app/ivr_menus/ivr_menus.php                    /ivr_menu
+Redirect	301	/app/call_center_active/call_center_queue.php    /call_center_queues?action=view
