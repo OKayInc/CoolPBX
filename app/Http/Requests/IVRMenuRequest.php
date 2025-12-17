@@ -70,7 +70,7 @@ class IVRMenuRequest extends FormRequest
 
         if (!is_null($ivrMenuUuid))
         {
-            $ivrMenu = $ivrMenu::findorFail($ivrMenuUuid);
+            $ivrMenu = IVRMenu::findorFail($ivrMenuUuid);
             // Editing
             $rules['ivr_menu_name'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->ignore($ivrMenu, $ivrMenu->getKeyName());
             $rules['ivr_menu_extension'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->where('domain_uuid', Session::get('domain_uuid'))->ignore($ivrMenu, $ivrMenu->getKeyName());
