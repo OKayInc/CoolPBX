@@ -68,7 +68,7 @@ class IvrMenuForm extends Component
     public function rules()
     {
         $ivrMenuRequest = new IVRMenuRequest();
-        $ivrMenuRules = $ivrMenuRequest->rules();
+        $ivrMenuRules = $ivrMenuRequest->rules($this->ivr_menu_uuid);
 
         $ivrMenuOptionRequest = new IVRMenuOptionRequest();
         $ivrMenuOptionRules = $ivrMenuOptionRequest->rules();

@@ -17,10 +17,9 @@ class IVRMenuRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
+    public function rules(?string $ivrMenuUuid = null): array
     {
-        $ivrMenu = $this->route('ivr_menu');
-        $ivrMenuUuid = $ivrMenu instanceof \App\Models\IVRMenu ? $ivrMenu->ivr_menu_uuid : null;
+        $ivrMenu = $this->route('ivr_menu.edit');
 
         if(App::hasDebugModeEnabled())
         {
