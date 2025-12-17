@@ -24,9 +24,8 @@ class IVRMenuRequest extends FormRequest
 
         if(App::hasDebugModeEnabled())
         {
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] this:'.print_r($this, true));
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing:'.(int)$isEditing);
+//            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ivrMenu:'.print_r($ivrMenu, true));
         }
 
         $rules =  [
