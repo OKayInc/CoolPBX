@@ -19,10 +19,14 @@ class IVRMenuRequest extends FormRequest
 
     public function rules(): array
     {
+	$ivrMenu = IVRMenu::find($this->route('ivr_menu'));
+        $isEditing = $ivrMenu ? true : false;
+
         if(App::hasDebugModeEnabled())
         {
             Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] IVRMenu: '.print_r($this, true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] this:'.print_r($this, true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] isEditing:'.(int)$isEditing);
         }
 
         return [
