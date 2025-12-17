@@ -19,12 +19,11 @@ class IVRMenuRequest extends FormRequest
 
     public function rules(?string $ivrMenuUuid = null): array
     {
-        $ivrMenu = $this->route('ivr_menu.edit');
 
         if(App::hasDebugModeEnabled())
         {
 //            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] request: '.print_r(request()->toArray(), true));
-            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ivrMenu:'.print_r($ivrMenu, true));
+            Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] ivrMenuUuid:'.$ivrMenuUuid);
         }
 
         $rules =  [
@@ -71,6 +70,7 @@ class IVRMenuRequest extends FormRequest
 
         if (!is_null($ivrMenuUuid))
         {
+            $ivrMenu = $ivrMenu::findorFail($ivrMenuUuid);
             // Editing
             $rules['ivr_menu_name'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->ignore($ivrMenu, $ivrMenu->getKeyName());
             $rules['ivr_menu_extension'][] = Rule::unique(IVRMenu::getTableName(),'ivr_menu_name')->where('domain_uuid', Session::get('domain_uuid'))->ignore($ivrMenu, $ivrMenu->getKeyName());
