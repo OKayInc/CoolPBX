@@ -136,7 +136,6 @@
                                 name="destination_condition_field"
                                 value="{{ old('destination_condition_field', $destination->destination_condition_field ?? '') }}"
                                 maxlength="32"
-                                required
                             >
                             @error('destination_condition_field')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
