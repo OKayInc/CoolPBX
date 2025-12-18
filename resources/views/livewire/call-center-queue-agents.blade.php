@@ -1,7 +1,19 @@
 <tbody wire:poll.1s="refreshAgents">
     @foreach($agents as $agent)
         <tr>
-            <td><a href="{{ route('call_center_agent.edit', $agent['uuid']) }}">{{ $agent['name'] }}</a></td>
+            <td>
+            @can('call_center_agent_edit')
+                @if(auth()->user()->agents->contains($agent['uuid']))
+                    <a href="{{ route('call_center_agent.edit', $agent['uuid']) }}">
+                        {{ $agent['name'] }}
+                    </a>
+                @else
+                    {{ $agent['name'] }}
+                @endif
+            @else
+                {{ $agent['name'] }}
+            @endcan
+            </td>
             <td>{{ $agent['extension'] }}</td>
             <td>{{ $agent['status'] }}</td>
             <td>{{ $agent['state'] }}</td>
