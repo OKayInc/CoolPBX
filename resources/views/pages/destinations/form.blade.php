@@ -499,7 +499,7 @@
                             <label class="form-label d-block">Order</label>
                             <select class="form-select" name="destination_order" required>
                                 @for ($i = 1; $i <= 999; $i++)
-                                    <option value="{{ $i }}" @selected(old('destination_order', $destination->destination_order ?? null) == $i)>{{ $i }}</option>
+                                    <option value="{{ $i }}" @selected(old('destination_order', $destination->destination_order ?? 100) == $i)>{{ $i }}</option>
                                 @endfor
                             </select>
                             @error('destination_order')

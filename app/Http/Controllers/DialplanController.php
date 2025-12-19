@@ -100,14 +100,14 @@ class DialplanController extends Controller
 
 		$data = $request->validated();
 
-		$dialplanService->setInbound($data, $destination);
+		$dialplanService->setInbound($data, $destination, null);
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
 	}
 
 	public function storeOutbound(OutboundDialplanRequest $request, DialplanService $dialplanService)
 	{
-		$dialplanService->setOutbound($request);
+		$dialplanService->setOutbound($request, null);
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
 	}

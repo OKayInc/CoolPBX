@@ -76,8 +76,8 @@ class DestinationRepository
 
 		if($destination->destination_type == "inbound")
 		{
-			$data["dialplan_name"] = $destination->destination_area_code ?? "" . $destination->destination_number;
-			$data["dialplan_number"] = $destination->destination_area_code ?? "" . $destination->destination_number;
+			$data["dialplan_name"] = ($destination->destination_area_code ?? "") . ($destination->destination_number ?? "");
+			$data["dialplan_number"] = ($destination->destination_area_code ?? "") . ($destination->destination_number ?? "");
 			$data["dialplan_order"] = $destination->destination_order;
 			$data["dialplan_enabled"] = $destination->destination_enabled ?? "false";
 			$data["dialplan_description"] = $destination->datadestination_description;
@@ -95,7 +95,7 @@ class DestinationRepository
 
     public function setDialplan(Destination $destination, Dialplan $dialplan)
     {
-        Destination::where('destination_uuid', $destination->destination_uuid_uuid)->update([
+        Destination::where('destination_uuid', $destination->destination_uuid)->update([
             "dialplan_uuid" => $dialplan->dialplan_uuid
         ]);
     }
