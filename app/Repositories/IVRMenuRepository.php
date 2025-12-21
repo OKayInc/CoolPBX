@@ -14,11 +14,13 @@ class IVRMenuRepository
 {
     protected $model;
     protected $dialplanService;
+    protected $dialplanRepository;
 
-    public function __construct(IVRMenu $ivrMenu, DialplanService $dialplanService)
+    public function __construct(IVRMenu $ivrMenu, DialplanService $dialplanService, DialplanRepository $dialplanRepository)
     {
         $this->model = $ivrMenu;
         $this->dialplanService = $dialplanService;
+        $this->dialplanRepository = $dialplanRepository;
     }
 
     public function getAll(): Collection
@@ -58,6 +60,8 @@ class IVRMenuRepository
 
     public function delete(IVRMenu $ivrMenu): ?bool
     {
+        $this->dialplanRepository->delete($ivrMenu->dialplan_uuid);
+
         return $ivrMenu->delete();
     }
 
