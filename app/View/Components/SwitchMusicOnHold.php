@@ -18,7 +18,7 @@ class SwitchMusicOnHold extends Component
     public $selected;
     public $options;
 
-    public function __construct($name = "", $selected = null, $withMusicOnHold = false, $withRecordings = false, $withStreams = false, $withRingtones = false, $withTones = false, $withPhrases = false, $withMisc = false, $withOthers = true)
+    public function __construct($name = "", $selected = null, $withMusicOnHold = false, $withRecordings = false, $withStreams = false, $withRingtones = false, $withTones = false, $withPhrases = false, $withSounds = false, $withMisc = false, $withOthers = true)
     {
         $this->name = $name;
         $this->selected = $selected;
@@ -156,6 +156,26 @@ class SwitchMusicOnHold extends Component
 
             $this->options[] = [
                 "label" => __("Phrases"),
+                "values" => $values
+            ];
+        }
+
+        if($withSounds)
+        {
+            $sounds = getSounds();
+
+            $values = [];
+
+            foreach($sounds as $sound)
+            {
+                $values[] = [
+                    "id" => $sound,
+                    "name" => $sound
+                ];
+            }
+
+            $this->options[] = [
+                "label" => __("Sounds"),
                 "values" => $values
             ];
         }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class ConferenceCenter extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_conference_centers';
 	protected $primaryKey = 'conference_center_uuid';
 	public $incrementing = false;
@@ -56,6 +57,11 @@ class ConferenceCenter extends Model
 	protected $casts = [
 	];
 
+	protected static $stringBooleanFields = [
+		'conference_center_enabled',
+	];
+
+
 	public function domain(): BelongsTo {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}
@@ -65,6 +71,6 @@ class ConferenceCenter extends Model
 	}
 
     public function conferencerooms(): HasMany {
-		return $this->belongsTo(ConferenceRoom::class, 'conference_center_uuid', 'conference_center_uuid');
+		return $this->hasMany(ConferenceRoom::class, 'conference_center_uuid', 'conference_center_uuid');
 	}
 }
