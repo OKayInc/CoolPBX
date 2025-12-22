@@ -75,13 +75,13 @@ class ConferenceCenterRepository
 
         $dialplanDetailData = [];
 
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "condition", type: "destination_number", data: "^({$conferenceCenter->conference_center_extension})(\d{{$conferenceCenter->conference_center_pin_length}})$", break:"on-true", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "destination_number=$1", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "pin_number=$2", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "app.lua conference_center", order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "condition", type: "destination_number", data: "^({$conferenceCenter->conference_center_extension})(\d{{$conferenceCenter->conference_center_pin_length}})$", break:"on-true", group: 0, order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "destination_number=$1", group: 0, order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "set", data: "pin_number=$2", group: 0, order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "app.lua conference_center", group: 0, order: $y++ * 10);
 
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "condition", type: "destination_number", data: "^{$conferenceCenter->conference_center_extension}$", order: $y++ * 10);
-        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "app.lua conference_center", order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "condition", type: "destination_number", data: "^{$conferenceCenter->conference_center_extension}$", group: 1, order: $y++ * 10);
+        $dialplanDetailData[] = $this->dialplanService->buildDialplanDetail(tag: "action", type: "lua", data: "app.lua conference_center", group: 1, order: $y++ * 10);
 
         $dialplan = Dialplan::find($conferenceCenter->dialplan_uuid);
 
