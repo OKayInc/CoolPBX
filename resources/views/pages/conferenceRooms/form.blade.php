@@ -64,7 +64,6 @@
                                 name="moderator_pin"
                                 placeholder="Enter moderator PIN"
                                 value="{{ old('moderator_pin', $conferenceRoom->moderator_pin ?? '') }}"
-                                required
                             >
                             @error('moderator_pin')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -84,7 +83,6 @@
                                 name="participant_pin"
                                 placeholder="Enter participant PIN"
                                 value="{{ old('participant_pin', $conferenceRoom->participant_pin ?? '') }}"
-                                required
                             >
                             @error('participant_pin')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -109,7 +107,7 @@
                 </div>
 
                <div class="row mt-3">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="max_members" class="form-label">Max Members</label>
                             <input
@@ -121,9 +119,43 @@
                                 value="{{ old('max_members', $conferenceRoom->max_members ?? '') }}"
                                 min=0
                                 max=100
-                                required
                             >
                             @error('max_members')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+               <div class="row mt-3">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="start_datetime" class="form-label">Schedule</label>
+                            <input
+                                type="datetime-local"
+                                class="form-control @error('start_datetime') is-invalid @enderror"
+                                id="start_datetime"
+                                name="start_datetime"
+                                placeholder="from"
+                                value="{{ old('start_datetime', $conferenceRoom->start_datetime ?? '') }}"
+                            >
+                            @error('start_datetime')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="stop_datetime" class="form-label">&nbsp;</label>
+                            <input
+                                type="datetime-local"
+                                class="form-control @error('stop_datetime') is-invalid @enderror"
+                                id="stop_datetime"
+                                name="stop_datetime"
+                                placeholder="to"
+                                value="{{ old('stop_datetime', $conferenceRoom->stop_datetime ?? '') }}"
+                            >
+                            @error('stop_datetime')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
