@@ -19,6 +19,7 @@ class ConferenceRoomRequest extends FormRequest
 			"conference_room_name" => "bail|required|string|max:255",
 			"moderator_pin" => "bail|nullable|integer",
 			"participant_pin" => "bail|nullable|integer",
+			"profile" => "bail|nullable|string|max:255",
 			"record" => "bail|nullable|bool",
 			"max_members" => "bail|nullable|integer",
 			"start_datetime" => "bail|nullable|date",

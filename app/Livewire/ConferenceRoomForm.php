@@ -19,10 +19,10 @@ class ConferenceRoomForm extends Component
 	public ?string $conference_room_uuid = null;
 	public ?string $conference_center_uuid = null;
 	public string $conference_room_name = '';
-	// 'profile',
 	public bool $record = true;
 	public ?int $moderator_pin = 0;
 	public ?int $participant_pin = 0;
+	public ?string $profile = '';
 	public ?int $max_members = 0;
 	public string $start_datetime = '';
 	public string $stop_datetime = '';
@@ -77,6 +77,7 @@ class ConferenceRoomForm extends Component
             $this->record = $conferenceRoom->record ?? false;
             $this->moderator_pin = $conferenceRoom->moderator_pin ?? '';
             $this->participant_pin = $conferenceRoom->participant_pin ?? '';
+            $this->profile = $conferenceRoom->profile ?? '';
             $this->max_members = $conferenceRoom->max_members ?? 0;
             $this->start_datetime = $conferenceRoom->start_datetime ?? '';
             $this->stop_datetime = $conferenceRoom->stop_datetime ?? '';
@@ -97,7 +98,6 @@ class ConferenceRoomForm extends Component
                 $this->conferenceRoomUsers[] = [
                     'conference_room_user_uuid' => $conferenceRoomUser->conference_room_user_uuid,
                     'user_uuid' => $conferenceRoomUser->user_uuid,
-                    'user_name' => $conferenceRoomUser->username,
                 ];
             }
         }
@@ -111,21 +111,16 @@ class ConferenceRoomForm extends Component
     public function addConferenceRoomUser(): void
     {
         $this->conferenceRoomUsers[] = [
-            'conferenceRoom_user_uuid' => '',
+            'conference_room_user_uuid' => '',
             'user_uuid' => '',
-            'prefix' => '',
-            'suffix' => '',
-            'codec' => '',
-            'priority' => '',
-            'enabled' => '',
         ];
     }
 
     public function removeConferenceRoomUser($index): void
     {
-        if(isset($this->conferenceRoomUsers[$index]['conferenceRoom_user_uuid']) && !empty($this->conferenceRoomUsers[$index]['conferenceRoom_user_uuid']))
+        if(isset($this->conferenceRoomUsers[$index]['conference_room_user_uuid']) && !empty($this->conferenceRoomUsers[$index]['conference_room_user_uuid']))
         {
-            $this->conferenceRoomUsersToDelete[] = $this->conferenceRoomUsers[$index]['conferenceRoom_user_uuid'];
+            $this->conferenceRoomUsersToDelete[] = $this->conferenceRoomUsers[$index]['conference_room_user_uuid'];
         }
 
         unset($this->conferenceRoomUsers[$index]);
@@ -136,7 +131,7 @@ class ConferenceRoomForm extends Component
     public function save(): void
     {
         $this->validate();
-/*
+
         $userRules = ConferenceRoomUserRequest::rules();
 
         foreach($this->conferenceRoomUsers as $index => $conferenceRoomUser)
@@ -165,28 +160,13 @@ class ConferenceRoomForm extends Component
             return !empty($conferenceRoomUser['user_uuid']);
         })->toArray();
 
-        $hasNewConferenceRoomUsers = collect($filteredConferenceRoomUsers)->filter(fn($cg) => empty($cg['conferenceRoom_user_uuid']))->count() > 0;
-
-        if($hasNewConferenceRoomUsers)
-        {
-            session()->flash('error', 'You do not have permission to add conferenceRoomUsers.');
-
-		    return;
-        }
-
-        if(!empty($this->conferenceRoomUsersToDelete))
-        {
-            session()->flash('error', 'You do not have permission to delete conferenceRoomUsers.');
-
-		    return;
-        }
-*/
         $conferenceRoomData = [
             'conference_center_uuid' => $this->conference_center_uuid,
             'conference_room_name' => $this->conference_room_name,
             'record' => $this->record,
             'moderator_pin' => $this->moderator_pin,
             'participant_pin' => $this->participant_pin,
+            'profile' => $this->profile,
             'max_members' => $this->max_members,
             'start_datetime' => $this->start_datetime,
             'stop_datetime' => $this->stop_datetime,
@@ -214,14 +194,14 @@ class ConferenceRoomForm extends Component
                 return;
             }
 
-            // $this->conferenceRoomUserRepository->update($this->conferenceRoom, $filteredConferenceRoomUsers);
+            $this->conferenceRoomUserRepository->update($this->conferenceRoom, $filteredConferenceRoomUsers);
 
-            // if(!empty($this->conferenceRoomUsersToDelete))
-            // {
-            //     $this->conferenceRoomUserRepository->delete($this->conferenceRoomUsersToDelete);
-            // }
+            if(!empty($this->conferenceRoomUsersToDelete))
+            {
+                $this->conferenceRoomUserRepository->delete($this->conferenceRoomUsersToDelete);
+            }
 
-            // session()->flash('message', 'ConferenceRoom updated successfully.');
+            session()->flash('message', 'Conference Room updated successfully.');
         }
         else
         {
@@ -229,7 +209,7 @@ class ConferenceRoomForm extends Component
 
             $this->conferenceRoom = $this->conferenceRoomRepository->create($conferenceRoomData);
 
-            // $this->conferenceRoomUserRepository->create($this->conferenceRoom, $filteredConferenceRoomUsers);
+            $this->conferenceRoomUserRepository->create($this->conferenceRoom, $filteredConferenceRoomUsers);
 
             session()->flash('message', 'ConferenceRoom created successfully.');
         }

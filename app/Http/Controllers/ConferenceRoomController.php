@@ -5,6 +5,7 @@ use App\Http\Requests\ConferenceRoomRequest;
 use App\Models\ConferenceCenter;
 use App\Models\ConferenceProfile;
 use App\Models\ConferenceRoom;
+use App\Models\User;
 use App\Repositories\ConferenceRoomRepository;
 use App\Services\ConferenceRoomActiveService;
 use App\Services\ConferenceRoomInteractiveService;
@@ -31,7 +32,9 @@ class ConferenceRoomController extends Controller
 
 		$conferenceProfiles = ConferenceProfile::where("profile_enabled", "true")->where("profile_name", "<>", "sla")->get();
 
-		return view("pages.conferenceRooms.form", compact("conferenceCenters", "conferenceProfiles"));
+		$users = User::all();
+
+		return view("pages.conferenceRooms.form", compact("conferenceCenters", "conferenceProfiles", "users"));
 	}
 
 	public function store(ConferenceRoomRequest $request)
@@ -52,7 +55,9 @@ class ConferenceRoomController extends Controller
 
 		$conferenceProfiles = ConferenceProfile::where("profile_enabled", "true")->where("profile_name", "<>", "sla")->get();
 
-		return view("pages.conferenceRooms.form", compact("conferenceRoom", "conferenceCenters", "conferenceProfiles"));
+		$users = User::all();
+
+		return view("pages.conferenceRooms.form", compact("conferenceRoom", "conferenceCenters", "conferenceProfiles", "users"));
 	}
 
 	public function update(ConferenceRoomRequest $request, ConferenceRoom $conferenceRoom)

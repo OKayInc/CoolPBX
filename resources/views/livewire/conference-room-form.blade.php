@@ -87,6 +87,65 @@
 					<div class="row mt-3">
 						<div class="col-md-6">
 							<div class="form-group">
+								<label for="conference_center_uuid" class="form-label">Users</label>
+								<div class="table-responsive">
+									<table class="table table-bordered">
+										<thead>
+											<tr>
+												<th>{{ __('User') }}</th>
+												<th class="text-center">{{ __('Action') }}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($conferenceRoomUsers as $index => $conferenceRoomUser)
+											<tr>
+												<td>
+													<select class="form-select @error('conferenceRoomUsers.' . $index . '.user_uuid') is-invalid @enderror" wire:model="conferenceRoomUsers.{{ $index }}.user_uuid" required>
+														@foreach($users as $user)
+														<option value="{{ $user->user_uuid }}">{{ $user->username }}</option>
+														@endforeach
+													</select>
+												</td>
+												<td class="text-center">
+													@if (count($conferenceRoomUsers) > 1)
+													<button type="button" class="btn btn-sm btn-danger" wire:click="removeConferenceRoomUser({{ $index }})"><i class="fas fa-times"></i> <i class="bi bi-trash"></i> </button>
+													@endif
+
+													@if ($index === count($conferenceRoomUsers) - 1)
+														<button type="button" class="btn btn-sm btn-success" wire:click="addConferenceRoomUser"><i class="fas fa-plus"></i> Add</button>
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+								@error('conference_center_uuid')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="profile" class="form-label">Profile</label>
+								<select class="form-select" name="profile" wire:model="profile">
+									@foreach($conferenceProfiles as $conferenceProfile)
+									<option value="{{ $conferenceProfile['profile_name'] }}">{{ $conferenceProfile['profile_name'] }}</option>
+									@endforeach
+								</select>
+								@error('profile')
+									<div class="invalid-feedback d-block">{{ $message }}</div>
+								@enderror
+							</div>
+						</div>
+					</div>
+
+					<div class="row mt-3">
+						<div class="col-md-6">
+							<div class="form-group">
 								<label class="form-label d-block">Record</label>
 								<div class="form-check form-switch">
 									<input class="form-check-input" type="checkbox" role="switch" id="record" name="record" value="true" wire:model="record" {{ old('record', $conferenceRoom->record ?? true) ? 'checked' : '' }}>

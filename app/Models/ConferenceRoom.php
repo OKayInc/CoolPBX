@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -92,8 +93,7 @@ class ConferenceRoom extends Model
 		return $this->belongsTo(ConferenceCenter::class, 'conference_center_uuid', 'conference_center_uuid');
 	}
 
-	public function users(): BelongsToMany {
-		return $this->belongsToMany(User::class, 'v_conference_room_users', 'conference_room_uuid', 'user_uuid');
-//		$this->belongsToMany(Group::class)->using(UserGroup::class);
+	public function users(): HasMany {
+		return $this->hasMany(ConferenceRoomUser::class, 'conference_room_uuid', 'conference_room_uuid');
 	}
 }

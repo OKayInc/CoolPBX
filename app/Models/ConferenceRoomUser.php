@@ -23,4 +23,8 @@ class ConferenceRoomUser extends Pivot
 	public function domain(): BelongsTo {
 		return $this->belongsTo(Domain::class, 'domain_uuid', 'domain_uuid');
 	}
+
+	public function user(): BelongsTo {
+		return $this->belongsTo(User::class, 'user_uuid', 'user_uuid');
+	}
 }
