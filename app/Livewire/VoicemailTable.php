@@ -91,7 +91,7 @@ class VoicemailTable extends DataTableComponent
     {
         $html = '<div class="d-flex gap-2" style="white-space: nowrap;">';
 
-        if (auth()->user()->hasPermission('voicemail_greeting_view')) {
+        if (auth()->user()->hasPermission('voicemail_greeting_view') && !empty($row->voicemail_id)) {
             $greetingsUrl = route('voicemails.greetings.index', [
                 'voicemailId' => $row->voicemail_id
             ]);
