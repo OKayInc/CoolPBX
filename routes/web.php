@@ -21,6 +21,7 @@ use App\Http\Controllers\CallCenterAgentController;
 use App\Http\Controllers\CallCenterQueueController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ConferenceCenterController;
+use App\Http\Controllers\ConferenceControlController;
 use App\Http\Controllers\ConferenceRoomController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -114,6 +115,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/conference_centers/active', [ConferenceCenterController::class, 'getActive'])->name('conference_centers.active', 'conference_centers.active');
     Route::get('/conference_centers/interactive/{conferenceRoom}', [ConferenceCenterController::class, 'getInteractive'])->name('conference_centers.interactive', 'conference_centers.interactive');
     Route::resource('/conference_centers', ConferenceCenterController::class)->name('conference_centers', 'conference_centers');
+
+    // CONFERENCE CONTROLS
+    Route::resource('/conference_controls', ConferenceControlController::class)->name('conference_controls', 'conference_controls');
+
+    // CONFERENCE ROOMS
     Route::resource('/conference_rooms', ConferenceRoomController::class)->name('conference_rooms', 'conference_rooms');
 
     // DESTINATION
