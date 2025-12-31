@@ -9,7 +9,7 @@
             </h3>
 
             <div class="card-tools">
-                <div class="d-flex gap-2 " role="conference_center" aria-label="Bridges actions">
+                <div class="d-flex gap-2 " role="conference_center" aria-label="Conference Center actions">
                     @can('conference_active_view')
                     <a href="{{ route('conference_centers.active') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-comments mr-1"></i> {{__('View Active')}}

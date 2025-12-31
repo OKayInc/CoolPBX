@@ -113,7 +113,7 @@
                                 id="conference_center_description"
                                 name="conference_center_description"
                                 rows="3"
-                                placeholder="Enter bridge description"
+                                placeholder="Enter conference center description"
                             >{{ old('conference_center_description', $conferenceCenter->conference_center_description ?? '') }}</textarea>
                             @error('conference_center_description')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
