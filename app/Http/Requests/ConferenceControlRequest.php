@@ -16,7 +16,7 @@ class ConferenceControlRequest extends FormRequest
 	{
 		return [
 			"control_name" => "bail|required|string|max:255",
-			"control_enabled" => "bail|nullable|in:true,false",
+			"control_enabled" => "bail|nullable|bool",
 			"control_description" => "bail|nullable|string|max:255",
 		];
 	}

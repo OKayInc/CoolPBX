@@ -21,7 +21,7 @@ class ConferenceControlRepository
 
     public function findByUuid(string $uuid): ?ConferenceControl
     {
-        return $this->model->where('conference_center_uuid', $uuid)->first();
+        return $this->model->where('conference_control_uuid', $uuid)->first();
     }
 
     public function create(array $data): ConferenceControl
