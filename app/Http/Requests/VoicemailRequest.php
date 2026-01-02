@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Facades\Setting;
 use App\Models\Voicemail;
 use App\Rules\E164;
+use App\Rules\ValidPIN;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +31,7 @@ class VoicemailRequest extends FormRequest
                 'required',
                 'numeric',
             ],
-            'voicemail_password' => ['required', 'integer', 'digits_between:'.$minLength.',255'],
+            'voicemail_password' => ['required', 'integer', 'digits_between:'.$minLength.',255', new ValidPIN()],
             'voicemail_mail_to' => ['nullable', 'string', 'max:255','email:rfc,dns,spoof,filter'],
             'voicemail_sms_to' => ['nullable', 'string', 'max:255', new E164(config('freeswitch.CHECK_COUNTRY_CODE'), '*')],
             'voicemail_description' => ['nullable', 'string', 'max:255'],
