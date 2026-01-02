@@ -35,7 +35,7 @@ class ValidPIN implements ValidationRule
         ];
 
         foreach ($sequences as $sequence) {
-            if (strpos($password, $sequence) !== false) {
+            if (strpos($value, $sequence) !== false) {
                 $fail("Password cannot contain sequential digits");
                 break;
             }
