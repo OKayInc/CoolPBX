@@ -2,14 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Repositories\VoicemailRepository;
-use App\Models\Voicemail;
-use App\Models\Extension;
 use App\Facades\Setting;
+use App\Http\Requests\VoicemailRequest;
+use App\Models\Extension;
+use App\Models\Voicemail;
+use App\Repositories\VoicemailRepository;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Component;
 
 class VoicemailForm extends Component
 {
@@ -59,26 +60,8 @@ class VoicemailForm extends Component
 
     public function rules(): array
     {
-        return [
-            'voicemail_id' => [
-                'required',
-                'numeric',
-                Rule::unique('v_voicemails', 'voicemail_id')
-                    ->where('domain_uuid', $this->domain_uuid)
-                    ->ignore($this->voicemailUuid, 'voicemail_uuid'),
-            ],
-            'voicemail_password' => ['required', 'string', 'max:50'],
-            'voicemail_mail_to' => ['nullable', 'string', 'max:255'],
-            'voicemail_sms_to' => ['nullable', 'string', 'max:255'],
-            'voicemail_description' => ['nullable', 'string', 'max:255'],
-            'voicemail_alternate_greet_id' => ['nullable', 'string', 'max:255'],
-            'greeting_id' => ['nullable', 'string'],
-            'voicemail_transcription_enabled' => ['nullable'],
-            'voicemail_tutorial' => ['nullable'],
-            'voicemail_file' => ['nullable', 'in:,link,attach'],
-            'voicemail_local_after_email' => ['nullable'],
-            'voicemail_enabled' => ['nullable'],
-        ];
+        $request = new VoicemailRequest();
+        return $request->rules($this->$voicemailUuid);
     }
 
     public function messages(): array

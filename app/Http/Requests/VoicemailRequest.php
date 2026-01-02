@@ -2,8 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Voicemail;
+use App\Rules\E164;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+
 
 class VoicemailRequest extends FormRequest
 {
@@ -19,9 +23,9 @@ class VoicemailRequest extends FormRequest
         return true;
     }
 
-    public function rules()
+    public function rules(?string $voicemailUuid = null)
     {
-        return [
+        $rules = [
             'voicemail_id' => [
                 'required',
                 'numeric',
@@ -29,9 +33,9 @@ class VoicemailRequest extends FormRequest
                     ->where('domain_uuid', auth()->user()->domain_uuid)
                     ->ignore($this->voicemailUuid, 'voicemail_uuid'),
             ],
-            'voicemail_password' => ['required', 'string', 'max:50'],
-            'voicemail_mail_to' => ['nullable', 'string', 'max:255'],
-            'voicemail_sms_to' => ['nullable', 'string', 'max:255'],
+            'voicemail_password' => ['required', 'string', 'max:50', 'Password::numbers()'],
+            'voicemail_mail_to' => ['nullable', 'string', 'max:255','email:rfc,dns,spoof,filter'],
+            'voicemail_sms_to' => ['nullable', 'string', 'max:255',new E164(config('freeswitch.CHECK_COUNTRY_CODE'), '*')],
             'voicemail_description' => ['nullable', 'string', 'max:255'],
             'voicemail_alternate_greet_id' => ['nullable', 'string', 'max:255'],
             'greeting_id' => ['nullable'],
@@ -41,6 +45,19 @@ class VoicemailRequest extends FormRequest
             'voicemail_local_after_email' => ['required', 'in:true,false'],
             'voicemail_enabled' => ['required', 'in:true,false'],
         ];
+
+        if (!is_null($ivrMenuUuid))
+        {
+            $voicemail = Voicemail::findorFail($voicemailUuid);
+            // Editing
+            $rules['voicemail_id'][] = Rule::unique(Voicemail::getTableName(),'voicemail_id')->ignore($voicemail, $voicemail->getKeyName());
+        }
+        else{
+            // Creating
+            $rules['voicemail_id'][] = Rule::unique(Voicemail::getTableName(),'voicemail_id');
+        }
+
+        return $rules;
     }
 
     public function messages()
