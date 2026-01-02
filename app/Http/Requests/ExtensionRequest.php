@@ -25,10 +25,10 @@ class ExtensionRequest extends FormRequest
     public function setExtension(?Extension $extension): void
     {
         $this->extension = $extension;
-	if (isset($extension))
-	{
-		$this->setExtensionUuid($extension->extension_uuid);
-	}
+        if (isset($extension))
+        {
+            $this->setExtensionUuid($extension->extension_uuid);
+        }
     }
 
     /**
@@ -59,7 +59,7 @@ class ExtensionRequest extends FormRequest
                 'string',
                 'max:50',
             ],
-            'number_alias' => ['nullable','numeric',],
+            'number_alias' => ['nullable','numeric', 'integer'],
             'password' => ['nullable','string'],
             'accountcode' => 'nullable|string|max:50',
             'enabled' => 'nullable|string|in:true,false',
@@ -96,7 +96,7 @@ class ExtensionRequest extends FormRequest
             'absolute_codec_string' => 'nullable|string|max:200',
             'force_ping' => 'nullable|string|max:50',
             'dial_string' => 'nullable|string|max:200',
-            'voicemail_password' => 'nullable|string|min:4|max:20',
+            'voicemail_password' => 'nullable|string|min:4|max:20|Password::numbers()',
             'voicemail_enabled' => 'nullable|in:true,false',
             'voicemail_mail_to' => 'nullable|email|max:200',
             'voicemail_transcription_enabled' => 'nullable|in:true,false',
