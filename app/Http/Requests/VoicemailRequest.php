@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Facades\Setting;
 use App\Models\Voicemail;
 use App\Rules\E164;
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,12 +24,13 @@ class VoicemailRequest extends FormRequest
 
     public function rules(?string $voicemailUuid = null)
     {
+	$minLength = Setting::getSetting('voicemail', 'password_min_length', 'numeric') ?? 6;
         $rules = [
             'voicemail_id' => [
                 'required',
                 'numeric',
             ],
-            'voicemail_password' => ['required', 'integer', 'digits_between:4,12'],
+            'voicemail_password' => ['required', 'integer', 'digits_between:'.$minLength.',255'],
             'voicemail_mail_to' => ['nullable', 'string', 'max:255','email:rfc,dns,spoof,filter'],
             'voicemail_sms_to' => ['nullable', 'string', 'max:255', new E164(config('freeswitch.CHECK_COUNTRY_CODE'), '*')],
             'voicemail_description' => ['nullable', 'string', 'max:255'],
@@ -38,7 +40,7 @@ class VoicemailRequest extends FormRequest
             'voicemail_tutorial' => ['sometimes', 'in:true,false'],
             'voicemail_file' => ['nullable', 'in:,link,attach'],
             'voicemail_local_after_email' => ['required', 'bool'],
-            'voicemail_enabled' => ['sometimes', 'in:true,false'],
+            'voicemail_enabled' => ['sometimes', 'bool'],
         ];
 
         if (!is_null($voicemailUuid))

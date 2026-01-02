@@ -328,6 +328,7 @@ class VoicemailForm extends Component
 
     public function save()
     {
+/*
         if ($this->passwordComplexity) {
             $validation = $this->validatePasswordComplexity();
             if (!$validation['valid']) {
@@ -335,7 +336,7 @@ class VoicemailForm extends Component
                 return;
             }
         }
-
+*/
         $this->validate();
 
         try {
