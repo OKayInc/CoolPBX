@@ -127,16 +127,38 @@
                                     @enderror
                                 </div>
 
-                                <div class="file-info flex-grow-1 overflow-hidden">
-                                    <p class="mb-0 font-weight-bold text-truncate" id="fileName" style="max-width: 180px;">
-                                    </p>
-                                    <div>
-                                        <small class="text-muted" id="fileSize"></small>
-                                        <span class="text-muted mx-1">|</span>
-                                        <small class="text-info font-weight-bold"
-                                            id="fileRate">{{ __('Detecting...') }}</small>
+
+
+
+                                {{-- <div class="form-group">
+                                    <label for="music_on_hold_rate"
+                                        class="font-weight-bold small text-uppercase text-muted mb-2">
+                                        {{ __('Quality') }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-2">
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio" id="rate8" name="music_on_hold_rate"
+                                                    value="8000" class="custom-control-input">
+                                                <label class="custom-control-label" for="rate8">8 kHz (Low)</label>
+                                            </div>
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio" id="rate16" name="music_on_hold_rate"
+                                                    value="16000" class="custom-control-input" checked>
+                                                <label class="custom-control-label font-weight-bold text-primary"
+                                                    for="rate16">16 kHz (Standard)</label>
+                                            </div>
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="rate48" name="music_on_hold_rate"
+                                                    value="48000" class="custom-control-input">
+                                                <label class="custom-control-label" for="rate48">48 kHz (High)</label>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                    @error('music_on_hold_rate')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div> --}}
                             </div>
 
                             <div class="col-md-7">
@@ -156,8 +178,7 @@
                                             <h6 class="font-weight-bold mb-1">{{ __('Click or Drag file here') }}</h6>
                                             <p class="text-muted small mb-3">{{ __('MP3, WAV, OGG (Max 50MB)') }}</p>
 
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm rounded-pill px-4"
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4"
                                                 onclick="document.getElementById('music_on_hold_file').click()">
                                                 {{ __('Browse') }}
                                             </button>
@@ -173,6 +194,11 @@
                                                     <p class="mb-0 font-weight-bold text-truncate" id="fileName"
                                                         style="max-width: 180px;"></p>
                                                     <small class="text-muted" id="fileSize"></small>
+                                                    <p class="mb-1">
+                                                        <span class="font-weight-bold">{{ __('Sample Rate') }}:</span>
+                                                        <span id="fileSampleRate"
+                                                            class="text-muted">{{ __('Detecting...') }}</span>
+                                                    </p>
                                                 </div>
                                                 <button type="button" class="btn btn-link text-danger p-0 ml-2"
                                                     id="removeFile">
@@ -355,6 +381,53 @@
                 fileSize.textContent = formatFileSize(file.size);
                 dropZone.querySelector('.drop-zone-content').style.display = 'none';
                 filePreview.style.display = 'block';
+
+                // Detectar el sample rate del archivo usando el backend
+                detectAudioSampleRate(file);
+            }
+
+            function detectAudioSampleRate(file) {
+                const fileSampleRateElement = document.getElementById('fileSampleRate');
+                fileSampleRateElement.textContent = '{{ __('Detecting...') }}';
+                fileSampleRateElement.className = 'text-muted';
+
+                // Crear FormData para enviar el archivo
+                const formData = new FormData();
+                formData.append('audio_file', file);
+
+                // Hacer petición AJAX
+                fetch('{{ route('musiconhold.detect-sample-rate') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const sampleRate = data.sample_rate;
+                            fileSampleRateElement.textContent =
+                                `${sampleRate} Hz (${data.sample_rate_khz} kHz)`;
+
+                            // Agregar clase de color según la frecuencia
+                            if (sampleRate < 16000) {
+                                fileSampleRateElement.className = 'text-warning';
+                            } else if (sampleRate >= 44100) {
+                                fileSampleRateElement.className = 'text-success';
+                            } else {
+                                fileSampleRateElement.className = 'text-primary';
+                            }
+                        } else {
+                            fileSampleRateElement.textContent = '{{ __('Could not detect') }}';
+                            fileSampleRateElement.className = 'text-muted';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        fileSampleRateElement.textContent = '{{ __('Error detecting') }}';
+                        fileSampleRateElement.className = 'text-danger';
+                    });
             }
 
             removeFileBtn.addEventListener('click', function(e) {
@@ -418,6 +491,12 @@
                 filePreview.style.display = 'none';
                 uploadProgress.style.display = 'none';
                 uploadBtn.disabled = false;
+
+                const fileSampleRateElement = document.getElementById('fileSampleRate');
+                if (fileSampleRateElement) {
+                    fileSampleRateElement.textContent = '{{ __('Detecting...') }}';
+                    fileSampleRateElement.className = 'text-muted';
+                }
             });
         });
     </script>

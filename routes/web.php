@@ -209,6 +209,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/musiconhold/{musiconhold}/{file}/play', [MusicOnHoldController::class, 'play'])->name('musiconhold.play');
     Route::get('/musiconhold/{musiconhold}/{file}/download', [MusicOnHoldController::class, 'download'])->name('musiconhold.download');
     Route::post('/musiconhold/upload', [MusicOnHoldController::class, 'upload'])->name('musiconhold.upload');
+    Route::post('musiconhold/detect-sample-rate', [MusicOnHoldController::class, 'detectSampleRateAjax'])
+    ->name('musiconhold.detect-sample-rate');
 
     // STREAMS
     Route::resource('/streams', StreamController::class)->name('streams', 'streams');
