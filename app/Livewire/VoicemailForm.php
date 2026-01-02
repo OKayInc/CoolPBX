@@ -61,7 +61,7 @@ class VoicemailForm extends Component
     public function rules(): array
     {
         $request = new VoicemailRequest();
-        return $request->rules($this->$voicemailUuid);
+        return $request->rules($this->voicemailUuid);
     }
 
     public function messages(): array
