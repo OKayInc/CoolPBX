@@ -27,9 +27,6 @@ class VoicemailRequest extends FormRequest
             'voicemail_id' => [
                 'required',
                 'numeric',
-                Rule::unique('v_voicemails', 'voicemail_id')
-                    ->where('domain_uuid', auth()->user()->domain_uuid)
-                    ->ignore($this->voicemailUuid, 'voicemail_uuid'),
             ],
             'voicemail_password' => ['required', 'integer', 'digits_between:4,12'],
             'voicemail_mail_to' => ['nullable', 'string', 'max:255','email:rfc,dns,spoof,filter'],
@@ -37,22 +34,25 @@ class VoicemailRequest extends FormRequest
             'voicemail_description' => ['nullable', 'string', 'max:255'],
             'voicemail_alternate_greet_id' => ['nullable', 'string', 'max:255'],
             'greeting_id' => ['nullable'],
-            'voicemail_transcription_enabled' => ['required', 'in:true,false'],
-            'voicemail_tutorial' => ['required', 'in:true,false'],
+            'voicemail_transcription_enabled' => ['sometimes', 'bool'],
+            'voicemail_tutorial' => ['sometimes', 'in:true,false'],
             'voicemail_file' => ['nullable', 'in:,link,attach'],
-            'voicemail_local_after_email' => ['required', 'in:true,false'],
-            'voicemail_enabled' => ['required', 'in:true,false'],
+            'voicemail_local_after_email' => ['required', 'bool'],
+            'voicemail_enabled' => ['sometimes', 'in:true,false'],
         ];
 
         if (!is_null($voicemailUuid))
         {
             $voicemail = Voicemail::findorFail($voicemailUuid);
             // Editing
-            $rules['voicemail_id'][] = Rule::unique(Voicemail::getTableName(),'voicemail_id')->ignore($voicemail, $voicemail->getKeyName());
+            $rules['voicemail_id'][] = Rule::unique('App\Models\Voicemail','voicemail_id')
+		->where('domain_uuid', auth()->user()->domain_uuid)
+		->ignore($voicemail,'voicemail_id');
         }
         else{
             // Creating
-            $rules['voicemail_id'][] = Rule::unique(Voicemail::getTableName(),'voicemail_id');
+            $rules['voicemail_id'][] = Rule::unique('App\Models\Voicemail','voicemail_id')
+		->where('domain_uuid', auth()->user()->domain_uuid);
         }
 
         return $rules;
