@@ -7,6 +7,7 @@ use App\Models\MusicOnHold;
 use App\Services\AudioPlayDownloadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MusicOnHoldController extends Controller
 {
@@ -45,19 +46,20 @@ class MusicOnHoldController extends Controller
 
 	public function index()
 	{
-		$musiconhold = MusicOnHold::all();
-
-		$list = [];
+		$musiconhold = MusicOnHold::orderBy('music_on_hold_name')
+			->orderBy('music_on_hold_rate')
+			->get();
 
 		$categories = array_unique($musiconhold->pluck("music_on_hold_name")->toArray());
 
+		$groupedList = [];
+
 		foreach ($musiconhold as $m) {
+			$directory = $this->getActualDirectory($m);
 			$file_list = [];
 
-			$directory = $this->getActualDirectory($m);
-
 			if (is_dir($directory)) {
-				$files = glob($directory . "/*.{mp3,wav}", GLOB_BRACE);
+				$files = glob($directory . "/*.{mp3,wav,ogg}", GLOB_BRACE);
 
 				if (!empty($files)) {
 					foreach ($files as $file) {
@@ -65,21 +67,39 @@ class MusicOnHoldController extends Controller
 							"name" => pathinfo($file, PATHINFO_BASENAME),
 							"size" => $this->byte_convert(filesize($file)),
 							"uploaded" => date("M d, Y H:i:s", filemtime($file)),
+							"uid"  => Str::uuid()
 						];
 					}
-
-					$list[] = [
-						"id" => $m->music_on_hold_uuid,
-						"name" => $m->music_on_hold_name,
-						"rate" => $m->kHz,
-						"files" => $file_list
-					];
 				}
 			}
+
+			$groupedList[$m->music_on_hold_name][] = [
+				"uuid" => $m->music_on_hold_uuid,
+				"rate" => $m->music_on_hold_rate,
+				"path" => $m->music_on_hold_path,
+				"files" => $file_list
+			];
 		}
 
-		return view('pages.musiconhold.index', compact('list', 'categories'));
+		return view('pages.musiconhold.index', compact('groupedList', 'categories'));
 	}
+
+	public function destroyFile(MusicOnHold $musiconhold, $filename)
+    {
+        $directory = $this->getActualDirectory($musiconhold);
+        $filePath = $directory . '/' . $filename;
+
+        if (strpos($filename, '..') !== false || strpos($filename, '/') !== false) {
+             return back()->with('error', 'Invalid filename.');
+        }
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            return back()->with('success', 'File deleted successfully.');
+        }
+
+        return back()->with('error', 'File not found.');
+    }
 
 	public function upload(MusicOnHoldRequest $request)
 	{
@@ -186,7 +206,7 @@ class MusicOnHoldController extends Controller
 	{
 		if (auth()->user()->hasPermission('music_on_hold_view')) {
 			$path = $this->getActualDirectory($musiconhold) . '/' . $file;
-			
+
 			return $this->audioPlayDownloadService->play($path);
 		}
 	}

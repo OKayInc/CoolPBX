@@ -211,6 +211,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/musiconhold/upload', [MusicOnHoldController::class, 'upload'])->name('musiconhold.upload');
     Route::post('musiconhold/detect-sample-rate', [MusicOnHoldController::class, 'detectSampleRateAjax'])
     ->name('musiconhold.detect-sample-rate');
+    Route::delete('/musiconhold/{musiconhold}/{filename}', [MusicOnHoldController::class, 'destroyFile'])
+    ->name('musiconhold.destroyFile');
 
     // STREAMS
     Route::resource('/streams', StreamController::class)->name('streams', 'streams');
