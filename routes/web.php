@@ -115,6 +115,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // CONFERENCE CENTERS
     Route::get('/conference_centers/active', [ConferenceCenterController::class, 'getActive'])->name('conference_centers.active', 'conference_centers.active');
     Route::get('/conference_centers/interactive/{conferenceRoom}', [ConferenceCenterController::class, 'getInteractive'])->name('conference_centers.interactive', 'conference_centers.interactive');
+    Route::get('/conference_centers/sessions/{conferenceRoom}', [ConferenceCenterController::class, 'getSessions'])->name('conference_centers.sessions', 'conference_centers.sessions');
+    Route::get('/conference_centers/{conferenceSession}/play', [ConferenceCenterController::class, 'play'])->name('conference_centers.play');
+    Route::get('/conference_centers/{conferenceSession}/download', [ConferenceCenterController::class, 'download'])->name('conference_centers.download');
     Route::resource('/conference_centers', ConferenceCenterController::class)->name('conference_centers', 'conference_centers');
 
     // CONFERENCE CONTROLS

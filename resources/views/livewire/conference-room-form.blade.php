@@ -401,7 +401,7 @@
 					<a href="{{ route('conference_centers.interactive', $conferenceRoom->conference_room_uuid) }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
 						View
 					</a>
-					<a href="{{ route('conference_centers.interactive', $conferenceRoom->conference_room_uuid) }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
+					<a href="{{ route('conference_centers.sessions', $conferenceRoom->conference_room_uuid) }}" class="btn btn-secondary ml-2 px-4 py-2" style="border-radius: 4px;">
 						Sessions
 					</a>
 					@endif

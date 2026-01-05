@@ -57,8 +57,8 @@ class CallRecordingsTable extends DataTableComponent
             $columns[] = Column::make("Recording", "caller_id_name")
                 ->format(function ($value, $row, Column $column) {
                     return view('components.buttons-audio', [
-                        'urlPlay' => route("callrecordings.play", $row->call_recording_uuid),
-                        'urlDownload' => route("callrecordings.download", $row->call_recording_uuid),
+                        'urlPlay' => route("callrecordings.play", $row->recording),
+                        'urlDownload' => route("callrecordings.download", $row->recording),
                     ])->render();
                 })
                 ->html();
