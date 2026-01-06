@@ -25,12 +25,12 @@ class VoicemailForm extends Component
     public ?string $voicemail_alternate_greet_id = '';
     public ?string $voicemail_mail_to = '';
     public ?string $voicemail_sms_to = '';
-    public string $voicemail_transcription_enabled = 'false';
-    public string $voicemail_tutorial = 'false';
+    public bool $voicemail_transcription_enabled = false;
+    public bool $voicemail_tutorial = false;
     public ?string $voicemail_file = '';
-    public string $voicemail_local_after_email = 'true';
+    public bool $voicemail_local_after_email = true;
     public ?string $voicemail_destination = null;
-    public string $voicemail_enabled = 'true';
+    public bool $voicemail_enabled = true;
     public ?string $voicemail_description = '';
 
     public array $voicemailOptions = [];
@@ -51,7 +51,7 @@ class VoicemailForm extends Component
     public bool $showDeleteOptions = false;
     public bool $showDeleteDestinations = false;
 
-    protected $voicemailRepository;
+    protected VoicemailRepository $voicemailRepository;
 
     public function boot(VoicemailRepository $voicemailRepository): void
     {
@@ -61,6 +61,7 @@ class VoicemailForm extends Component
     public function rules(): array
     {
         $request = new VoicemailRequest();
+        $request->setVoicemailUuid($this->voicemailUuid);
         return $request->rules($this->voicemailUuid);
     }
 
@@ -161,18 +162,18 @@ class VoicemailForm extends Component
     {
         $user = auth()->user();
         $this->domain_uuid = $user->domain_uuid;
-        $this->voicemail_enabled = 'true';
-        $this->voicemail_local_after_email = 'true';
-        $this->voicemail_tutorial = 'false';
+        $this->voicemail_enabled = true;
+        $this->voicemail_local_after_email = true;
+        $this->voicemail_tutorial = false;
 
         $this->voicemail_file = Setting::getSetting('voicemail', 'voicemail_file', 'text') ?? '';
 
         $keepLocalDefault = Setting::getSetting('voicemail', 'keep_local', 'boolean');
-        $this->voicemail_local_after_email = $keepLocalDefault ?? 'true';
+        $this->voicemail_local_after_email = ($keepLocalDefault === 'true') ? true : false;
 
         if (!$this->showTranscription || !auth()->user()->hasPermission('voicemail_transcription_enabled')) {
             $transcriptionDefault = Setting::getSetting('voicemail', 'transcription_enabled_default', 'boolean');
-            $this->voicemail_transcription_enabled = $transcriptionDefault ?? 'false';
+            $this->voicemail_transcription_enabled = ($transcriptionDefault === 'true') ? true : false;
         }
     }
 
@@ -225,24 +226,15 @@ class VoicemailForm extends Component
     public function updatedVoicemailFile()
     {
         if ($this->voicemail_file !== 'attach') {
-            $this->voicemail_local_after_email = 'true';
+            $this->voicemail_local_after_email = true;
         }
     }
 
     public function updatedVoicemailLocalAfterEmail()
     {
-        if ($this->voicemail_local_after_email === 'false') {
+        if ($this->voicemail_local_after_email === false) {
             $this->voicemail_file = 'attach';
         }
-    }
-
-    public function validatePasswordComplexity()
-    {
-        if (!$this->passwordComplexity) {
-            return ['valid' => true, 'errors' => []];
-        }
-
-        return $this->voicemailRepository->validatePasswordComplexity($this->voicemail_password);
     }
 
     public function addVoicemailOption()
@@ -328,31 +320,22 @@ class VoicemailForm extends Component
 
     public function save()
     {
-/*
-        if ($this->passwordComplexity) {
-            $validation = $this->validatePasswordComplexity();
-            if (!$validation['valid']) {
-                session()->flash('error', 'Password requirements: ' . implode(', ', $validation['errors']));
-                return;
-            }
-        }
-*/
         $this->validate();
 
         try {
             $voicemailData = [
                 'voicemail_id' => $this->voicemail_id,
                 'voicemail_password' => $this->voicemail_password,
-                'greeting_id' => $this->greeting_id,
-                'voicemail_alternate_greet_id' => $this->voicemail_alternate_greet_id,
-                'voicemail_mail_to' => $this->voicemail_mail_to,
-                'voicemail_sms_to' => $this->voicemail_sms_to,
+                'greeting_id' => $this->greeting_id ?: null,
+                'voicemail_alternate_greet_id' => $this->voicemail_alternate_greet_id ?: null,
+                'voicemail_mail_to' => $this->voicemail_mail_to ?: null,
+                'voicemail_sms_to' => $this->voicemail_sms_to ?: null,
                 'voicemail_transcription_enabled' => $this->voicemail_transcription_enabled ? 'true' : 'false',
                 'voicemail_tutorial' => $this->voicemail_tutorial ? 'true' : 'false',
-                'voicemail_file' => $this->voicemail_file,
+                'voicemail_file' => $this->voicemail_file ?: null,
                 'voicemail_local_after_email' => $this->voicemail_local_after_email ? 'true' : 'false',
                 'voicemail_enabled' => $this->voicemail_enabled ? 'true' : 'false',
-                'voicemail_description' => $this->voicemail_description,
+                'voicemail_description' => $this->voicemail_description ?: null,
                 'voicemail_options' => $this->voicemailOptions,
                 'voicemail_options_delete' => $this->voicemailOptionsDelete,
                 'voicemail_destinations' => $this->assignedDestinations,

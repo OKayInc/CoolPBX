@@ -37,11 +37,11 @@ class VoicemailRequest extends FormRequest
             'voicemail_description' => ['nullable', 'string', 'max:255'],
             'voicemail_alternate_greet_id' => ['nullable', 'string', 'max:255'],
             'greeting_id' => ['nullable'],
-            'voicemail_transcription_enabled' => ['sometimes', 'bool'],
-            'voicemail_tutorial' => ['sometimes', 'in:true,false'],
+            'voicemail_transcription_enabled' => ['sometimes', 'boolean'],
+            'voicemail_tutorial' => ['sometimes', 'boolean'],
             'voicemail_file' => ['nullable', 'in:,link,attach'],
-            'voicemail_local_after_email' => ['required', 'bool'],
-            'voicemail_enabled' => ['sometimes', 'bool'],
+            'voicemail_local_after_email' => ['required', 'boolean'],
+            'voicemail_enabled' => ['sometimes', 'boolean'],
         ];
 
         if (!is_null($voicemailUuid))

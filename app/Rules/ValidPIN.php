@@ -4,6 +4,7 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use App\Facades\Setting;
 
 class ValidPIN implements ValidationRule
 {
@@ -14,6 +15,16 @@ class ValidPIN implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $complexityEnabled = Setting::getSetting('voicemail', 'password_complexity', 'boolean');
+
+        if (!$complexityEnabled) {
+            return; 
+        }
+
+        if (preg_match('/(\d)\1{2,}/', $value)) {
+            $fail("The :attribute cannot contain 3 or more repeating digits (e.g., 111, 2222).");
+            return;
+        }
 
         $sequences = [
             '012',
@@ -36,8 +47,8 @@ class ValidPIN implements ValidationRule
 
         foreach ($sequences as $sequence) {
             if (strpos($value, $sequence) !== false) {
-                $fail("Password cannot contain sequential digits");
-                break;
+                $fail("The :attribute cannot contain sequential digits (e.g., 123, 456, 987).");
+                return;
             }
         }
     }

@@ -71,8 +71,9 @@
                                         @if ($passwordComplexity)
                                             <small class="form-text text-muted">
                                                 <i class="fas fa-shield-alt"></i> Password must be at least
-                                                {{ $passwordMinLength }} digits, numeric only, no repeating or
-                                                sequential digits
+                                                {{ $passwordMinLength }} digits long, numeric only,
+                                                cannot contain 3 or more repeating digits (111, 2222)
+                                                or sequential digits (123, 456, 987)
                                             </small>
                                         @endif
                                     </div>
@@ -499,7 +500,7 @@
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 id="voicemail_enabled" wire:model="voicemail_enabled" value="true">
                                             <label class="form-check-label" for="voicemail_enabled">
-                                                {{ $voicemail_enabled === 'true' ? 'Enabled' : 'Disabled' }}
+                                                {{ $voicemail_enabled ? 'Enabled' : 'Disabled' }}
                                             </label>
                                         </div>
                                         <small class="form-text text-muted">
@@ -569,22 +570,13 @@
                 }
             }
 
-            @if ($passwordComplexity)
-                document.addEventListener('DOMContentLoaded', function() {
-                    const passwordField = document.getElementById('voicemail_password');
-
-                    passwordField.addEventListener('input', function() {
-                        @this.call('validatePasswordComplexity');
-                    });
-                });
-            @endif
         </script>
     @endpush
-@if ($errors->any())
-    <ul>
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-@endif
+    @if ($errors->any())
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
 </div>
