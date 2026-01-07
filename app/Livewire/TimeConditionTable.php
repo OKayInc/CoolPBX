@@ -165,7 +165,7 @@ class TimeConditionTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $appUuid = env('TIME_CONDITION_APP_UUID');
+        $appUuid = config('timecondition.time_conditions.app_uuid');
 
         $query = Dialplan::query()
             ->where('app_uuid', $appUuid);
