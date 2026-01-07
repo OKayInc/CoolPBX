@@ -140,6 +140,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/dialplans/inbound/store', [DialplanController::class, 'storeInbound'])->name('dialplans.inbound.store');
     Route::get('/dialplans/outbound/create', [DialplanController::class, 'createOutbound'])->name('dialplans.outbound.create');
     Route::post('/dialplans/outbound/store', [DialplanController::class, 'storeOutbound'])->name('dialplans.outbound.store');
+    Route::get('/dialplans/queue/create', [DialplanController::class, 'createQueue'])->name('dialplans.queue.create');
+    Route::post('/dialplans/queue/store', [DialplanController::class, 'storeQueue'])->name('dialplans.queue.store');
 
     // DOMAIN
     Route::resource('/domains', DomainController::class)->name('domains', 'domains');
