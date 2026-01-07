@@ -8,6 +8,7 @@ use App\Models\Domain;
 use App\Http\Requests\DialplanRequest;
 use App\Http\Requests\InboundDialplanRequest;
 use App\Http\Requests\OutboundDialplanRequest;
+use App\Http\Requests\QueueDialplanRequest;
 use App\Repositories\DialplanDetailRepository;
 use App\Repositories\DialplanRepository;
 use App\Services\DialplanService;
@@ -94,6 +95,13 @@ class DialplanController extends Controller
 		return view("pages.dialplans.outbound.form", compact("app_uuid"));
 	}
 
+	public function createQueue(Request $request)
+	{
+		$app_uuid = $request->query("app_uuid");
+
+		return view("pages.dialplans.queue.form", compact("app_uuid"));
+	}
+
 	public function storeInbound(InboundDialplanRequest $request, DialplanService $dialplanService)
 	{
 		$destination = Destination::where("domain_uuid", Session::get("domain_uuid"))->where("destination_uuid", $request->input("destination_uuid"))->first();
@@ -108,6 +116,15 @@ class DialplanController extends Controller
 	public function storeOutbound(OutboundDialplanRequest $request, DialplanService $dialplanService)
 	{
 		$dialplanService->setOutbound($request, null);
+
+		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
+	}
+
+	public function storeQueue(QueueDialplanRequest $request, DialplanService $dialplanService)
+	{
+		$data = $request->validated();
+
+		$dialplanService->setQueue($data, null);
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
 	}

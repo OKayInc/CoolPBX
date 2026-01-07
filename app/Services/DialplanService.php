@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\InboundDialplanRequest;
 use App\Http\Requests\OutboundDialplanRequest;
+use App\Http\Requests\QueueDialplanRequest;
 use App\Models\Destination;
 use App\Models\Dialplan;
 use App\Models\Fax;
@@ -736,6 +737,89 @@ class DialplanService
 		}
 
 		return redirect()->to(route("dialplans.index") . "?app_uuid=" . urlencode($request->input("app_uuid")));
+	}
+
+	public function setQueue(array $data)
+	{
+		$dialplanData = [
+            "domain_uuid" => Session::get("domain_uuid"),
+            "app_uuid" => $data["app_uuid"] ?? '16589224-c876-aeb3-f59f-523a1c0801f7',
+            "dialplan_name" => $data["extension_name"],
+            "dialplan_order" => $data["dialplan_order"],
+            "dialplan_continue" => "false",
+            "dialplan_destination" => "false",
+            "dialplan_context" => $data["dialplan_context"] ?? Session::get("domain_name"),
+            "dialplan_enabled" => $data["dialplan_enabled"] ?? "false",
+            "dialplan_description" => $data["dialplan_description"],
+        ];
+
+		$queue_name = $data["extension_name"] . "@\${domain_name}";
+
+		$dialplanDetailData = [];
+
+		$y = 0;
+
+		//set the destination number
+		$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'condition', type: 'destination_number', data: "^{$data["queue_extension_number"]}$", order: $y++ * 10, group: 1, enabled: 'true', break: ((strlen($data["agent_queue_extension_number"]) > 0) || (!empty($data["agent_login_logout_extension_number"]))) ? 'on-true' : '');
+
+		//set the hold music
+		$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "fifo_music=\$\${hold_music}", order: $y++ * 10, group: 1, inline: "true");
+
+		//action answer
+		$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'answer', data: "", order: $y++ * 10, group: 1);
+
+		//action fifo
+		$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'fifo', data: "{$queue_name} in", order: $y++ * 10, group: 1);
+
+		// Caller Queue / Agent Queue
+		if(!empty($data["agent_queue_extension_number"]))
+		{
+			$y = 0;
+
+			//set the destination number
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'condition', type: 'destination_number', data: "^{$data["agent_queue_extension_number"]}$", order: $y++ * 10, group: 2, break: (!empty($data["agent_login_logout_extension_number"])) ? 'on-true' : '');
+
+			//set the hold music
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "fifo_music=\$\${hold_music}", order: $y++ * 10, group: 2, inline: "true");
+
+			//action answer
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'answer', data: "", order: $y++ * 10, group: 2);
+
+			//action fifo
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'fifo', data: "{$queue_name} out wait", order: $y++ * 10, group: 2);
+		}
+
+		// agent or member login / logout
+		if(!empty($data["agent_login_logout_extension_number"]))
+		{
+			$y = 0;
+
+			//set the destination number
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'condition', type: 'destination_number', data: "^{$data["agent_login_logout_extension_number"]}$", order: $y++ * 10, group: 3, break: 'on-true');
+
+			//set the queue_name
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "queue_name={$queue_name}", order: $y++ * 10, group: 3, inline: "true");
+
+			//set the user_name
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: 'user_name=${caller_id_number}@${domain_name}', order: $y++ * 10, group: 3, inline: "true");
+
+			//set the fifo_simo
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "fifo_simo=1", order: $y++ * 10, group: 3, inline: "true");
+
+			//set the fifo_timeout
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "fifo_timeout=10", order: $y++ * 10, group: 3, inline: "true");
+
+			//set the fifo_lag
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "fifo_lag=10", order: $y++ * 10, group: 3, inline: "true");
+
+			//set the pin_number
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'set', data: "pin_number=", order: $y++ * 10, group: 3, inline: "true");
+
+			//action lua
+			$dialplanDetailData[] = $this->buildDialplanDetail(tag: 'action', type: 'lua', data: "fifo_member.lua", order: $y++ * 10, group: 3);
+		}
+
+		return $this->saveDialplan($dialplanData, $dialplanDetailData, null);
 	}
 
 	private function parseAction(?string $action): array

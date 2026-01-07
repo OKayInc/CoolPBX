@@ -25,6 +25,13 @@
                             </a>
                             @endcan
                             @break
+                        @case("16589224-c876-aeb3-f59f-523a1c0801f7")
+                            @can('fifo_add')
+                            <a href="{{ route('dialplans.queue.create', ['app_uuid' => $app_uuid]) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus mr-1"></i> {{__('Add')}}
+                            </a>
+                            @endcan
+                            @break
                         @default
                             @can('dialplan_add')
                             <a href="{{ route('dialplans.create') }}" class="btn btn-primary btn-sm">
