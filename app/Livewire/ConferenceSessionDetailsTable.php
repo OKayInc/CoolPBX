@@ -2,19 +2,22 @@
 
 namespace App\Livewire;
 
-use App\Facades\Setting;
 use App\Models\ConferenceSession;
+use App\Models\ConferenceSessionDetail;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\BooleanColumn;
 
-class ConferenceSessionsTable extends DataTableComponent
+class ConferenceSessionDetailsTable extends DataTableComponent
 {
-    protected $model = ConferenceSession::class;
+    protected $model = ConferenceSessionDetail::class;
+
+    public ConferenceSession $conferenceSession;
+
+    public function mount(ConferenceSession $conferenceSession)
+    {
+        $this->conferenceSession = $conferenceSession;
+    }
 
     public function configure(): void
     {
@@ -30,7 +33,7 @@ class ConferenceSessionsTable extends DataTableComponent
             ->setTableRowUrl(function ($row) use ($canViewDetails)
             {
                 return $canViewDetails
-                    ? route('conference_centers.sessions_details', $row->conference_session_uuid)
+                    ? route('xmlcdr.details', $row->uuid)
                     : null;
             })
             ->setPaginationEnabled();
@@ -39,7 +42,27 @@ class ConferenceSessionsTable extends DataTableComponent
     public function columns(): array
     {
         $columns = [
-            Column::make("uuid", "conference_session_uuid")->hideIf(true),
+            Column::make("uuid", "uuid")->hideIf(true),
+
+            Column::make("Caller ID Name", "caller_id_name")
+                ->sortable(),
+
+            Column::make("Caller ID Number", "caller_id_number")
+                ->sortable(),
+
+            Column::make("Moderator", "moderator")
+                ->sortable(),
+
+            Column::make("Network address", "network_addr")
+                ->sortable(),
+
+            Column::make("Time", "end_epoch")
+                ->format(function ($value, $row, Column $column) {
+					$time_difference = $row->end_epoch - $row->start_epoch;
+
+					return gmdate("G:i:s", $time_difference);
+                })
+                ->sortable(),
 
             Column::make("Start", "start_epoch")
                 ->format(function ($value, $row, Column $column) {
@@ -52,34 +75,6 @@ class ConferenceSessionsTable extends DataTableComponent
                     return date("j M Y H:i:s", $value);
                 })
                 ->sortable(),
-
-            Column::make("Time", "end_epoch")
-                ->format(function ($value, $row, Column $column) {
-					$time_difference = $row->end_epoch - $row->start_epoch;
-
-					return gmdate("G:i:s", $time_difference);
-                })
-                ->sortable(),
-
-            Column::make("Profile", "profile")
-                ->sortable(),
-
-			Column::make("Tools", "conference_session_uuid")
-                ->format(function ($value, $row, Column $column) {
-
-					$tools = "";
-
-					if(auth()->user()->hasPermission('conference_session_play'))
-					{
-						$tools = view('components.buttons-audio', [
-							'urlPlay' => route("conference_centers.play", $row->conference_session_uuid),
-							'urlDownload' => route("conference_centers.download", $row->conference_session_uuid),
-						])->render();
-					}
-
-					return $tools;
-                })
-                ->html()
 		];
 
         return $columns;
@@ -87,9 +82,8 @@ class ConferenceSessionsTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $query = ConferenceSession::query()
-            ->where('domain_uuid', Session::get('domain_uuid'))
-            ->where('meeting_uuid', Setting::getSetting('meeting', 'uuid'));
+        $query = ConferenceSessionDetail::query()
+            ->where('conference_session_uuid', $this->conferenceSession->conference_session_uuid);
         return $query;
     }
 }

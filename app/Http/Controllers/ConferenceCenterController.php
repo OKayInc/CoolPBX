@@ -85,6 +85,11 @@ class ConferenceCenterController extends Controller
 		return view('pages.conferenceCenters.sessions', compact("conferenceRoom"));
 	}
 
+	public function getSessionDetails(ConferenceSession $conferenceSession)
+	{
+		return view('pages.conferenceCenters.session_details', compact("conferenceSession"));
+	}
+
     public function play(ConferenceSession $conferenceSession)
     {
         if (auth()->user()->hasPermission('conference_session_play'))

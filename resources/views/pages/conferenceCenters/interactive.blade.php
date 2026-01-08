@@ -11,7 +11,7 @@
                 <div class="card-tools">
                     <div class="d-flex gap-2 " role="group" aria-label="Interactive Conference actions">
 
-                    <img src="{{ asset('assets/icons/' . (($data['head']['recording']) ? 'recording.png' : 'not_recording.png')) }}" width="16" height="16" alt="">
+                    <img src="{{ asset('assets/icons/' . (($data['head']['recording'] ?? '') ? 'recording.png' : 'not_recording.png')) }}" width="16" height="16" alt="">
 
                         @can('conference_interactive_lock')
                             @if(!empty($locked) && $locked == 'true')
@@ -32,7 +32,7 @@
                                     class="btn btn-sm btn-primary"
                                     wire:click="runCommand(@js([
                                         'cmd' => 'conference',
-                                        'name' => $data['head']['conference_name'],
+                                        'name' => $data['head']['conference_name'] ?? '',
                                         'data' => 'lock',
                                     ]))"
                                 >
@@ -48,7 +48,7 @@
                                     class="btn btn-sm btn-primary"
                                     wire:click="runCommand(@js([
                                         'cmd' => 'conference',
-                                        'name' => $data['head']['conference_name'],
+                                        'name' => $data['head']['conference_name'] ?? '',
                                         'data' => 'unmute+non_moderator',
                                     ]))"
                                 >
@@ -60,7 +60,7 @@
                                     class="btn btn-sm btn-primary"
                                     wire:click="runCommand(@js([
                                         'cmd' => 'conference',
-                                        'name' => $data['head']['conference_name'],
+                                        'name' => $data['head']['conference_name'] ?? '',
                                         'data' => 'mute+non_moderator',
                                     ]))"
                                 >
@@ -74,7 +74,7 @@
                             class="btn btn-sm btn-primary"
                             wire:click="runCommand(@js([
                                 'cmd' => 'conference',
-                                'name' => $data['head']['conference_name'],
+                                'name' => $data['head']['conference_name'] ?? '',
                                 'data' => 'kick+all',
                             ]))"
                         >
