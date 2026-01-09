@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
+use App\Models\Voicemail;
 use App\Models\XmlCDR;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -56,6 +57,9 @@ class DashboardController extends Controller
             "longest_wait_time" => $this->getLongestWaitTime(),
             "active_agents" => $this->getActiveAgents(),
             "inbound_contacts" => $this->getInboundContacts(),
+            "new_messages" => $this->getNewMessages(),
+            "missed_calls" => $this->getMissedCalls(),
+            "recent_calls" => $this->getRecentCalls(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -339,5 +343,138 @@ class DashboardController extends Controller
         $data = $this->getInboundContacts();
 
         return response()->json($data);
+    }
+
+    public function getNewMessages()
+    {
+        $voicemails = Voicemail::query()
+            ->where('domain_uuid', Session::get('domain_uuid'))
+            ->withCount([
+                'voicemailmessages as total_messages',
+                'voicemailmessages as new_messages' => function ($q) {
+                    $q->where('message_status', '')
+                    ->orWhereNull('message_status');
+                },
+            ])
+            ->get();
+
+        $totalMessages = $voicemails->sum('total_messages');
+        $newMessages = $voicemails->sum('new_messages');
+
+        return [
+            'title' => 'New Messages',
+            'subtitle' => '',
+            'count' => $totalMessages,
+            'metrics' => [
+                'New Messages' => [
+                    'value' => $newMessages,
+                    'color' => '#00A65A',
+                ],
+            ],
+        ];
+    }
+
+    private function getAssignedExtensions()
+    {
+        $assignedExtensions = [];
+
+        $userExtensions = Setting::getSetting('user', 'extension');
+
+        if(is_array($userExtensions))
+        {
+            foreach($userExtensions  as $userExtension)
+            {
+                $assignedExtensions[] = [
+                    'extension_uuid' => $userExtension['extension_uuid'],
+                    'destination_number' => $userExtension['user'],
+                ];
+            }
+        }
+
+        return $assignedExtensions;
+    }
+
+    public function getMissedCalls()
+    {
+        $assignedExtensions = $this->getAssignedExtensions();
+
+        $query = XmlCDR::query()
+            ->where('domain_uuid', Session::get('domain_uuid'))
+            ->whereIn('direction', ['inbound', 'local'])
+            ->where(function ($q) {
+                $q->where('missed_call', true)
+                ->orWhereNull('bridge_uuid');
+            })
+            ->where('hangup_cause', '<>', 'LOSE_RACE')
+            ->where('start_epoch', '>', (time() - 86400));
+
+        if(!empty($assignedExtensions))
+        {
+            $query->where(function ($q) use ($assignedExtensions)
+            {
+                foreach($assignedExtensions as $assignedExtension)
+                {
+                    $q->orWhere(function ($or) use ($assignedExtension)
+                    {
+                        $or->where('extension_uuid', $assignedExtension['extension_uuid'])
+                        ->orWhere('destination_number', $assignedExtension['destination_number']);
+                    });
+                }
+            });
+        }
+
+        $missedCalls = $query->count();
+
+        return [
+            'title' => 'Missed Calls',
+            'subtitle' => 'Last 24 hours',
+            'count' => $missedCalls,
+            'metrics' => [
+                'Missed Calls' => [
+                    'value' => $missedCalls,
+                    'color' => '#DD4B39',
+                ],
+            ],
+        ];
+    }
+
+    public function getRecentCalls()
+    {
+        $assignedExtensions = $this->getAssignedExtensions();
+
+        $query = XmlCdr::query()
+            ->where('domain_uuid', Session::get('domain_uuid'))
+            ->where('start_epoch', '>', (now()->subDay()->timestamp));
+
+        if(!empty($assignedExtensions))
+        {
+            $query->where(function ($q) use ($assignedExtensions)
+            {
+                foreach($assignedExtensions as $extensionUuid => $extension)
+                {
+                    $q->orWhere(function ($q2) use ($extensionUuid, $extension)
+                    {
+                        $q2->where('extension_uuid', $extensionUuid)
+                        ->orWhere('caller_id_number', $extension)
+                        ->orWhere('destination_number', $extension)
+                        ->orWhere('destination_number', '*99' . $extension);
+                    });
+                }
+            });
+        }
+
+        $count = $query->count();
+
+        return [
+            'title' => 'Recent Calls',
+            'subtitle' => 'Last 24 hours',
+            'count' => $count,
+            'metrics' => [
+                'Missed Calls' => [
+                    'value' => $count,
+                    'color' => '#1D78DF',
+                ],
+            ],
+        ];
     }
 }

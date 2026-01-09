@@ -65,6 +65,52 @@
             </div>
         </div>
     </div>
+    <div class="mt-3">
+        <div class="card-header">
+            <h2>PBX Stats</h2>
+        </div>
+        <br>
+        <div class="card-body">
+            <div class="row">
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="new-messages"
+                    cols="3"
+                    :labels="array_keys($stats['new_messages']['metrics'])"
+                    :values="array_column($stats['new_messages']['metrics'], 'value')"
+                    :colors="array_column($stats['new_messages']['metrics'], 'color')"
+                    :extra="array_column($stats['new_messages']['metrics'], 'extra')"
+                    :links="array_column($stats['new_messages']['metrics'], 'link')"
+                    :count="$stats['new_messages']['count']"
+                    :title="$stats['new_messages']['title']"
+                />
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="missed-calls"
+                    cols="3"
+                    :labels="array_keys($stats['missed_calls']['metrics'])"
+                    :values="array_column($stats['missed_calls']['metrics'], 'value')"
+                    :colors="array_column($stats['missed_calls']['metrics'], 'color')"
+                    :extra="array_column($stats['missed_calls']['metrics'], 'extra')"
+                    :links="array_column($stats['missed_calls']['metrics'], 'link')"
+                    :count="$stats['missed_calls']['count']"
+                    :title="$stats['missed_calls']['title']"
+                />
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="recent-calls"
+                    cols="3"
+                    :labels="array_keys($stats['recent_calls']['metrics'])"
+                    :values="array_column($stats['recent_calls']['metrics'], 'value')"
+                    :colors="array_column($stats['recent_calls']['metrics'], 'color')"
+                    :extra="array_column($stats['recent_calls']['metrics'], 'extra')"
+                    :links="array_column($stats['recent_calls']['metrics'], 'link')"
+                    :count="$stats['recent_calls']['count']"
+                    :title="$stats['recent_calls']['title']"
+                />
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 

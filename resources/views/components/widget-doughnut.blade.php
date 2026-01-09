@@ -11,9 +11,19 @@
         $values = [100];
         $colors = ['#d2d6de'];
     }
+
+    $cols = (int) ($cols ?? 2);
+    $valid = [1,2,3,4,6];
+
+    if(!in_array($cols, $valid))
+    {
+        $cols = 2;
+    }
+
+    $colClass = "col-lg-" . (12 / $cols) . " col-12";
 @endphp
 
-<div class="col-lg-6 col-12">
+<div class="{{ $colClass }}">
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="d-flex justify-content-between">
