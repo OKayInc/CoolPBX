@@ -44,7 +44,7 @@ class TimeConditionRepository
 
     public function getAllForDomain(string $domainUuid)
     {
-        return Dialplan::where('app_uuid', config('timecondition.time_conditions.app_uuid'))
+        return Dialplan::where('app_uuid', config('fusionpbx.time_conditions.app_uuid'))
             ->where(function ($query) use ($domainUuid) {
                 $query->where('domain_uuid', $domainUuid)
                     ->orWhereNull('domain_uuid');
@@ -57,7 +57,7 @@ class TimeConditionRepository
     public function findByUuid(string $uuid, bool $withDetails = false): ?Dialplan
     {
         $query = Dialplan::where('dialplan_uuid', $uuid)
-            ->where('app_uuid', config('timecondition.time_conditions.app_uuid'));
+            ->where('app_uuid', config('fusionpbx.time_conditions.app_uuid'));
 
         if ($withDetails) {
             $query->with(['dialplanDetails' => function ($query) {
@@ -106,7 +106,7 @@ class TimeConditionRepository
             $dialplanData = [
                 'dialplan_uuid' => $data['dialplan_uuid'] ?? Str::uuid(),
                 'domain_uuid' => $data['domain_uuid'] ?? Session::get('domain_uuid'),
-                'app_uuid' => config('timecondition.time_conditions.app_uuid'),
+                'app_uuid' => config('fusionpbx.time_conditions.app_uuid'),
                 'dialplan_name' => str_replace('/', '', $data['dialplan_name']),
                 'dialplan_number' => $data['dialplan_number'],
                 'dialplan_context' => $data['dialplan_context'] ?? Session::get('domain_name'),

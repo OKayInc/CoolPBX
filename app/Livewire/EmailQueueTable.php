@@ -31,7 +31,7 @@ class EmailQueueTable extends DataTableComponent
 
         if ($canEdit) {
             $tableConfig->setTableRowUrl(function ($row) use ($canEdit) {
-                return route('email-queues.edit', $row->email_queue_uuid);
+                return route('email_queues.edit', $row->email_queue_uuid);
             });
         }
     }
