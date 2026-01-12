@@ -165,7 +165,7 @@ class TimeConditionTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $appUuid = config('fusionpbx.time_conditions.app_uuid');
+        $appUuid = config('coolpbx.time_conditions.app_uuid');
 
         $query = Dialplan::query()
             ->where('app_uuid', $appUuid);
