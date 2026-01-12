@@ -50,7 +50,8 @@ class DialplanService
 	{
 		$dialplanData = [
             "domain_uuid" => Session::get("domain_uuid"),
-            "app_uuid" => $data["app_uuid"] ?? 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4',
+            "app_uuid" => config('coolpbx.inbound_route.app_uuid') ?? $data["app_uuid"],
+//          "app_uuid" => $data["app_uuid"] ?? 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4',
             "dialplan_name" => $data["dialplan_name"],
             "dialplan_number" => isset($destination) ? $destination->destination_number : null,
             "dialplan_order" => $data["dialplan_order"],
@@ -608,7 +609,8 @@ class DialplanService
 				//call direction
 				$dialplanData = [
 					"domain_uuid" => Session::get("domain_uuid"),
-					"app_uuid" => $request->input("app_uuid"),
+					"app_uuid" => config('coolpbx.outbound_route.app_uuid'),
+//					"app_uuid" => $request->input("app_uuid"),
 					"dialplan_name" => "call_direction-outbound",
 					"dialplan_order" => "22",
 					"dialplan_continue" => "true",
@@ -743,7 +745,8 @@ class DialplanService
 	{
 		$dialplanData = [
             "domain_uuid" => Session::get("domain_uuid"),
-            "app_uuid" => $data["app_uuid"] ?? '16589224-c876-aeb3-f59f-523a1c0801f7',
+            "app_uuid" => config('coolpbx.queue.app_uuid'),
+//            "app_uuid" => $data["app_uuid"] ?? '16589224-c876-aeb3-f59f-523a1c0801f7',
             "dialplan_name" => $data["extension_name"],
             "dialplan_order" => $data["dialplan_order"],
             "dialplan_continue" => "false",

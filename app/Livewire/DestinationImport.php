@@ -368,7 +368,7 @@ class DestinationImport extends Component
 				$this->dialplanRepository->delete($destination->dialplan_uuid);
 			}
 
-			$data["app_uuid"] = "c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4";
+//			$data["app_uuid"] = "c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4";    // APP UUID is set in the Service
 			$data["dialplan_name"] = $data["destination_area_code"] ?? "" . $data["destination_number"] ?? "";
 			$data["dialplan_number"] = $data["destination_area_code"] ?? "" . $data["destination_number"] ?? "";
 			$data["dialplan_order"] = $data["destination_order"] ?? 0;

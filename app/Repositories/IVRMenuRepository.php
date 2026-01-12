@@ -69,7 +69,8 @@ class IVRMenuRepository
     {
 		$dialplanData = [
             "domain_uuid" => $ivrMenu->domain_uuid,
-            "app_uuid" => "a5788e9b-58bc-bd1b-df59-fff5d51253ab",
+//            "app_uuid" => "a5788e9b-58bc-bd1b-df59-fff5d51253ab",
+            "app_uuid" =>  config('coolpbx.ivr_menu.app_uuid'),
             "dialplan_name" => $ivrMenu->ivr_menu_name,
             "dialplan_number" => $ivrMenu->ivr_menu_extension,
             "dialplan_order" => "101",

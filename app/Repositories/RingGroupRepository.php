@@ -346,16 +346,16 @@ class RingGroupRepository
             'dialplan_context' => $ringGroup->ring_group_context,
             'dialplan_xml' => $dialplanXml,
             'dialplan_order' => 101,
-            'dialplan_continue' => 'false', 
+            'dialplan_continue' => 'false',
             'dialplan_enabled' => $ringGroup->ring_group_enabled,
             'dialplan_description' => $ringGroup->ring_group_description,
             'dialplan_uuid' => $dialplanUuid,
-            'app_uuid' => env('RING_GROUPS_APP_UUID')
+            'app_uuid' => config('coolpbx.ring_group.app_uuid'),
         ]);
 
         $dialplan->update(['dialplan_uuid' => $dialplanUuid]);
 
-        $dialplan->refresh(); 
+        $dialplan->refresh();
     }
 
     private function updateDialplan(RingGroup $ringGroup)
