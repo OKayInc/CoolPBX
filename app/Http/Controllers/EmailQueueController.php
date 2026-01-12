@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\EmailQueueRepository;
+use App\Services\EmailQueueService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,10 +12,12 @@ use Illuminate\Support\Facades\Mail;
 class EmailQueueController extends Controller
 {
     protected EmailQueueRepository $emailQueueRepository;
+    protected EmailQueueService $emailQueueService;
 
-    public function __construct(EmailQueueRepository $emailQueueRepository)
+    public function __construct(EmailQueueRepository $emailQueueRepository, EmailQueueService $emailQueueService)
     {
         $this->emailQueueRepository = $emailQueueRepository;
+        $this->emailQueueService = $emailQueueService;
     }
     public function index(): View
     {
@@ -43,21 +46,22 @@ class EmailQueueController extends Controller
             $emailBody .= "If you received this message, your current SMTP settings are valid.<br /><br />\n";
 
             $emailFromAddress = config('mail.from.address');
-            $emailFromName = config('mail.from.name');
-
-            Mail::html($emailBody, function ($message) use ($emailRecipient, $emailFromAddress, $emailFromName) {
-                $message->to($emailRecipient)
-                    ->subject('Test Message')
-                    ->from($emailFromAddress, $emailFromName);
-            });
+            $queueItem = $this->emailQueueService->queueEmail([
+                'domain_uuid' => null,
+                'hostname'    => $request->getHost(),
+                'to'          => $emailRecipient,
+                'from'        => $emailFromAddress,
+                'subject'     => 'Test Message (Queued)',
+                'body'        => $emailBody,
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Message Sent Successfully',
+                'message' => 'Message Queued Successfully',
+                'uuid'    => $queueItem->email_queue_uuid,
                 'recipient' => $emailRecipient,
                 'settings' => [
                     'from_address' => $emailFromAddress,
-                    'from_name' => $emailFromName,
                     'smtp_host' => config('mail.mailers.smtp.host'),
                     'smtp_port' => config('mail.mailers.smtp.port'),
                     'smtp_encryption' => config('mail.mailers.smtp.encryption'),
@@ -66,7 +70,7 @@ class EmailQueueController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Message Failed',
+                'message' => 'Queueing Failed',
                 'error' => $e->getMessage()
             ], 500);
         }
