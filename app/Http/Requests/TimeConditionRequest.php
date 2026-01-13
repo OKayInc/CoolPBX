@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Dialplan;
 use App\Rules\ValidContext;
+use App\Rules\ValidTimeCondition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,7 @@ class TimeConditionRequest extends FormRequest
 
             'customConditions.*.conditions' => 'nullable|array|min:1',
             'customConditions.*.conditions.*.variable' => 'nullable|string|in:year,mon,mday,wday,week,mweek,hour,time-of-day,date-time',
-            'customConditions.*.conditions.*.value_start' => 'nullable',
+            'customConditions.*.conditions.*.value_start' => ['nullable', new ValidTimeCondition()],
             'customConditions.*.conditions.*.value_stop' => 'nullable',
             'customConditions.*.action' => 'nullable|string',
 
