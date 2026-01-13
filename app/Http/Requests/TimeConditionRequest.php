@@ -55,8 +55,8 @@ class TimeConditionRequest extends FormRequest
         {
             $timeCondition = Dialplan::findorFail($timeConditionUuid);
             // Editing
-            $rules['dialplan_name'][] = Rule::unique(Dialplan::getTableName(),'dialplan_name')->ignore($timeCondition, $timeCondition->getKeyName());
-            $rules['dialplan_number'][] = Rule::unique(Dialplan::getTableName(),'dialplan_number')->where('domain_uuid', Session::get('domain_uuid'))->ignore($timeCondition, $timeCondition->getKeyName());
+            $rules['dialplan_name'][] = Rule::unique(Dialplan::getTableName(),'dialplan_name')->ignore($timeCondition, 'dialplan_name');
+            $rules['dialplan_number'][] = Rule::unique(Dialplan::getTableName(),'dialplan_number')->where('domain_uuid', Session::get('domain_uuid'))->ignore($timeCondition, 'dialplan_number');
         }
         else
         {
