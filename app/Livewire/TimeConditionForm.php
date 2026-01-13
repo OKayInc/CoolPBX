@@ -49,7 +49,7 @@ class TimeConditionForm extends Component
     public function rules()
     {
         $request = new TimeConditionRequest();
-        return $request->rules();
+        return $request->rules($this->dialplanUuid);
     }
 
     public function mount($dialplanUuid = null): void
