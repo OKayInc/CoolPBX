@@ -75,6 +75,7 @@ class DashboardController extends Controller
             "missed_calls" => $this->getMissedCalls(),
             "recent_calls" => $this->getRecentCalls(),
             "disk_usage" => $this->getDiskUsage(),
+            "cpu_usage" => $this->getCpuUsage(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -643,5 +644,121 @@ class DashboardController extends Controller
         {
             return 'N/A';
         }
+    }
+
+    public function getCpuUsage()
+    {
+        if(!stristr(PHP_OS, 'Linux'))
+        {
+            return 'N/A';
+        }
+
+        $stat1 = $this->readCpuStat();
+        usleep(200000); // 0.2s
+        $stat2 = $this->readCpuStat();
+
+        if(!$stat1 || !$stat2)
+        {
+            return 'N/A';
+        }
+
+        $totalDiff = $stat2['total'] - $stat1['total'];
+        $idleDiff  = $stat2['idle']  - $stat1['idle'];
+
+        if($totalDiff === 0)
+        {
+            return 'N/A';
+        }
+
+        $usage = (1 - ($idleDiff / $totalDiff)) * 100;
+
+        $percent = (int) round($usage);
+
+        return [
+            'title' => 'CPU Usage',
+            'subtitle' => '',
+            'count' => $percent,
+            'metrics' => [
+                'Used' => [
+                    'value' => $percent,
+                    'color' => $this->getCpuColor($percent),
+                ],
+            ],
+            "cpu_info" => $this->getCpuInfo(),
+        ];
+    }
+
+    private function readCpuStat()
+    {
+        $stat = file('/proc/stat');
+
+        if(!$stat)
+        {
+            return null;
+        }
+
+        $parts = preg_split('/\s+/', trim($stat[0]));
+
+        array_shift($parts); // remove "cpu"
+
+        $total = array_sum($parts);
+
+        $idle  = $parts[3] + ($parts[4] ?? 0); // idle + iowait
+
+        return [
+            'total' => $total,
+            'idle'  => $idle,
+        ];
+    }
+
+    public function getCpuInfo()
+    {
+        $avgLoad = $this->getLoadAverage();
+
+        return [
+            'CPU cores' => $this->getCpuCores(),
+            'Load Average (1)' => $avgLoad[0],
+            'Load Average (5)' => $avgLoad[1],
+            'Load Average (15)' => $avgLoad[2],
+        ];
+    }
+
+    protected function getCpuCores()
+    {
+        if(!stristr(PHP_OS, 'Linux'))
+        {
+            return 'N/A';
+        }
+
+        $cpuinfo = file('/proc/cpuinfo');
+
+        return count(array_filter($cpuinfo, fn($line) => str_starts_with($line, 'processor')));
+    }
+
+    protected function getLoadAverage()
+    {
+        if(!function_exists('sys_getloadavg'))
+        {
+            return 'N/A';
+        }
+
+        $load = sys_getloadavg();
+
+        return array_map(fn($v) => number_format($v, 2), $load);
+    }
+
+    protected function getCpuColor(int $percent)
+    {
+        if($percent >= 85)
+        {
+            return $this->colorRed;
+        }
+
+        if($percent >= 60)
+        {
+            return $this->colorYellow;
+        }
+
+        return $this->colorGreen;
     }
 }

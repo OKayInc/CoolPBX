@@ -23,8 +23,8 @@
     $colClass = "col-lg-" . (12 / $cols) . " col-12";
 @endphp
 
-<div class="{{ $colClass }}">
-    <div class="card shadow-sm">
+<div class="{{ $colClass }} d-flex">
+    <div class="card shadow-sm w-100">
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <!-- <h6 class="text-muted mb-2">{{ $title }}</h6> -->

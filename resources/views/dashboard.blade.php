@@ -141,6 +141,37 @@
                         </table>
                     </x-slot>
                 </x-widget-doughnut>
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="cpu-usage"
+                    cols="3"
+                    :labels="array_keys($stats['cpu_usage']['metrics'])"
+                    :values="array_column($stats['cpu_usage']['metrics'], 'value')"
+                    :colors="array_column($stats['cpu_usage']['metrics'], 'color')"
+                    :extra="array_column($stats['cpu_usage']['metrics'], 'extra')"
+                    :links="array_column($stats['cpu_usage']['metrics'], 'link')"
+                    :count="$stats['cpu_usage']['count']"
+                    :title="$stats['cpu_usage']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Item</th>
+                                    <th class="text-end">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['cpu_usage']['cpu_info'] as $key => $value)
+                                    <tr>
+                                        <td class="text-muted">{{ $key }}</td>
+                                        <td class="text-end widget-value">{{ $value }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
             </div>
         </div>
     </div>
