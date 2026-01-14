@@ -109,6 +109,39 @@
                     :title="$stats['recent_calls']['title']"
                 />
             </div>
+            <div class="row mt-4">
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="disk-usage"
+                    cols="3"
+                    :labels="array_keys($stats['disk_usage']['metrics'])"
+                    :values="array_column($stats['disk_usage']['metrics'], 'value')"
+                    :colors="array_column($stats['disk_usage']['metrics'], 'color')"
+                    :extra="array_column($stats['disk_usage']['metrics'], 'extra')"
+                    :links="array_column($stats['disk_usage']['metrics'], 'link')"
+                    :count="$stats['disk_usage']['count']"
+                    :title="$stats['disk_usage']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Item</th>
+                                    <th class="text-end">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['disk_usage']['system_info'] as $key => $value)
+                                    <tr>
+                                        <td class="text-muted">{{ $key }}</td>
+                                        <td class="text-end widget-value">{{ $value }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
+            </div>
         </div>
     </div>
 </div>
@@ -117,3 +150,14 @@
 @push("scripts")
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endpush
+
+@push('css')
+<style>
+    .widget-value
+    {
+        font-weight: 500;
+        color: #3b82f6 !important;
+    }
+</style>
+@endpush
+

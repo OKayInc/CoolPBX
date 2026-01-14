@@ -27,7 +27,8 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="d-flex justify-content-between">
-                <h6 class="text-muted mb-2">{{ $title }}</h6>
+                <!-- <h6 class="text-muted mb-2">{{ $title }}</h6> -->
+                <div class="widget-title mb-2">{{ $title }}</div>
                 <!-- <i class="fas fa-ellipsis-v text-muted"></i> -->
                 @isset($controls)
                     <div>
@@ -50,6 +51,11 @@
                     ></canvas>
                 </div>
             </div>
+            @isset($table)
+                <div class="mt-3">
+                    {{ $table }}
+                </div>
+            @endisset
         </div>
     </div>
 </div>

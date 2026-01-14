@@ -19,6 +19,13 @@ class DashboardController extends Controller
     private $businessEnd;
     private $inboundTimeRange;
 
+    private $colorRed;
+    private $colorGreen;
+    private $colorBlue;
+    private $colorYellow;
+    private $colorOrange;
+    private $colorViolet;
+
     public function __construct()
     {
         // ToDo: define settings
@@ -32,6 +39,13 @@ class DashboardController extends Controller
         $this->businessStart = 9;   // local time
         $this->businessEnd = 18;    // localtime
         $this->inboundTimeRange = 'today'; // today | 15m | 30m | hour
+
+        $this->colorRed = "#DD4B39FF";
+        $this->colorGreen = "#00A65AFF";
+        $this->colorBlue = "#1D78DFFF";
+        $this->colorYellow = "#F3DD12FF";
+        $this->colorOrange = "#E97313FF";
+        $this->colorViolet = "#605CA8FF";
     }
 
     function formatSeconds($seconds)
@@ -60,6 +74,7 @@ class DashboardController extends Controller
             "new_messages" => $this->getNewMessages(),
             "missed_calls" => $this->getMissedCalls(),
             "recent_calls" => $this->getRecentCalls(),
+            "disk_usage" => $this->getDiskUsage(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -200,22 +215,22 @@ class DashboardController extends Controller
             "metrics" => [
                 "Available" => [
                     "value" => $available,
-                    "color" => "#00A65A",
+                    "color" => $this->colorGreen,
                     "extra" => $agents["Available"]["names"] ?? [],
                 ],
                 "Available (On Demand)" => [
                     "value" => $availableOnDemand,
-                    "color" => "#1D78DF",
+                    "color" => $this->colorBlue,
                     "extra" => $agents["Available (On Demand)"]["names"] ?? [],
                 ],
                 "Logged Out" => [
                     "value" => $loggedOut,
-                    "color" => "#DD4B39",
+                    "color" => $this->colorRed,
                     "extra" => $agents["Logged Out"]["names"] ?? [],
                 ],
                 "On Break" => [
                     "value" => $onBreak,
-                    "color" => "#F39C12",
+                    "color" => $this->colorOrange,
                     "extra" => $agents["On Break"]["names"] ?? [],
                 ],
             ],
@@ -300,27 +315,27 @@ class DashboardController extends Controller
             "metrics" => [
                 "Answered" => [
                     "value" => (int) $result->answered,
-                    "color" => "#00A65A",
+                    "color" => $this->colorGreen,
                     "link" => route("xmlcdr.filter_status", ["status" => "answered"]),
                 ],
                 "Abandoned" => [
                     "value" => (int) $result->abandoned,
-                    "color" => "#DD3923",
+                    "color" => $this->colorRed,
                     "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Short Abandoned" => [
                     "value" => (int) $result->short_abandoned,
-                    "color" => "#E97313",
+                    "color" => $this->colorOrange,
                     "link" => route("xmlcdr.filter_status", ["status" => "cancelled"]),
                 ],
                 "Missed" => [
                     "value" => (int) $result->missed,
-                    "color" => "#605CA8",
+                    "color" => $this->colorViolet,
                     "link" => route("xmlcdr.filter_status", ["status" => "missed"]),
                 ],
                 "Voicemail" => [
                     "value" => (int) $result->voicemail,
-                    "color" => "#F3DD12",
+                    "color" => $this->colorYellow,
                     "link" => route("xmlcdr.filter_status", ["status" => "voicemail"]),
                 ],
             ],
@@ -368,7 +383,7 @@ class DashboardController extends Controller
             'metrics' => [
                 'New Messages' => [
                     'value' => $newMessages,
-                    'color' => '#00A65A',
+                    'color' => $this->colorGreen,
                 ],
             ],
         ];
@@ -432,7 +447,7 @@ class DashboardController extends Controller
             'metrics' => [
                 'Missed Calls' => [
                     'value' => $missedCalls,
-                    'color' => '#DD4B39',
+                    'color' => $this->colorRed,
                 ],
             ],
         ];
@@ -472,9 +487,161 @@ class DashboardController extends Controller
             'metrics' => [
                 'Missed Calls' => [
                     'value' => $count,
-                    'color' => '#1D78DF',
+                    'color' => $this->colorBlue,
                 ],
             ],
         ];
+    }
+
+    public function getDiskUsage()
+    {
+        $path = '/home';
+
+        $total = @disk_total_space($path);
+        $free  = @disk_free_space($path);
+
+        if(!$total || !$free)
+        {
+            $percent = null;
+        }
+        else
+        {
+            $used = $total - $free;
+            $percent = round(($used / $total) * 100);
+        }
+
+        return [
+            'title' => 'Disk Usage',
+            'subtitle' => $path,
+            'count' => $percent,
+            'metrics' => [
+                'Used' => [
+                    'value' => $percent,
+                    'color' => $percent >= 85 ? $this->colorRed : $this->colorBlue,
+                ],
+            ],
+            "system_info" => $this->getSystemInfo(),
+        ];
+    }
+
+    public function getSystemInfo()
+    {
+        return [
+            'App' => Setting::getSetting('theme', 'title', 'text') ?? config("app.name"),
+            'OS Uptime' => $this->getOsUptime(),
+            'Memory Usage' => $this->getMemoryUsage(),
+            'Avail. Memory' => $this->getAvailableMemory(),
+            // 'Disk Usage' => $this->getDiskUsagePercent() . '%',
+            'DB Connections' => $this->getDbConnections(),
+        ];
+    }
+
+    private function getOsUptime()
+    {
+        if(!is_readable('/proc/uptime'))
+        {
+            return null;
+        }
+
+        $contents = trim(file_get_contents('/proc/uptime'));
+
+        [$seconds] = explode(' ', $contents);
+
+        return $this->formatUptime((int)$seconds);
+    }
+
+    private function formatUptime(int $seconds): string
+    {
+        $weeks = intdiv($seconds, 604800);
+        $seconds %= 604800;
+
+        $days = intdiv($seconds, 86400);
+        $seconds %= 86400;
+
+        $hours = intdiv($seconds, 3600);
+        $seconds %= 3600;
+
+        $minutes = intdiv($seconds, 60);
+
+        $parts = [];
+
+        if($weeks)
+        {
+            $parts[] = "$weeks weeks";
+        }
+
+        if($days)
+        {
+            $parts[] = "$days days";
+        }
+
+        if($hours)
+        {
+            $parts[] = "$hours hours";
+        }
+
+        if($minutes)
+        {
+            $parts[] = "$minutes minutes";
+        }
+
+        return implode(', ', $parts);
+    }
+
+    private function getMemoryUsage()
+    {
+        if(!stristr(PHP_OS, 'Linux'))
+        {
+            return 'N/A';
+        }
+
+        $meminfo = file_get_contents('/proc/meminfo');
+
+        preg_match('/MemTotal:\s+(\d+)/', $meminfo, $total);
+        preg_match('/MemAvailable:\s+(\d+)/', $meminfo, $available);
+
+        if(empty($total[1]) || empty($available[1]))
+        {
+            return 'N/A';
+        }
+
+        $used = $total[1] - $available[1];
+        $percent = ($used / $total[1]) * 100;
+
+        return round($percent) . '%';
+    }
+
+    private function getAvailableMemory()
+    {
+        if(!stristr(PHP_OS, 'Linux'))
+        {
+            return 'N/A';
+        }
+
+        $meminfo = file_get_contents('/proc/meminfo');
+        preg_match('/MemAvailable:\s+(\d+)/', $meminfo, $available);
+
+        if(empty($available[1]))
+        {
+            return 'N/A';
+        }
+
+        $mb = $available[1] / 1024;
+
+        return round($mb / 1024, 1) . ' GiB';
+    }
+
+    private function getDbConnections()
+    {
+        try
+        {
+            $result = DB::selectOne('SHOW STATUS WHERE Variable_name = "Threads_connected"');
+
+            return $result->Value ?? '0';
+        }
+        catch(\Throwable $e)
+        {
+            return 'N/A';
+        }
     }
 }
