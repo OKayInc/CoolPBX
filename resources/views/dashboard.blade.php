@@ -173,6 +173,59 @@
                     </x-slot>
                 </x-widget-doughnut>
             </div>
+            <div class="row mt-4">
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="system-counts"
+                    cols="3"
+                    :labels="array_keys($stats['system_counts']['metrics'])"
+                    :values="array_column($stats['system_counts']['metrics'], 'value')"
+                    :colors="array_column($stats['system_counts']['metrics'], 'color')"
+                    :extra="array_column($stats['system_counts']['metrics'], 'extra')"
+                    :links="array_column($stats['system_counts']['metrics'], 'link')"
+                    :count="$stats['system_counts']['count']"
+                    :title="$stats['system_counts']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Item</th>
+                                    <th class="text-end">Disabled</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['system_counts']['modules'] as $key => $value)
+                                    <tr>
+                                        <td class="text-muted">{{ $key }}</td>
+                                        <td class="text-end widget-value">{{ $value["disabled"] }}</td>
+                                        <td class="text-end widget-value">{{ $value["total"] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Item</th>
+                                    <th class="text-end">New</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['system_counts']['messages'] as $key => $value)
+                                    <tr>
+                                        <td class="text-muted">{{ $key }}</td>
+                                        <td class="text-end widget-value">{{ $value["new"] }}</td>
+                                        <td class="text-end widget-value">{{ $value["total"] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
+            </div>
         </div>
     </div>
 </div>

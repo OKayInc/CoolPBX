@@ -3,7 +3,9 @@ namespace App\Http\Controllers;
 
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
+use App\Models\Domain;
 use App\Models\Voicemail;
+use App\Models\VoicemailMessage;
 use App\Models\XmlCDR;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -25,6 +27,8 @@ class DashboardController extends Controller
     private $colorYellow;
     private $colorOrange;
     private $colorViolet;
+
+    private $scope;
 
     public function __construct()
     {
@@ -76,6 +80,7 @@ class DashboardController extends Controller
             "recent_calls" => $this->getRecentCalls(),
             "disk_usage" => $this->getDiskUsage(),
             "cpu_usage" => $this->getCpuUsage(),
+            "system_counts" => $this->getSystemCounts(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -532,7 +537,6 @@ class DashboardController extends Controller
             'OS Uptime' => $this->getOsUptime(),
             'Memory Usage' => $this->getMemoryUsage(),
             'Avail. Memory' => $this->getAvailableMemory(),
-            // 'Disk Usage' => $this->getDiskUsagePercent() . '%',
             'DB Connections' => $this->getDbConnections(),
         ];
     }
@@ -760,5 +764,142 @@ class DashboardController extends Controller
         }
 
         return $this->colorGreen;
+    }
+
+    public function getSystemCounts()
+    {
+        $this->scope = (auth()->user()->hasPermission("dialplan_add")) ? "system" : "domain";
+
+        $modules = $this->getSystemCountInfo();
+
+        return [
+            'title' => 'System Counts',
+            'subtitle' => '',
+            'count' => $modules["Domains"]["total"],
+            'metrics' => [
+                'Used' => [
+                    'value' => $modules["Domains"]["total"],
+                    'color' => $this->colorBlue,
+                ],
+            ],
+            "modules" => $modules,
+            "messages" => [
+                'Messages' => $this->getVoicemailCount(),
+            ],
+        ];
+    }
+
+    private function getSystemCountInfo()
+    {
+        return [
+            'Domains' => $this->getDomainsCount(),
+            'Devices' => $this->getModelCount(\App\Models\Device::class, "device_view", "device_enabled"),
+            'Extensions' => $this->getModelCount(\App\Models\Extension::class, "extension_view", "enabled"),
+            'Gateways' => $this->getModelCount(\App\Models\Gateway::class, "gateway_view", "enabled"),
+            'Users' => $this->getModelCount(\App\Models\User::class, "user_view", "user_enabled"),
+            'Destinations' => $this->getModelCount(\App\Models\Destination::class, "destination_view", "destination_enabled"),
+            'CC Queues' => $this->getModelCount(\App\Models\CallCenterQueue::class, "call_center_active_view"),
+            'IVR Menus' => $this->getModelCount(\App\Models\IVRMenu::class, "ivr_menu_view", "ivr_menu_enabled"),
+            'Ring Groups' => $this->getModelCount(\App\Models\RingGroup::class, "ring_group_view", "ring_group_enabled"),
+            'Voicemail' => $this->getModelCount(\App\Models\Voicemail::class, "voicemail_view", "voicemail_enabled"),
+        ];
+    }
+
+    private function getDomainsCount()
+    {
+        $stats = [
+            'total' => 0,
+            'disabled' => 0,
+        ];
+
+        if(auth()->user()->hasPermission("domain_view"))
+        {
+            $domains = Domain::all();
+
+            $stats['total'] = $domains->count();
+
+            foreach($domains as $domain)
+            {
+                $stats['disabled'] += ($domain->domain_enabled != 'true') ? 1 : 0;
+            }
+        }
+
+        return $stats;
+    }
+
+    private function getModelCount($model, $permission, $enabledField = null)
+    {
+        $stats = [
+            'system' => [
+                'total' => 0,
+                'disabled' => 0,
+            ],
+            'domain' => [
+                'total' => 0,
+                'disabled' => 0,
+            ],
+        ];
+
+        if(auth()->user()->hasPermission($permission))
+        {
+            $items = $model::all();
+
+            $stats['system']['total'] = $items->count();
+
+            foreach($items as $item)
+            {
+                if(!is_null($enabledField))
+                {
+                    $stats['system']['disabled'] += ($item->{$enabledField} == "true") ? 0 : 1;
+                }
+
+                if($item->domain_uuid == Session::get('domain_uuid'))
+                {
+                    $stats['domain']['total']++;
+
+                    if(!is_null($enabledField))
+                    {
+                        $stats['domain']['disabled'] += ($item->{$enabledField} == "true") ? 0 : 1;
+                    }
+                }
+            }
+        }
+
+        return $stats[$this->scope];
+    }
+
+    private function getVoicemailCount()
+    {
+        $stats = [
+            'system' => [
+                'total' => 0,
+                'new' => 0,
+            ],
+            'domain' => [
+                'total' => 0,
+                'new' => 0,
+            ],
+        ];
+
+        if(auth()->user()->hasPermission("voicemail_message_view"))
+        {
+            $items = VoicemailMessage::all();
+
+            $stats['system']['total'] = $items->count();
+
+            foreach($items as $item)
+            {
+                $stats['system']['new'] += ($item->message_status == "saved") ? 0 : 1;
+
+                if($item->domain_uuid == Session::get('domain_uuid'))
+                {
+                    $stats['domain']['total']++;
+
+                    $stats['domain']['new'] += ($item->message_status == "saved") ? 0 : 1;
+                }
+            }
+        }
+
+        return $stats[$this->scope];
     }
 }
