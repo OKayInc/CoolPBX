@@ -59,10 +59,10 @@ class TimeConditionForm extends Component
 
         $this->loadDropdownData();
 
-            if ($this->isEditing) {
-                $this->loadTimeCondition();
-            } else {
-                $this->initializeDefaults();
+        if ($this->isEditing) {
+            $this->loadTimeCondition();
+        } else {
+            $this->initializeDefaults();
         }
     }
 
@@ -96,7 +96,7 @@ class TimeConditionForm extends Component
         $this->dialplan_anti_action = $parsed['anti_action'] ?? null;
     }
 
-    protected function initializeDefaults():void
+    protected function initializeDefaults(): void
     {
         $user = auth()->user();
         $this->domain_uuid = $user->domain_uuid ?? Session::get('domain_uuid');
@@ -107,7 +107,7 @@ class TimeConditionForm extends Component
         $this->addCustomConditionGroup();
     }
 
-    protected function loadDropdownData():void
+    protected function loadDropdownData(): void
     {
         $user = auth()->user();
 
@@ -118,13 +118,12 @@ class TimeConditionForm extends Component
 
         if ($user->hasPermission('time_condition_domain')) {
             $this->availableDomains = $this->timeConditionRepository->getAllDomains();
-
         }
     }
 
 
 
-    public function addCustomConditionGroup():void
+    public function addCustomConditionGroup(): void
     {
         $newIndex = count($this->customConditions);
 
@@ -139,7 +138,7 @@ class TimeConditionForm extends Component
         $this->dispatch('openNewAccordion', groupIndex: $newIndex);
     }
 
-    public function removeCustomConditionGroup($index):void
+    public function removeCustomConditionGroup($index): void
     {
         if (isset($this->customConditions[$index])) {
             if (
@@ -157,7 +156,7 @@ class TimeConditionForm extends Component
         }
     }
 
-    public function addConditionToGroup($groupIndex):void
+    public function addConditionToGroup($groupIndex): void
     {
         if (isset($this->customConditions[$groupIndex])) {
             $this->customConditions[$groupIndex]['conditions'][] = $this->createEmptyCondition();
@@ -166,7 +165,7 @@ class TimeConditionForm extends Component
         $this->dispatch('keepAccordionOpen', groupIndex: $groupIndex);
     }
 
-    public function removeConditionFromGroup($groupIndex, $conditionIndex):void
+    public function removeConditionFromGroup($groupIndex, $conditionIndex): void
     {
         if (isset($this->customConditions[$groupIndex]['conditions'][$conditionIndex])) {
             unset($this->customConditions[$groupIndex]['conditions'][$conditionIndex]);
@@ -186,10 +185,11 @@ class TimeConditionForm extends Component
             'variable' => '',
             'value_start' => '',
             'value_stop' => '',
+            'negate' => false
         ];
     }
 
-    public function togglePreset($presetName):void
+    public function togglePreset($presetName): void
     {
         if (isset($this->presetGroups[$presetName])) {
             $groupIndex = $this->presetGroups[$presetName];
@@ -216,6 +216,7 @@ class TimeConditionForm extends Component
                         'variable' => $variable,
                         'value_start' => $start,
                         'value_stop' => $stop,
+                        'negate' => false
                     ];
                 }
 
@@ -234,7 +235,7 @@ class TimeConditionForm extends Component
         }
     }
 
-    protected function reindexPresetGroups():void
+    protected function reindexPresetGroups(): void
     {
         $newPresetGroups = [];
         foreach ($this->presetGroups as $presetName => $oldIndex) {
@@ -282,7 +283,7 @@ class TimeConditionForm extends Component
         $this->showAdvanced = !$this->showAdvanced;
     }
 
-    protected function validateConditionsExist():bool
+    protected function validateConditionsExist(): bool
     {
         $hasCustomConditions = !empty($this->customConditions);
         $hasPresets = !empty($this->selectedPresets);
@@ -295,7 +296,7 @@ class TimeConditionForm extends Component
         return true;
     }
 
-    protected function validateAlternateDestination():bool
+    protected function validateAlternateDestination(): bool
     {
         $needsAlternate = false;
         foreach ($this->selectedPresets as $preset) {
@@ -493,6 +494,7 @@ class TimeConditionForm extends Component
                     ['value' => '3', 'label' => 'Week 3'],
                     ['value' => '4', 'label' => 'Week 4'],
                     ['value' => '5', 'label' => 'Week 5'],
+                    ['value' => '6', 'label' => 'Week 6']
                 ];
 
             case 'hour':
@@ -511,6 +513,23 @@ class TimeConditionForm extends Component
                         $label = $h == 0 ? '12:' . sprintf('%02d', $m) . ' AM' : ($h < 12 ? $h . ':' . sprintf('%02d', $m) . ' AM' : ($h == 12 ? '12:' . sprintf('%02d', $m) . ' PM' : ($h - 12) . ':' . sprintf('%02d', $m) . ' PM'));
                         $options[] = ['value' => $time, 'label' => $label];
                     }
+                }
+                return $options;
+
+            case 'yday':
+                $options = [];
+                for ($d = 1; $d <= 366; $d++) {
+                    $options[] = ['value' => $d, 'label' => 'Day ' . $d];
+                }
+                return $options;
+
+            case 'minute-of-day':
+                $options = [];
+                for ($m = 1; $m <= 1440; $m += 15) {
+                    $hours = floor(($m - 1) / 60);
+                    $mins = ($m - 1) % 60;
+                    $timeLabel = sprintf('%02d:%02d', $hours, $mins);
+                    $options[] = ['value' => $m, 'label' => "Minute $m ($timeLabel)"];
                 }
                 return $options;
 

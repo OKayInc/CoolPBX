@@ -86,10 +86,7 @@ class User extends Authenticatable
         return $this->belongsToMany(Group::class, 'v_user_groups', 'user_uuid', 'group_uuid')
             ->using(UserGroup::class)
             ->withPivot(['user_group_uuid', 'domain_uuid'])
-            ->withTimestamps([
-                'created_at' => 'insert_date',
-                'updated_at' => 'update_date'
-            ])
+            ->withTimestamps('insert_date', 'update_date')
             ->orderBy('group_name');
 	}
 

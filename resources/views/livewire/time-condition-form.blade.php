@@ -298,21 +298,26 @@
                                                             <table class="table table-sm table-bordered">
                                                                 <thead class="table-light">
                                                                     <tr>
-                                                                        <th width="25%">Condition Type</th>
-                                                                        <th width="25%">Value (Start)</th>
-                                                                        <th width="25%">Value (End)</th>
-                                                                        <th width="15%" class="text-center">Range
+                                                                        <th width="20%">Condition Type</th>
+                                                                        <th width="22%">Value (Start)</th>
+                                                                        <th width="22%">Value (End)</th>
+                                                                        <th width="10%" class="text-center">Range
                                                                         </th>
-                                                                        <th width="10%">Actions</th>
+                                                                        <th width="10%" class="text-center">Negate
+                                                                        </th>
+                                                                        <th width="16%">Actions</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach ($group['conditions'] as $condIndex => $condition)
-                                                                        <tr wire:key="condition-{{ $groupIndex }}-{{ $condIndex }}"
-                                                                            x-data="{ selectedVar: '{{ $condition['variable'] ?? '' }}' }">
+                                                                        @php
+                                                                            $currentVar = $condition['variable'] ?? '';
+                                                                        @endphp
 
+                                                                        <tr
+                                                                            wire:key="condition-{{ $groupIndex }}-{{ $condIndex }}">
                                                                             <td>
-                                                                                <select x-model="selectedVar"
+                                                                                <select
                                                                                     wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.variable"
                                                                                     class="form-select form-select-sm">
                                                                                     <option value="">Select...
@@ -327,19 +332,38 @@
                                                                             </td>
 
                                                                             <td>
-                                                                                <template x-if="selectedVar === ''">
+                                                                                @if ($currentVar === '')
                                                                                     <input type="text"
                                                                                         class="form-control form-control-sm"
                                                                                         placeholder="select type"
                                                                                         disabled>
-                                                                                </template>
-                                                                                <template
-                                                                                    x-if="selectedVar !== '' && selectedVar !== 'date-time'">
+                                                                                @elseif($currentVar === 'date-time')
+                                                                                    <input type="datetime-local"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                        class="form-control form-control-sm">
+                                                                                @elseif($currentVar === 'time-of-day')
+                                                                                    <input type="time"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                        class="form-control form-control-sm"
+                                                                                        step="1">
+                                                                                @elseif($currentVar === 'minute-of-day')
+                                                                                    <input type="number"
+                                                                                        min="1" max="1440"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="1-1440">
+                                                                                @elseif($currentVar === 'yday')
+                                                                                    <input type="number"
+                                                                                        min="1" max="366"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="1-366">
+                                                                                @else
                                                                                     <select
                                                                                         wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_start"
                                                                                         class="form-select form-select-sm">
-                                                                                        <option value="">Select...
-                                                                                        </option>
+                                                                                        <option value="">
+                                                                                            Select...</option>
                                                                                         @foreach ($this->getOptionsForVariable($groupIndex, $condIndex) as $option)
                                                                                             <option
                                                                                                 value="{{ $option['value'] }}">
@@ -347,18 +371,38 @@
                                                                                             </option>
                                                                                         @endforeach
                                                                                     </select>
-                                                                                </template>
+                                                                                @endif
                                                                             </td>
 
                                                                             <td>
-                                                                                <template x-if="selectedVar === ''">
+                                                                                @if ($currentVar === '')
                                                                                     <input type="text"
                                                                                         class="form-control form-control-sm"
                                                                                         placeholder="select type"
                                                                                         disabled>
-                                                                                </template>
-                                                                                <template
-                                                                                    x-if="selectedVar !== '' && selectedVar !== 'date-time'">
+                                                                                @elseif($currentVar === 'date-time')
+                                                                                    <input type="datetime-local"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
+                                                                                        class="form-control form-control-sm">
+                                                                                @elseif($currentVar === 'time-of-day')
+                                                                                    <input type="time"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
+                                                                                        class="form-control form-control-sm"
+                                                                                        step="1"
+                                                                                        placeholder="Optional">
+                                                                                @elseif($currentVar === 'minute-of-day')
+                                                                                    <input type="number"
+                                                                                        min="1" max="1440"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="Optional (1-1440)">
+                                                                                @elseif($currentVar === 'yday')
+                                                                                    <input type="number"
+                                                                                        min="1" max="366"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
+                                                                                        class="form-control form-control-sm"
+                                                                                        placeholder="Optional (1-366)">
+                                                                                @else
                                                                                     <select
                                                                                         wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.value_stop"
                                                                                         class="form-select form-select-sm">
@@ -371,7 +415,7 @@
                                                                                             </option>
                                                                                         @endforeach
                                                                                     </select>
-                                                                                </template>
+                                                                                @endif
                                                                             </td>
 
                                                                             <td class="text-center">
@@ -384,6 +428,18 @@
                                                                                 @endif
                                                                             </td>
 
+                                                                            <td class="text-center">
+                                                                                <div
+                                                                                    class="form-check form-switch d-flex justify-content-center">
+                                                                                    <input class="form-check-input"
+                                                                                        type="checkbox"
+                                                                                        wire:model.live="customConditions.{{ $groupIndex }}.conditions.{{ $condIndex }}.negate"
+                                                                                        title="Negate this condition (NOT)"
+                                                                                        style="cursor: pointer;">
+                                                                                </div>
+                                                                            </td>
+
+                                                                            {{-- Columna: Actions --}}
                                                                             <td>
                                                                                 <button type="button"
                                                                                     wire:click="removeConditionFromGroup({{ $groupIndex }}, {{ $condIndex }})"
@@ -506,7 +562,6 @@
         </div>
     </div>
 
-
     @push('styles')
         <style>
             .accordion-button:not(.collapsed) {
@@ -531,7 +586,6 @@
                 font-weight: 500;
             }
 
-            /* Transiciones suaves para Alpine.js */
             [x-cloak] {
                 display: none !important;
             }
