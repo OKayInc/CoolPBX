@@ -156,4 +156,10 @@ class Extension extends Model
 	{
 		return $this->hasOne(FollowMe::class, 'follow_me_uuid', 'follow_me_uuid');
 	}
+
+	public function followMeDestinations(): HasMany
+	{
+		return $this->hasMany(FollowMeDestination::class, 'follow_me_uuid', 'follow_me_uuid');
+	}
+
 }

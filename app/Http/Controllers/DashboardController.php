@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
 use App\Models\Domain;
+use App\Models\Extension;
 use App\Models\Voicemail;
 use App\Models\VoicemailMessage;
 use App\Models\XmlCDR;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -27,6 +29,7 @@ class DashboardController extends Controller
     private $colorYellow;
     private $colorOrange;
     private $colorViolet;
+    private $colorGrey;
 
     private $scope;
 
@@ -50,6 +53,7 @@ class DashboardController extends Controller
         $this->colorYellow = "#F3DD12FF";
         $this->colorOrange = "#E97313FF";
         $this->colorViolet = "#605CA8FF";
+        $this->colorGrey = "#979797FF";
     }
 
     function formatSeconds($seconds)
@@ -81,6 +85,7 @@ class DashboardController extends Controller
             "disk_usage" => $this->getDiskUsage(),
             "cpu_usage" => $this->getCpuUsage(),
             "system_counts" => $this->getSystemCounts(),
+            "call_forward" => $this->getCallForward(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -471,14 +476,14 @@ class DashboardController extends Controller
         {
             $query->where(function ($q) use ($assignedExtensions)
             {
-                foreach($assignedExtensions as $extensionUuid => $extension)
+                foreach($assignedExtensions as $assignedExtension)
                 {
-                    $q->orWhere(function ($q2) use ($extensionUuid, $extension)
+                    $q->orWhere(function ($q2) use ($assignedExtension)
                     {
-                        $q2->where('extension_uuid', $extensionUuid)
-                        ->orWhere('caller_id_number', $extension)
-                        ->orWhere('destination_number', $extension)
-                        ->orWhere('destination_number', '*99' . $extension);
+                        $q2->where('extension_uuid', $assignedExtension['extension_uuid'])
+                        ->orWhere('caller_id_number', $assignedExtension['destination_number'])
+                        ->orWhere('destination_number', $assignedExtension['destination_number'])
+                        ->orWhere('destination_number', '*99' . $assignedExtension['destination_number']);
                     });
                 }
             });
@@ -901,5 +906,120 @@ class DashboardController extends Controller
         }
 
         return $stats[$this->scope];
+    }
+
+    public function getCallForward()
+    {
+        $assignedExtensions = $this->getAssignedExtensions();
+
+        $query = Extension::query()
+            ->where('domain_uuid', Session::get('domain_uuid'))
+            ->where('enabled', 'true')
+            ->withCount('followMeDestinations');
+
+        if(auth()->user()->hasPermission("extension_edit"))
+        {
+            if(!empty($assignedExtensions))
+            {
+                $query->where(function ($q) use ($assignedExtensions)
+                {
+                    foreach($assignedExtensions as $assignedExtension)
+                    {
+                        $q->orWhere(function ($or) use ($assignedExtension)
+                        {
+                            $or->orWhere('extension', $assignedExtension['destination_number']);
+                        });
+                    }
+                });
+            }
+            else
+            {
+                $query->where('extension', 'disabled');
+            }
+        }
+
+        $extensions = $query->get();
+
+        $stats = [
+            'dnd' => 0,
+            'follow_me' => 0,
+            'call_forward' => 0,
+            'active' => 0,
+        ];
+
+        foreach($extensions as $extension)
+        {
+            if(auth()->user()->hasPermission("call_forward"))
+            {
+                $stats['call_forward'] += ($extension->forward_all_enabled == 'true' && $extension->forward_all_destination) ? 1 : 0;
+            }
+
+            if(auth()->user()->hasPermission("follow_me"))
+            {
+                $stats['follow_me'] += ($extension->follow_me_enabled == 'true' && Str::isUuid($extension->follow_me_uuid)) ? 1 : 0;
+            }
+
+            if(auth()->user()->hasPermission("do_not_disturb"))
+            {
+                $stats['dnd'] += ($extension->do_not_disturb == 'true') ? 1 : 0;
+            }
+        }
+
+        $stats['active'] = $extensions->count() - $stats['call_forward'] - $stats['follow_me'] - $stats['dnd'];
+
+        $total = $stats['active'] + $stats['call_forward'] + $stats['follow_me'] + $stats['dnd'];
+
+        $list = [];
+
+        foreach($extensions as $extension)
+        {
+            $item = [
+                'extension_uuid' => $extension->extension_uuid,
+                'extension' => $extension->extension,
+                'link' => route('call_forward.edit', $extension->extension_uuid),
+            ];
+
+            if(auth()->user()->hasPermission('call_forward'))
+            {
+                $item['call_forward'] = ($extension->forward_all_enabled == 'true' && !empty($extension->forward_all_destination)) ? format_phone($extension->forward_all_destination) : '';
+            }
+
+            if(auth()->user()->hasPermission('follow_me'))
+            {
+                $item['follow_me'] = ($extension->follow_me_destinations_count) ? 'Enabled (' . $extension->follow_me_destinations_count . ')' : '';
+            }
+
+            if(auth()->user()->hasPermission('do_not_disturb'))
+            {
+                $item['dnd'] = ($extension->do_not_disturb == 'true') ? 'enabled' : '';
+            }
+
+            $list[] = $item;
+        }
+
+        return [
+            'title' => 'Call Forward',
+            'subtitle' => '',
+            'count' => $total,
+            'metrics' => [
+                'Active' => [
+                    'value' => $stats['active'],
+                    'color' => $this->colorGrey,
+                ],
+                'Call Forward' => [
+                    'value' => $stats['call_forward'],
+                    'color' => $this->colorBlue,
+                ],
+                'Follow Me' => [
+                    'value' => $stats['follow_me'],
+                    'color' => $this->colorGreen,
+                ],
+                'Do Not Disturb' => [
+                    'value' => $stats['dnd'],
+                    'color' => $this->colorRed,
+                ],
+            ],
+            'extensions' => $list,
+        ];
     }
 }
