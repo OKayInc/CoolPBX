@@ -225,6 +225,62 @@
                         </table>
                     </x-slot>
                 </x-widget-doughnut>
+
+                <div class="col-lg-4 col-12 d-flex"></div>
+
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="call-forward"
+                    cols="3"
+                    :labels="array_keys($stats['call_forward']['metrics'])"
+                    :values="array_column($stats['call_forward']['metrics'], 'value')"
+                    :colors="array_column($stats['call_forward']['metrics'], 'color')"
+                    :extra="array_column($stats['call_forward']['metrics'], 'extra')"
+                    :links="array_column($stats['call_forward']['metrics'], 'link')"
+                    :count="$stats['call_forward']['count']"
+                    :title="$stats['call_forward']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Extension</th>
+
+                                    @can('call_forward')
+                                    <th class="text-end">Call Forward</th>
+                                    @endcan
+
+                                    @can('follow_me')
+                                    <th class="text-end">Follow Me</th>
+                                    @endcan
+
+                                    @can('do_not_disturb')
+                                    <th class="text-end">Do Not Disturb</th>
+                                    @endcan
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['call_forward']['extensions'] as $key => $value)
+                                    <tr>
+                                        <td class="text-end widget-value"><a href="{{ $value['link'] }}">{{ $value["extension"] }}</a></td>
+
+                                        @can('call_forward')
+                                        <td class="text-end widget-value">{{ $value["call_forward"] }}</td>
+                                        @endcan
+
+                                        @can('follow_me')
+                                        <td class="text-end widget-value">{{ $value["follow_me"] }}</td>
+                                        @endcan
+
+                                        @can('do_not_disturb')
+                                        <td class="text-end widget-value">{{ $value["dnd"] }}</td>
+                                        @endcan
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
             </div>
         </div>
     </div>

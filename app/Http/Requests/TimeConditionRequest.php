@@ -44,7 +44,7 @@ class TimeConditionRequest extends FormRequest
             'default_preset_action' => 'nullable|string',
 
             'customConditions.*.conditions' => 'nullable|array|min:1',
-            'customConditions.*.conditions.*.variable' => 'nullable|string|in:year,mon,mday,wday,week,mweek,hour,time-of-day,date-time',
+            'customConditions.*.conditions.*.variable' => 'nullable|string|in:year,yday,mon,mday,wday,week,mweek,hour,minute-of-day,time-of-day,date-time',
             'customConditions.*.conditions.*.value_start' => ['nullable', new ValidTimeCondition()],
             'customConditions.*.conditions.*.value_stop' => 'nullable',
             'customConditions.*.action' => 'nullable|string',

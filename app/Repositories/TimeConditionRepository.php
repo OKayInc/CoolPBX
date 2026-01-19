@@ -284,9 +284,9 @@ class TimeConditionRepository
                     if (empty($condition['variable']) || empty($condition['value_start'])) {
                         continue;
                     }
-
                     $conditionVar = $condition['variable'];
                     $conditionValue = $condition['value_start'];
+                    $isNegated = isset($condition['negate']) && $condition['negate'];
 
                     if ($conditionVar === 'time-of-day') {
                         $conditionVar = 'minute-of-day';
@@ -295,11 +295,24 @@ class TimeConditionRepository
                         if (!empty($condition['value_stop'])) {
                             $conditionValue .= '-' . $this->timeToMinutes($condition['value_stop']);
                         }
+                    }
+                    // Para minute-of-day y yday, usar el valor directamente
+                    elseif ($conditionVar === 'minute-of-day' || $conditionVar === 'yday') {
+                        if (!empty($condition['value_stop'])) {
+                            $conditionValue .= '-' . $condition['value_stop'];
+                        }
+                    } elseif ($conditionVar === 'date-time') {
+                        if (!empty($condition['value_stop'])) {
+                            $conditionValue .= '~' . $condition['value_stop'];
+                        }
                     } else {
                         if (!empty($condition['value_stop'])) {
-                            $rangeIndicator = ($conditionVar === 'date-time') ? '~' : '-';
-                            $conditionValue .= $rangeIndicator . $condition['value_stop'];
+                            $conditionValue .= '-' . $condition['value_stop'];
                         }
+                    }
+
+                    if ($isNegated) {
+                        $conditionValue = '!' . $conditionValue;
                     }
 
                     $detailOrder += 10;
@@ -454,14 +467,25 @@ class TimeConditionRepository
                 $conditionVar = $detail->dialplan_detail_type;
                 $conditionValue = $detail->dialplan_detail_data;
 
+                $isNegated = false;
+                if (strpos($conditionValue, '!') === 0) {
+                    $isNegated = true;
+                    $conditionValue = substr($conditionValue, 1);
+                }
+
                 if ($conditionVar === 'minute-of-day') {
                     $conditionVar = 'time-of-day';
                     $parts = explode('-', $conditionValue);
                     $valueStart = $this->minutesToTime((int)$parts[0]);
                     $valueStop = isset($parts[1]) ? $this->minutesToTime((int)$parts[1]) : null;
-                } else {
-                    $rangeIndicator = ($conditionVar === 'date-time') ? '~' : '-';
-                    $parts = explode($rangeIndicator, $conditionValue);
+                }
+                elseif ($conditionVar === 'date-time') {
+                    $parts = explode('~', $conditionValue);
+                    $valueStart = $parts[0];
+                    $valueStop = $parts[1] ?? null;
+                }
+                else {
+                    $parts = explode('-', $conditionValue);
                     $valueStart = $parts[0];
                     $valueStop = $parts[1] ?? null;
                 }
@@ -470,6 +494,7 @@ class TimeConditionRepository
                     'variable' => $conditionVar,
                     'value_start' => $valueStart,
                     'value_stop' => $valueStop,
+                    'negate' => $isNegated,
                 ];
             } else if ($detail->dialplan_detail_tag === 'action') {
                 $customGroups[$group]['action'] = $detail->dialplan_detail_type .
@@ -487,12 +512,14 @@ class TimeConditionRepository
     {
         return [
             'year' => 'Year',
+            'yday' => 'Day of Year',
             'mon' => 'Month',
             'mday' => 'Day of Month',
             'wday' => 'Day of Week',
             'week' => 'Week of Year',
             'mweek' => 'Week of Month',
             'hour' => 'Hour of Day',
+            'minute-of-day' => 'Minute of Day',
             'time-of-day' => 'Time of Day',
             'date-time' => 'Date and Time',
         ];
