@@ -27,3 +27,4 @@ Redirect	301	/app/call_centers/call_center_agent_status.php  /call_center_agent_
 Redirect	301	/app/ivr_menus/ivr_menus.php                    /ivr_menu
 Redirect	301	/app/call_center_active/call_center_queue.php    /call_center_queues?action=view
 Redirect	301	/app/time_conditions/time_conditions.php			/time_conditions
+Redirect	301	/app/voicemails/voicemails.php					/voicemails
