@@ -32,8 +32,7 @@ class TimeConditionTable extends DataTableComponent
             });
         }
 
-        if(request('showAll'))
-        {
+        if(request('showAll')){
             $this->showAll = true;
         }
     }
