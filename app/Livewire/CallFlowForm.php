@@ -62,24 +62,8 @@ class CallFlowForm extends Component
 
     public function rules()
     {
-        $rules = [
-            'call_flow_name' => 'required|string|max:255',
-            'call_flow_extension' => 'required|string|max:255',
-            'call_flow_feature_code' => 'required|string|max:255',
-            'call_flow_status' => 'nullable|in:true,false',
-            'call_flow_pin_number' => 'nullable|string|max:255',
-            'call_flow_label' => 'nullable|string|max:255',
-            'call_flow_sound' => 'nullable|string|max:255',
-            'call_flow_destination' => 'required|string',
-            'call_flow_alternate_label' => 'nullable|string|max:255',
-            'call_flow_alternate_sound' => 'nullable|string|max:255',
-            'call_flow_alternate_destination' => 'nullable|string',
-            'call_flow_context' => 'nullable|string|max:255',
-            'call_flow_enabled' => 'required|in:true,false',
-            'call_flow_description' => 'nullable|string|max:255',
-        ];
-
-        return $rules;
+        $request = new CallFlowRequest();
+        return $request->rules();
     }
 
     public function mount($callFlowUuid = null)
