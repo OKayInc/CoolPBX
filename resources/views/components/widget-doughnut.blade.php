@@ -1,6 +1,7 @@
 @php
     $widget = $widget ?? '';
     $count = $count ?? 0;
+    $unit = $unit ?? '';
     $labels = $labels ?? [];
     $values = $values ?? [];
     $colors = $colors ?? [];
@@ -47,6 +48,7 @@
                         data-extra='@json($extra)'
                         data-links='@json($links)'
                         data-count='@json($count)'
+                        data-unit='{{ $unit }}'
                         height="200"
                     ></canvas>
                 </div>

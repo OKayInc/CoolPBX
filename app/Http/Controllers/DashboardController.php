@@ -5,6 +5,7 @@ use App\Facades\Setting;
 use App\Models\CallCenterAgent;
 use App\Models\Domain;
 use App\Models\Extension;
+use App\Models\RingGroup;
 use App\Models\Voicemail;
 use App\Models\VoicemailMessage;
 use App\Models\XmlCDR;
@@ -86,6 +87,7 @@ class DashboardController extends Controller
             "cpu_usage" => $this->getCpuUsage(),
             "system_counts" => $this->getSystemCounts(),
             "call_forward" => $this->getCallForward(),
+            "ring_group_forward" => $this->getRingGroupForward(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -965,9 +967,9 @@ class DashboardController extends Controller
             }
         }
 
-        $stats['active'] = $extensions->count() - $stats['call_forward'] - $stats['follow_me'] - $stats['dnd'];
+        $total = $extensions->count();
 
-        $total = $stats['active'] + $stats['call_forward'] + $stats['follow_me'] + $stats['dnd'];
+        $stats['active'] = $total - $stats['call_forward'] - $stats['follow_me'] - $stats['dnd'];
 
         $list = [];
 
@@ -1020,6 +1022,64 @@ class DashboardController extends Controller
                 ],
             ],
             'extensions' => $list,
+        ];
+    }
+
+    public function getRingGroupForward()
+    {
+        if(auth()->user()->hasPermission('ring_group_add') || auth()->user()->hasPermission('ring_group_edit'))
+        {
+            $ringGroups = RingGroup::where('domain_uuid', Session::get('domain_uuid'))->get();
+        }
+        else
+        {
+            $ringGroups = RingGroup::where('domain_uuid', Session::get('domain_uuid'))
+            ->where("user_uuid", auth()->user()->user_uuid)
+            ->with("users")->get();
+        }
+
+        $stats = [
+            'forwarding' => 0,
+            'active' => 0,
+        ];
+
+        $list = [];
+
+        foreach($ringGroups as $ringGroup)
+        {
+            $stats['forwarding'] += ($ringGroup->ring_group_forward_enabled == 'true' && $ringGroup->ring_group_forward_destination) ? 1 : 0;
+
+            $item = [
+                'uuid' => $ringGroup->ring_group_uuid,
+                'name' => $ringGroup->ring_group_name,
+                'extension' => $ringGroup->ring_group_extension,
+                'enabled' => $ringGroup->ring_group_forward_enabled,
+                'destination' => $ringGroup->ring_group_forward_destination,
+                'link' => route('ring_groups.edit', $ringGroup->ring_group_uuid),
+            ];
+
+            $list[] = $item;
+        }
+
+        $total = $ringGroups->count();
+
+        $stats['active'] = $total- $stats['forwarding'];
+
+        return [
+            'title' => 'Ring Group Forward',
+            'subtitle' => '',
+            'count' => $total,
+            'metrics' => [
+                'Active' => [
+                    'value' => $stats['active'],
+                    'color' => $this->colorGrey,
+                ],
+                'Ring Group Forward' => [
+                    'value' => $stats['forwarding'],
+                    'color' => $this->colorRed,
+                ],
+            ],
+            "list" => $list,
         ];
     }
 }

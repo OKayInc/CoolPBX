@@ -63,6 +63,8 @@ document.addEventListener("DOMContentLoaded", function()
                         context.restore();
 
                         const count = chart.canvas.dataset.count || "";
+                        const unit = chart.canvas.dataset.unit ?? '';
+                        const value = `${count}${unit}`;
 
                         if(count)
                         {
@@ -70,10 +72,10 @@ document.addEventListener("DOMContentLoaded", function()
                             context.textBaseline = "middle";
                             context.fillStyle = "#000";
                             const textX = Math.round(
-                                (width - context.measureText(count).width) / 2
+                                (width - context.measureText(value).width) / 2
                             );
                             const textY = height / 2 - 10;
-                            context.fillText(count, textX, textY);
+                            context.fillText(value, textX, textY);
                         }
 
                         context.save();

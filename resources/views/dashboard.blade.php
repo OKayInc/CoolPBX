@@ -114,6 +114,7 @@
                     type="doughnut"
                     widget="disk-usage"
                     cols="3"
+                    unit="%"
                     :labels="array_keys($stats['disk_usage']['metrics'])"
                     :values="array_column($stats['disk_usage']['metrics'], 'value')"
                     :colors="array_column($stats['disk_usage']['metrics'], 'color')"
@@ -281,6 +282,48 @@
                         </table>
                     </x-slot>
                 </x-widget-doughnut>
+            </div>
+            <div class="row mt-4">
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="ring-group-forward"
+                    cols="3"
+                    :labels="array_keys($stats['ring_group_forward']['metrics'])"
+                    :values="array_column($stats['ring_group_forward']['metrics'], 'value')"
+                    :colors="array_column($stats['ring_group_forward']['metrics'], 'color')"
+                    :extra="array_column($stats['ring_group_forward']['metrics'], 'extra')"
+                    :links="array_column($stats['ring_group_forward']['metrics'], 'link')"
+                    :count="$stats['ring_group_forward']['count']"
+                    :title="$stats['ring_group_forward']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Name</th>
+                                    <th>Extension</th>
+                                    <th>Forwarding</th>
+                                    <th>Destination</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['ring_group_forward']['list'] as $key => $value)
+                                    <tr>
+                                        <td class="widget-value"><a href="{{ $value['link'] }}">{{ $value["name"] }}</a></td>
+                                        <td class="widget-value">{{ $value["extension"] }}</td>
+                                        <td class="widget-value">
+                                            <i class="fa-regular {{ $value['enabled'] ? 'fa-circle-check text-success' : 'fa-circle-xmark text-danger' }}"></i>
+                                        </td>
+                                        <td class="widget-value">{{ $value["destination"] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
+
+                <div class="col-lg-4 col-12 d-flex"></div>
+
             </div>
         </div>
     </div>
