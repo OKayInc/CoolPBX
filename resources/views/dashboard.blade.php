@@ -322,8 +322,40 @@
                     </x-slot>
                 </x-widget-doughnut>
 
-                <div class="col-lg-4 col-12 d-flex"></div>
-
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="caller-id"
+                    cols="3"
+                    :labels="array_keys($stats['caller_id']['metrics'])"
+                    :values="array_column($stats['caller_id']['metrics'], 'value')"
+                    :colors="array_column($stats['caller_id']['metrics'], 'color')"
+                    :extra="array_column($stats['caller_id']['metrics'], 'extra')"
+                    :links="array_column($stats['caller_id']['metrics'], 'link')"
+                    :count="$stats['caller_id']['count']"
+                    :title="$stats['caller_id']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Extension</th>
+                                    <th>Caller ID</th>
+                                    <th>Destination</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['caller_id']['list'] as $key => $value)
+                                    <tr>
+                                        <td class="widget-value"><a href="{{ $value['link'] }}">{{ $value["extension"] }}</a></td>
+                                        <td class="widget-value">{{ $value["extension"] }}</td>
+                                        <td class="widget-value">{{ $value["caller_id"] }}</td>
+                                        <td class="widget-value">{{ $value["destination"] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
             </div>
         </div>
     </div>

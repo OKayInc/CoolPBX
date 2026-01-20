@@ -88,6 +88,7 @@ class DashboardController extends Controller
             "system_counts" => $this->getSystemCounts(),
             "call_forward" => $this->getCallForward(),
             "ring_group_forward" => $this->getRingGroupForward(),
+            "caller_id" => $this->getCallerId(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -404,22 +405,7 @@ class DashboardController extends Controller
 
     private function getAssignedExtensions()
     {
-        $assignedExtensions = [];
-
-        $userExtensions = Setting::getSetting('user', 'extension');
-
-        if(is_array($userExtensions))
-        {
-            foreach($userExtensions  as $userExtension)
-            {
-                $assignedExtensions[] = [
-                    'extension_uuid' => $userExtension['extension_uuid'],
-                    'destination_number' => $userExtension['user'],
-                ];
-            }
-        }
-
-        return $assignedExtensions;
+        return auth()->user()->extensions;
     }
 
     public function getMissedCalls()
@@ -444,8 +430,8 @@ class DashboardController extends Controller
                 {
                     $q->orWhere(function ($or) use ($assignedExtension)
                     {
-                        $or->where('extension_uuid', $assignedExtension['extension_uuid'])
-                        ->orWhere('destination_number', $assignedExtension['destination_number']);
+                        $or->where('extension_uuid', $assignedExtension->extension_uuid)
+                        ->orWhere('destination_number', $assignedExtension->number_alias ?: $assignedExtension->extension);
                     });
                 }
             });
@@ -482,10 +468,10 @@ class DashboardController extends Controller
                 {
                     $q->orWhere(function ($q2) use ($assignedExtension)
                     {
-                        $q2->where('extension_uuid', $assignedExtension['extension_uuid'])
-                        ->orWhere('caller_id_number', $assignedExtension['destination_number'])
-                        ->orWhere('destination_number', $assignedExtension['destination_number'])
-                        ->orWhere('destination_number', '*99' . $assignedExtension['destination_number']);
+                        $q2->where('extension_uuid', $assignedExtension->extension_uuid)
+                        ->orWhere('caller_id_number', $assignedExtension->number_alias ?: $assignedExtension->extension)
+                        ->orWhere('destination_number', $assignedExtension->number_alias ?: $assignedExtension->extension)
+                        ->orWhere('destination_number', '*99' . $assignedExtension->number_alias ?: $assignedExtension->extension);
                     });
                 }
             });
@@ -929,7 +915,7 @@ class DashboardController extends Controller
                     {
                         $q->orWhere(function ($or) use ($assignedExtension)
                         {
-                            $or->orWhere('extension', $assignedExtension['destination_number']);
+                            $or->orWhere('extension', $assignedExtension->number_alias ?: $assignedExtension->extension);
                         });
                     }
                 });
@@ -1076,6 +1062,59 @@ class DashboardController extends Controller
                 ],
                 'Ring Group Forward' => [
                     'value' => $stats['forwarding'],
+                    'color' => $this->colorRed,
+                ],
+            ],
+            "list" => $list,
+        ];
+    }
+
+    public function getCallerId()
+    {
+        $assignedExtensions = $this->getAssignedExtensions();
+
+        $stats = [
+            'defined' => 0,
+            'undefined' => 0,
+        ];
+
+        $list = [];
+
+        foreach($assignedExtensions as $assignedExtension)
+        {
+            if(is_numeric($assignedExtension->outbound_caller_id_number))
+            {
+                $stats['defined']++;
+            }
+            else
+            {
+                $stats['undefined']++;
+            }
+
+            $item = [
+                'uuid' => $assignedExtension->extension_uuid,
+                'extension' => $assignedExtension->extension,
+                'caller_id' => $assignedExtension->outbound_caller_id_name,
+                'destination' => $assignedExtension->outbound_caller_id_number,
+                'link' => route('extensions.edit', $assignedExtension->extension_uuid),
+            ];
+
+            $list[] = $item;
+        }
+
+        $total = $stats['defined'] + $stats['undefined'];
+
+        return [
+            'title' => 'Caller ID',
+            'subtitle' => '',
+            'count' => $total,
+            'metrics' => [
+                'Active' => [
+                    'value' => $stats['defined'],
+                    'color' => $this->colorGrey,
+                ],
+                'Ring Group Forward' => [
+                    'value' => $stats['undefined'],
                     'color' => $this->colorRed,
                 ],
             ],
