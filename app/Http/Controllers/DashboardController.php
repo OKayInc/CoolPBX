@@ -3,9 +3,15 @@ namespace App\Http\Controllers;
 
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
+use App\Models\CallCenterQueue;
+use App\Models\Destination;
+use App\Models\Device;
 use App\Models\Domain;
 use App\Models\Extension;
+use App\Models\Gateway;
+use App\Models\IVRMenu;
 use App\Models\RingGroup;
+use App\Models\User;
 use App\Models\Voicemail;
 use App\Models\VoicemailMessage;
 use App\Models\XmlCDR;
@@ -89,6 +95,7 @@ class DashboardController extends Controller
             "call_forward" => $this->getCallForward(),
             "ring_group_forward" => $this->getRingGroupForward(),
             "caller_id" => $this->getCallerId(),
+            "domain_limits" => $this->getDomainLimits(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -1116,6 +1123,143 @@ class DashboardController extends Controller
                 'Ring Group Forward' => [
                     'value' => $stats['undefined'],
                     'color' => $this->colorRed,
+                ],
+            ],
+            "list" => $list,
+        ];
+    }
+
+    public function getDomainLimits()
+    {
+        $total = 0;
+        $metricKey = "";
+        $metricValue = "";
+
+        $domainUuid = Session::get('domain_uuid');
+        $user = auth()->user();
+
+        $list = [];
+
+        if($user->hasPermission('user_view'))
+        {
+            $metricKey = "Users";
+
+            $metricValue = User::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "users", "numeric") ?? 0,
+                "link" => route('users.index'),
+            ];
+        }
+
+        if($user->hasPermission('call_center_active_view'))
+        {
+            $metricKey = "Call Center Queues";
+
+            $metricValue = CallCenterQueue::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "call_center_queues", "numeric") ?? 0,
+                "link" => route('call_center_queues.index'),
+            ];
+        }
+
+        if($user->hasPermission('destination_view'))
+        {
+            $metricKey = $metricKeyUsed = "Destinations";
+
+            $metricValue = $metricValueUsed = Destination::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "destinations", "numeric") ?? 0,
+                "link" => route('destinations.index'),
+            ];
+        }
+
+        if($user->hasPermission('device_view'))
+        {
+            $metricKey = "Devices";
+
+            $metricValue = Device::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "devices", "numeric") ?? 0,
+                "link" => route('devices.index'),
+            ];
+        }
+
+        if($user->hasPermission('extension_view'))
+        {
+            $metricKey = $metricKeyUsed = "Extensions";
+
+            $metricValue = $metricValueUsed = Extension::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "extensions", "numeric") ?? 0,
+                "link" => route('extensions.index'),
+            ];
+        }
+
+        if($user->hasPermission('gateway_view'))
+        {
+            $metricKey = "Gateways";
+
+            $metricValue = Gateway::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "gateways", "numeric") ?? 0,
+                "link" => route('gateways.index'),
+            ];
+        }
+
+        if($user->hasPermission('ivr_menu_view'))
+        {
+            $metricKey = "IVR Menus";
+
+            $metricValue = IVRMenu::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "ivr_menus", "numeric") ?? 0,
+                "link" => route('ivr_menu.index'),
+            ];
+        }
+
+        if($user->hasPermission('ring_group_view'))
+        {
+            $metricKey = "Ring Groups";
+
+            $metricValue = RingGroup::where('domain_uuid', $domainUuid)->count();
+
+            $list[] = [
+                "feature" => $metricKey,
+                "used" => $metricValue,
+                "total" => Setting::getSetting("limit", "ring_groups", "numeric") ?? 0,
+                "link" => route('ring_groups.index'),
+            ];
+        }
+
+        return [
+            'title' => 'Domain Limits',
+            'subtitle' => '',
+            'count' => $metricValueUsed,
+            'metrics' => [
+                $metricKeyUsed => [
+                    'value' => $metricValueUsed,
+                    'color' => $this->colorGrey,
                 ],
             ],
             "list" => $list,

@@ -227,7 +227,39 @@
                     </x-slot>
                 </x-widget-doughnut>
 
-                <div class="col-lg-4 col-12 d-flex"></div>
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="domain-limits"
+                    cols="3"
+                    :labels="array_keys($stats['domain_limits']['metrics'])"
+                    :values="array_column($stats['domain_limits']['metrics'], 'value')"
+                    :colors="array_column($stats['domain_limits']['metrics'], 'color')"
+                    :extra="array_column($stats['domain_limits']['metrics'], 'extra')"
+                    :links="array_column($stats['domain_limits']['metrics'], 'link')"
+                    :count="$stats['domain_limits']['count']"
+                    :title="$stats['domain_limits']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Feature</th>
+                                    <th>Used</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['domain_limits']['list'] as $key => $value)
+                                    <tr>
+                                        <td class="widget-value"><a href="{{ $value['link'] }}">{{ $value["feature"] }}</a></td>
+                                        <td class="widget-value">{{ $value["used"] }}</td>
+                                        <td class="widget-value">{{ $value["total"] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
 
                 <x-widget-doughnut
                     type="doughnut"
