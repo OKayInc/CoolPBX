@@ -17,54 +17,14 @@ return new class extends Migration
         {
             Schema::create($tableName, function (Blueprint $table)
             {
-                $table->collation('latin1_swedish_ci');
-                switch (env('DB_CONNECTION', 'mysql'))
-                {
-                    case 'mariadb':
-                    case 'mysql':
-                        $table->collation('latin1_swedish_ci');
-                        $table->engine('InnoDB');
-                        break;
-                    case 'pgsql':
-                        $table->collation('en_US.utf8');
-                }
-                $table->uuid('domain_uuid')->primary();
-                $table->uuid('domain_uuid')->nullable();
-                $table->string('domain_name', length: 255)->nullable(false);
-                $table->enum('domain_enabled', ['true','false'])->nullable(false);
-                $table->text('domain_description', length: 255)->nullable(false);
-                // timestamps
-                $table->date('insert_date')->nullable();
-                $table->uuid('insert_user')->nullable();
-                $table->date('update_date')->nullable();
-                $table->uuid('update_user')->nullable();
+                $this->dql($table);
             });
         }
         else
         {
             Schema::table($tableName, function (Blueprint $table) {
-                $table->collation('latin1_swedish_ci');
-                switch (env('DB_CONNECTION', 'mysql'))
-                {
-                    case 'mariadb':
-                    case 'mysql':
-                        $table->collation('latin1_swedish_ci');
-                        $table->engine('InnoDB');
-                        break;
-                    case 'pgsql':
-                        $table->collation('en_US.utf8');
-                }
-                $table->uuid('domain_uuid')->primary();
-                $table->uuid('domain_uuid')->nullable();
-                $table->string('domain_name', length: 255)->nullable(false);
-                $table->enum('domain_enabled', ['true','false'])->nullable(false);
-                $table->text('domain_description', length: 255)->nullable(false);
-                // timestamps
-                $table->date('insert_date')->nullable();
-                $table->uuid('insert_user')->nullable();
-                $table->date('update_date')->nullable();
-                $table->uuid('update_user')->nullable();
-            }
+                $this->dql($table);
+            });
         }
 
     }
@@ -76,5 +36,29 @@ return new class extends Migration
     {
         $tableName = User::getTableName();
         Schema::dropIfExists($tableName);
+    }
+
+    private function dql(Blueprint $table): void
+    {
+        switch (env('DB_CONNECTION', 'mysql'))
+        {
+            case 'mariadb':
+            case 'mysql':
+                $table->collation('unicode_ci');
+                $table->engine('InnoDB');
+                break;
+            case 'pgsql':
+                $table->collation('en_US.utf8');
+        }
+        $table->uuid('domain_uuid')->primary();
+        $table->uuid('domain_uuid')->nullable();
+        $table->string('domain_name', length: 255)->nullable(false);
+        $table->enum('domain_enabled', ['true','false'])->nullable(false);
+        $table->text('domain_description', length: 255)->nullable(false);
+        // timestamps
+        $table->date('insert_date')->nullable();
+        $table->uuid('insert_user')->nullable();
+        $table->date('update_date')->nullable();
+        $table->uuid('update_user')->nullable();
     }
 };
