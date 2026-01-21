@@ -146,6 +146,7 @@
                     type="doughnut"
                     widget="cpu-usage"
                     cols="3"
+                    unit="%"
                     :labels="array_keys($stats['cpu_usage']['metrics'])"
                     :values="array_column($stats['cpu_usage']['metrics'], 'value')"
                     :colors="array_column($stats['cpu_usage']['metrics'], 'color')"
@@ -164,6 +165,37 @@
                             </thead>
                             <tbody>
                                 @foreach($stats['cpu_usage']['cpu_info'] as $key => $value)
+                                    <tr>
+                                        <td class="text-muted">{{ $key }}</td>
+                                        <td class="text-end widget-value">{{ $value }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </x-slot>
+                </x-widget-doughnut>
+                <x-widget-doughnut
+                    type="doughnut"
+                    widget="switch-status"
+                    cols="3"
+                    :labels="array_keys($stats['switch_status']['metrics'])"
+                    :values="array_column($stats['switch_status']['metrics'], 'value')"
+                    :colors="array_column($stats['switch_status']['metrics'], 'color')"
+                    :extra="array_column($stats['switch_status']['metrics'], 'extra')"
+                    :links="array_column($stats['switch_status']['metrics'], 'link')"
+                    :count="$stats['switch_status']['count']"
+                    :title="$stats['switch_status']['title']"
+                >
+                    <x-slot name="table">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Name</th>
+                                    <th class="text-end">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['switch_status']['cpu_info'] as $key => $value)
                                     <tr>
                                         <td class="text-muted">{{ $key }}</td>
                                         <td class="text-end widget-value">{{ $value }}</td>
@@ -388,6 +420,29 @@
                         </table>
                     </x-slot>
                 </x-widget-doughnut>
+
+                <div class="col-lg-4 col-12 d-flex">
+                    <div class="card shadow-sm w-100">
+                        <div class="d-flex justify-content-center">
+                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Label</th>
+                                    <th>Vendor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stats['device_keys'] as $device)
+                                    <tr>
+                                        <td class="widget-value">{{ $device->device_label }}</td>
+                                        <td class="widget-value">{{ $device->device_vendor }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

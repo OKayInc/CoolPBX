@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Facades\FreeSwitch;
 use App\Facades\Setting;
 use App\Models\CallCenterAgent;
 use App\Models\CallCenterQueue;
@@ -96,6 +97,8 @@ class DashboardController extends Controller
             "ring_group_forward" => $this->getRingGroupForward(),
             "caller_id" => $this->getCallerId(),
             "domain_limits" => $this->getDomainLimits(),
+            "device_keys" => $this->getDeviceKeys(),
+            "switch_status" => $this->getSwitchStatus(),
         ];
 
         return view("dashboard", compact("stats"));
@@ -1259,6 +1262,103 @@ class DashboardController extends Controller
             'metrics' => [
                 $metricKeyUsed => [
                     'value' => $metricValueUsed,
+                    'color' => $this->colorGrey,
+                ],
+            ],
+            "list" => $list,
+        ];
+    }
+
+    public function getDeviceKeys()
+    {
+        $devices = Device::where("device_user_uuid", auth()->user()->user_uuid)->get();
+
+        return $devices;
+    }
+
+    public function getSwitchStatus()
+    {
+        $list = [];
+
+        //switch version
+        if(auth()->user()->hasPermission('switch_version'))
+        {
+            $result = FreeSwitch::execute("version");
+            preg_match("/FreeSWITCH Version (\d+\.\d+\.\d+(?:\.\d+)?).*\(.*?(\d+\w+)\s*\)/", $result, $matches);
+            $switchVersion = $matches[1];
+            $switchBits = $matches[2];
+
+            $list[] = [
+                "Switch" => $switchVersion,
+            ];
+        }
+
+        //switch uptime
+        if(auth()->user()->hasPermission('switch_uptime'))
+        {
+            $result = FreeSwitch::execute("status");
+            $result = explode("\n", $result);
+            $result = $result[0];
+            $result = explode(' ', $result);
+            $uptime = (($result[1]) ? $result[1].'y ' : null);
+            $uptime .= (($result[3]) ? $result[3].'d ' : null);
+            $uptime .= (($result[5]) ? $result[5].'h ' : null);
+            $uptime .= (($result[7]) ? $result[7].'m ' : null);
+            $uptime .= (($result[9]) ? $result[9].'s' : null);
+
+            // todo
+            // if(auth()->user()->hasPermission('system_status_sofia_status') || auth()->user()->hasPermission('system_status_sofia_status_profile') || auth()->user()->hasGroup("superadmin"))
+            // {
+            //     $link = route("sip_status");
+            // }
+
+            $list[] = [
+                "Switch Uptime" => $uptime,
+            ];
+        }
+
+        //channel count
+        if(auth()->user()->hasPermission('switch_channels'))
+        {
+            $result = FreeSwitch::execute("status");
+            $matches = Array();
+            preg_match("/(\d+)\s+session\(s\)\s+\-\speak/", $result, $matches);
+            $channels = $matches[1] ? $matches[1] : 0;
+
+            // todo
+            // if(auth()->user()->hasPermission('call_active_view'))
+            // {
+            //     $link = route("calls_active");
+            // }
+
+            $list[] = [
+                "Channels" => $channels,
+            ];
+        }
+
+        //registration count
+        if(auth()->user()->hasPermission('switch_registrations') && file_exists($_SERVER["DOCUMENT_ROOT"].PROJECT_PATH."/app/registrations/"))
+        {
+            // $registration = new registrations;
+
+            // todo
+            // if(auth()->user()->hasPermission("registration_all"))
+            // {
+            //     $registration->show = 'all';
+            //     $link = route("registrations");
+            // }
+
+            // $registrations = $registration->count();
+            $registrations = 48;
+        }
+
+        return [
+            'title' => 'Switch Status',
+            'subtitle' => '',
+            'count' => $registrations,
+            'metrics' => [
+                'Registrations' => [
+                    'value' => $registrations,
                     'color' => $this->colorGrey,
                 ],
             ],
