@@ -217,8 +217,12 @@ class FreeSwitchConnectionManager implements FreeSwitchConnectionManagerInterfac
         $line = trim($command);
         if (!empty($param)) {
             $line .= ' ' . trim($param);
+	    list($command, $param) = explode(' ', $line, 2);
         }
-        list($command, $param) = explode(' ', $line, 2);
+	else
+	{
+	    $command = $line;
+	}
 
         $url = 'http://' . $host . ':' . $http_port . '/txtapi/' . $command . '?' . (isset($param) ? rawurlencode($param) : '');
 
