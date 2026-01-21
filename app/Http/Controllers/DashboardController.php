@@ -1337,7 +1337,8 @@ class DashboardController extends Controller
         }
 
         //registration count
-        if(auth()->user()->hasPermission('switch_registrations') && file_exists($_SERVER["DOCUMENT_ROOT"].PROJECT_PATH."/app/registrations/"))
+        // if(auth()->user()->hasPermission('switch_registrations') && file_exists($_SERVER["DOCUMENT_ROOT"].PROJECT_PATH."/app/registrations/"))
+        if(auth()->user()->hasPermission('switch_registrations'))
         {
             // $registration = new registrations;
 
