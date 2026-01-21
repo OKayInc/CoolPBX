@@ -1289,7 +1289,8 @@ class DashboardController extends Controller
             $switchBits = $matches[2];
 
             $list[] = [
-                "Switch" => $switchVersion,
+                "name" => "Switch",
+                "value" => "{$switchVersion} ({$switchBits})",
             ];
         }
 
@@ -1313,7 +1314,8 @@ class DashboardController extends Controller
             // }
 
             $list[] = [
-                "Switch Uptime" => $uptime,
+                "name" => "Switch Uptime",
+                "value" => $uptime,
             ];
         }
 
@@ -1332,25 +1334,47 @@ class DashboardController extends Controller
             // }
 
             $list[] = [
-                "Channels" => $channels,
+                "name" => "Channels",
+                "value" => $channels,
             ];
         }
 
         //registration count
-        // if(auth()->user()->hasPermission('switch_registrations') && file_exists($_SERVER["DOCUMENT_ROOT"].PROJECT_PATH."/app/registrations/"))
         if(auth()->user()->hasPermission('switch_registrations'))
         {
-            // $registration = new registrations;
+            $xml = FreeSwitch::execute("sofia xmlstatus profile 'all' reg");
 
-            // todo
-            // if(auth()->user()->hasPermission("registration_all"))
-            // {
-            //     $registration->show = 'all';
-            //     $link = route("registrations");
-            // }
+            $registrations = 0;
 
-            // $registrations = $registration->count();
-            $registrations = 48;
+            if(strlen($xml) > 100)
+            {
+                $xml = preg_replace('/[\x00-\x1F\x7F]/u', '', $xml);
+                $xml = str_replace(
+                    ['<profile-info>', '</profile-info>'],
+                    ['<profile_info>', '</profile_info>'],
+                    $xml
+                );
+
+                $xmlObj = null;
+
+                try
+                {
+                    $xmlObj = new \SimpleXMLElement($xml);
+
+                    if(isset($xmlObj->registrations->registration))
+                    {
+                        $registrations = count($xmlObj->registrations->registration);
+                    }
+                }
+                catch(\Exception $e)
+                {
+                }
+            }
+
+            $list[] = [
+                "name" => "Registrations",
+                "value" => $registrations,
+            ];
         }
 
         return [
