@@ -195,7 +195,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($stats['switch_status']['cpu_info'] as $key => $value)
+                                @foreach($stats['switch_status']['list'] as $key => $value)
                                     <tr>
                                         <td class="text-muted">{{ $key }}</td>
                                         <td class="text-end widget-value">{{ $value }}</td>
