@@ -423,24 +423,29 @@
 
                 <div class="col-lg-4 col-12 d-flex">
                     <div class="card shadow-sm w-100">
-                        <div class="d-flex justify-content-center">
-                        <table class="table table-sm table-borderless widget-table mb-0 mt-3">
-                            <thead>
-                                <tr class="text-muted small">
-                                    <th>Label</th>
-                                    <th>Vendor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($stats['device_keys'] as $device)
-                                    <tr>
-                                        <td class="widget-value">{{ $device->device_label }}</td>
-                                        <td class="widget-value">{{ $device->device_vendor }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center">
+                                <div class="widget-title mb-2">Device Keys</div>
+                            </div>
+                            <div class="mt-3">
+                                <table class="table table-sm table-borderless widget-table mb-0 mt-3">
+                                    <thead>
+                                        <tr class="text-muted small">
+                                            <th>Label</th>
+                                            <th>Vendor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($stats['device_keys'] as $device)
+                                            <tr>
+                                                <td class="widget-value">{{ $device->device_label }}</td>
+                                                <td class="widget-value">{{ $device->device_vendor }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
