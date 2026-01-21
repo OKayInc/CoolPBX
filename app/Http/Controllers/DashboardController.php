@@ -1289,7 +1289,8 @@ class DashboardController extends Controller
             $switchBits = $matches[2];
 
             $list[] = [
-                "Switch" => $switchVersion,
+                "name" => "Switch",
+                "value" => "{$switchVersion} ({$switchBits})",
             ];
         }
 
@@ -1313,7 +1314,8 @@ class DashboardController extends Controller
             // }
 
             $list[] = [
-                "Switch Uptime" => $uptime,
+                "name" => "Switch Uptime",
+                "value" => $uptime,
             ];
         }
 
@@ -1332,7 +1334,8 @@ class DashboardController extends Controller
             // }
 
             $list[] = [
-                "Channels" => $channels,
+                "name" => "Channels",
+                "value" => $channels,
             ];
         }
 
@@ -1351,6 +1354,11 @@ class DashboardController extends Controller
 
             // $registrations = $registration->count();
             $registrations = 48;
+
+            $list[] = [
+                "name" => "Registrations",
+                "value" => $registrations,
+            ];
         }
 
         return [

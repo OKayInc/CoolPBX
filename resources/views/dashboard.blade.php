@@ -195,10 +195,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($stats['switch_status']['list'] as $key => $value)
+                                @foreach($stats['switch_status']['list'] as $item)
                                     <tr>
-                                        <td class="text-muted">{{ $key }}</td>
-                                        <td class="text-end widget-value">{{ $value }}</td>
+                                        <td class="text-muted">{{ $item["name"] }}</td>
+                                        <td class="text-end widget-value"">{{ $item["value"] }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
