@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Domain;
+use App\Models\FollowMe;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = FollowMe::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = FollowMe::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,16 +50,19 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('domain_description')->nullable(false)->comment('Dommain description');
+        $table->uuid('follow_me_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->string('cid_name_prefix', length: 255)->nullable();
+        $table->string('cid_number_prefix', length: 255)->nullable();
+        $table->longText('dial_string')->nullable();
+        $table->enum('follow_me_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->enum('follow_me_ignore_busy', ['true','false'])->default('false')->nullable(false);
+
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
+        $table->comment('CoolPBX follow me');
     }
 };

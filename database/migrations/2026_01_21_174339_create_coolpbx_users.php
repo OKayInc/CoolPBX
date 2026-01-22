@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Domain;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -50,16 +50,24 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('domain_description')->nullable(false)->comment('Dommain description');
+        $table->uuid('user_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('contact_uuid')->nullable();
+        $table->string('username', length: 255)->nullable(false);
+        $table->string('password', length: 60)->nullable(false);
+        $table->string('salt', length: 255)->nullable();
+        $table->string('user_email', length: 255)->nullable(false);
+        $table->string('user_status', length: 255)->nullable();
+        $table->string('api_key', length: 36)->nullable();
+        $table->string('user_totp_secret', length: 255)->nullable(false);
+        $table->enum('user_enable', ['true','false'])->default('false')->nullable(false);
+        $table->text('token')->nullable();
+        $table->text('remember_token')->nullable();
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
+        $table->comment('CoolPBX user loging information');
     }
 };
