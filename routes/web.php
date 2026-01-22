@@ -23,6 +23,7 @@ use App\Http\Controllers\CallFlowController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\ConferenceCenterController;
 use App\Http\Controllers\ConferenceControlController;
+use App\Http\Controllers\ConferenceController;
 use App\Http\Controllers\ConferenceProfileController;
 use App\Http\Controllers\ConferenceRoomController;
 use App\Http\Controllers\ContactController;
@@ -112,6 +113,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/callrecordings', [ViewCallRecordingController::class, 'index'])->name('callrecordings.index', 'callrecordings.index');
     Route::get('/callrecordings/{file}/play', [ViewCallRecordingController::class, 'play'])->name('callrecordings.play', 'callrecordings.play');
     Route::get('/callrecordings/{file}/download', [ViewCallRecordingController::class, 'download'])->name('callrecordings.download', 'callrecordings.download');
+
+    // CONFERENCES
+    Route::resource('/conferences', ConferenceController::class)->name('conferences', 'conferences');
 
     // CONFERENCE CENTERS
     Route::get('/conference_centers/active', [ConferenceCenterController::class, 'getActive'])->name('conference_centers.active', 'conference_centers.active');
