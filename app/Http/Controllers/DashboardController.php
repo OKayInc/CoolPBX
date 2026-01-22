@@ -1285,8 +1285,8 @@ class DashboardController extends Controller
         {
             $result = FreeSwitch::execute("version");
             preg_match("/FreeSWITCH Version (\d+\.\d+\.\d+(?:\.\d+)?).*\(.*?(\d+\w+)\s*\)/", $result, $matches);
-            $switchVersion = $matches[1];
-            $switchBits = $matches[2];
+            $switchVersion = $matches[1] ?? "";
+            $switchBits = $matches[2] ?? "";
 
             $list[] = [
                 "name" => "Switch",
@@ -1298,14 +1298,22 @@ class DashboardController extends Controller
         if(auth()->user()->hasPermission('switch_uptime'))
         {
             $result = FreeSwitch::execute("status");
-            $result = explode("\n", $result);
-            $result = $result[0];
-            $result = explode(' ', $result);
-            $uptime = (($result[1]) ? $result[1].'y ' : null);
-            $uptime .= (($result[3]) ? $result[3].'d ' : null);
-            $uptime .= (($result[5]) ? $result[5].'h ' : null);
-            $uptime .= (($result[7]) ? $result[7].'m ' : null);
-            $uptime .= (($result[9]) ? $result[9].'s' : null);
+
+            if(empty($result))
+            {
+                $uptime = "";
+            }
+            else
+            {
+                $result = explode("\n", $result);
+                $result = $result[0];
+                $result = explode(' ', $result);
+                $uptime = (($result[1]) ? $result[1].'y ' : null);
+                $uptime .= (($result[3]) ? $result[3].'d ' : null);
+                $uptime .= (($result[5]) ? $result[5].'h ' : null);
+                $uptime .= (($result[7]) ? $result[7].'m ' : null);
+                $uptime .= (($result[9]) ? $result[9].'s' : null);
+            }
 
             // todo
             // if(auth()->user()->hasPermission('system_status_sofia_status') || auth()->user()->hasPermission('system_status_sofia_status_profile') || auth()->user()->hasGroup("superadmin"))
@@ -1325,7 +1333,7 @@ class DashboardController extends Controller
             $result = FreeSwitch::execute("status");
             $matches = Array();
             preg_match("/(\d+)\s+session\(s\)\s+\-\speak/", $result, $matches);
-            $channels = $matches[1] ? $matches[1] : 0;
+            $channels = $matches[1] ?? 0;
 
             // todo
             // if(auth()->user()->hasPermission('call_active_view'))
