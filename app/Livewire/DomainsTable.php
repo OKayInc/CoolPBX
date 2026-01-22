@@ -30,7 +30,7 @@ class DomainsTable extends DataTableComponent
             ->setSearchEnabled()
             ->setSearchPlaceholder('Search Domains')
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setTableRowUrl(function($row) use ($canEdit) {
+            ->setTableRowUrl(function ($row) use ($canEdit) {
                 return $canEdit
                     ? route('domains.edit', $row->domain_uuid)
                     : null;
@@ -51,13 +51,11 @@ class DomainsTable extends DataTableComponent
             $bulkActions['bulkDelete'] = 'Delete';
         }
 
-        if(auth()->user()->hasPermission('domain_add')) {
+        if (auth()->user()->hasPermission('domain_add')) {
             $bulkActions['bulkCopy'] = 'Copy';
         }
 
         return $bulkActions;
-
-
     }
 
     public function markEnabled()
@@ -102,30 +100,24 @@ class DomainsTable extends DataTableComponent
 
         $selectedRows = $this->getSelected();
         if (App::hasDebugModeEnabled()) {
-             Log::debug('[DomainRepository:getForSelectControl] $selectedRows: ' . print_r($selectedRows, true));
+            Log::debug('[DomainRepository:getForSelectControl] $selectedRows: ' . print_r($selectedRows, true));
         }
 
-        if (in_array(auth()->user()->domain_uuid, $selectedRows))
-        {
+        if (in_array(auth()->user()->domain_uuid, $selectedRows)) {
             session()->flash('error', 'You cannot delete your own tenant.');
-        }
-        else
-        {
-            foreach ($selectedRows as $domain_uuid)
-            {
+        } else {
+            foreach ($selectedRows as $domain_uuid) {
                 $trashedDomain = Domain::find($domain_uuid);
-                if (isset($trashedDomain))
-                {
-                    if ($trashedDomain->children->isEmpty()){
+                if (isset($trashedDomain)) {
+                    if ($trashedDomain->children->isEmpty()) {
                         $this->domainRepository = new DomainRepository($trashedDomain, null);
                         $this->domainRepository->delete($trashedDomain);
-                    }
-                    else{
+                    } else {
                         session()->flash('error', 'You cannot delete tenants with children.');
                     }
                 }
             }
-/*
+            /*
             // NOTE: Don't know if this still necessary
             try {
                 DB::beginTransaction();
@@ -143,8 +135,7 @@ class DomainsTable extends DataTableComponent
             }
 */
             // If we deleted our current domain
-            if (in_array(Session::get('domain_uuid'), $selectedRows))
-            {
+            if (in_array(Session::get('domain_uuid'), $selectedRows)) {
                 DomainService::switchByUuid(auth()->user()->domain_uuid);
                 return redirect()->intended('/dashboard');
             }
@@ -193,6 +184,19 @@ class DomainsTable extends DataTableComponent
                 ->sortable()
                 ->searchable(),
 
+            Column::make("Tools", "domain_uuid")
+                ->format(function ($value, $row) {
+                    if (!auth()->user()->hasPermission('domain_setting_view')) {
+                        return '';
+                    }
+
+                    $url = route('domains_settings.index', ['domain_uuid' => $value]);
+                    return '<a href="' . $url . '" class="btn btn-sm btn-primary" onclick="event.stopPropagation()" title="Domain Settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>';
+                })
+                ->html(),
+
             BooleanColumn::make("Enabled", "domain_enabled")
                 ->sortable(),
 
@@ -205,7 +209,7 @@ class DomainsTable extends DataTableComponent
     public function builder(): Builder
     {
         $query = Domain::query()
-                ->orderBy('domain_name', 'asc');
+            ->orderBy('domain_name', 'asc');
         return $query;
     }
 }

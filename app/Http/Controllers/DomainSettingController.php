@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Session;
 
 class DomainSettingController extends Controller
 {
+    public function index()
+    {
+        return view('pages.domainsetting.index');
+    }
+
+    
     // $name doesn't mean name, it is more the type of the setting
 	public function get(string $category, string $subcategory, ?string $name = null){
         $domain_uuid = Session::get('domain_uuid');
@@ -66,4 +72,10 @@ class DomainSettingController extends Controller
 
         return $answer;
 	}
+
+    public function create()
+    {
+        return view('pages.domainsetting.form');
+    }
+
 }
