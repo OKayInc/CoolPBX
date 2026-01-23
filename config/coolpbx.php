@@ -19,4 +19,7 @@ return [
     'ring_group' => [
         'app_uuid' => env('RING_GROUP_APP_UUID', '1d61fb65-1eec-bc73-a6ee-a6203b4fe6f2'),
     ],
+    'conference' => [
+        'app_uuid' => env('CONFERENCE_APP_UUID', 'b81412e8-7253-91f4-e48e-42fc2c9a38d9'),
+    ],
 ];
