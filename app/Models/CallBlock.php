@@ -39,7 +39,7 @@ class CallBlock extends Model
         'call_block_action',
         'call_block_app',
         'call_block_data',
-        'date_added',           // Review this
+        //'date_added',           // Review this
         'call_block_enabled',
         'call_block_description',
 	];

@@ -155,7 +155,7 @@ class CallBlockController extends Controller
 
 					$callblockData['call_block_count'] = 0;
 					$callblockData['call_block_enabled'] = 'true';
-					$callblockData['date_added'] = time();
+					//$callblockData['date_added'] = time();
                     $insert = true;
 				}
 				else
@@ -196,7 +196,7 @@ class CallBlockController extends Controller
 
                         $callblockData['call_block_count'] = 0;
                         $callblockData['call_block_enabled'] = 'true';
-                        $callblockData['date_added'] = time();
+                        //$callblockData['date_added'] = time();
                         $insert = true;
 					}
 				}
