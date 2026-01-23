@@ -39,7 +39,7 @@ class CallCenterAgent extends Model
         'agent_password',
         'agent_contact',
         'agent_status',
-        'agent_logout',
+//      'agent_logout',
         'agent_max_no_answer',
         'agent_wrap_up_time',
         'agent_reject_delay_time',

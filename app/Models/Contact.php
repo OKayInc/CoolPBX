@@ -39,7 +39,7 @@ class Contact extends Model
         'contact_title',
         'contact_role',
         'contact_category',
-        'contact_url',
+//        'contact_url',
         'contact_time_zone',
         'contact_note',
 	];
