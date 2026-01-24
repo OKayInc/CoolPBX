@@ -153,8 +153,18 @@ Route::middleware(['auth', 'permission'])->group(function () {
         return redirect('/dashboard');
     });
     Route::get('/domains/switch/{domain}', [DomainController::class, 'switchByUuid'])->name('domain.switchuuid');
-    Route::resource('/domains_settings', DomainSettingController::class);
 
+    // Domain settings.
+    Route::prefix('domains_settings')->name('domains_settings.')->group(function () {
+        Route::get('/{domainUuid}', [DomainSettingController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{domainUuid}/create', [DomainSettingController::class, 'create'])
+            ->name('create');
+
+        Route::get('/{domainUuid}/{domainSettingUuid}/edit', [DomainSettingController::class, 'edit'])
+            ->name('edit');
+    });
     // FAX
     Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
     Route::get('/faxes/{fax}/send', [FaxController::class, 'send'])->name('faxes.send');
@@ -282,7 +292,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     Route::resource('voicemails', VoicemailController::class);
 
-    route::resource('/time_conditions',TimeConditionController::class)->name('time_conditions', 'time_conditions');
+    route::resource('/time_conditions', TimeConditionController::class)->name('time_conditions', 'time_conditions');
     Route::resource('/call_forward', CallForwardController::class)->name('call_forward', 'call_forward');
 
     Route::prefix('voicemails/{voicemailUuid}')->name('voicemails.')->group(function () {
@@ -326,7 +336,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     });
 
     Route::resource('/call_flows', CallFlowController::class)->name('call_flows', 'call_flows');
-
 });
 
 Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {

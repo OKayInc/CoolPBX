@@ -12,7 +12,7 @@
                 <div class="d-flex gap-2 " role="group" aria-label="Group actions">
                 
                 <div class="d-flex gap-2 " role="menu" aria-label="Menu actions">
-                    <a href="{{ route('domains_settings.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('domains_settings.create', ['domainUuid' => $domainUuid] )}}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> {{__('Add')}}
                     </a>
                 </div>
@@ -21,7 +21,7 @@
         </div>
 
         <div class="card-body">
-            <livewire:domain-setting-table/>
+            <livewire:domain-setting-table :domainUuid="$domainUuid"/>
         </div>
     </div>
 </div>

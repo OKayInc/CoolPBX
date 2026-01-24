@@ -190,7 +190,7 @@ class DomainsTable extends DataTableComponent
                         return '';
                     }
 
-                    $url = route('domains_settings.index', ['domain_uuid' => $value]);
+                    $url = route('domains_settings.index', ['domainUuid' => $value]);
                     return '<a href="' . $url . '" class="btn btn-sm btn-primary" onclick="event.stopPropagation()" title="Domain Settings">
                     <i class="fas fa-cog"></i> Settings
                 </a>';

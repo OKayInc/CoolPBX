@@ -2,40 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Domain;
 use App\Models\DomainSetting;
+use App\Repositories\DomainSettingRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class DomainSettingController extends Controller
 {
-    public function index()
+    public DomainSettingRepository $domainSettingRepository;
+
+    public function __construct(DomainSettingRepository $domainSettingRepository)
     {
-        return view('pages.domainsetting.index');
+        $this->domainSettingRepository = $domainSettingRepository;
+    }
+    public function index($domainUuid)
+    {
+        $domain = Domain::findOrFail($domainUuid);
+
+        return view('pages.domainsetting.index', [
+            'domainUuid' => $domainUuid,
+            'domain' => $domain
+        ]);
     }
 
-    
+
     // $name doesn't mean name, it is more the type of the setting
-	public function get(string $category, string $subcategory, ?string $name = null){
+    public function get(string $category, string $subcategory, ?string $name = null)
+    {
         $domain_uuid = Session::get('domain_uuid');
         $answer = null;
         $domain_settings = DB::table(DomainSetting::getTableName())
-                ->where('domain_setting_enabled', '=', 'true')
-                ->where('domain_setting_category', '=', $category)
-                ->where('domain_setting_subcategory', '=', $subcategory)
-                ->where('domain_uuid', '=', $domain_uuid)
-                ->orderBy('default_setting_order')
-                ->get();
+            ->where('domain_setting_enabled', '=', 'true')
+            ->where('domain_setting_category', '=', $category)
+            ->where('domain_setting_subcategory', '=', $subcategory)
+            ->where('domain_uuid', '=', $domain_uuid)
+            ->orderBy('default_setting_order')
+            ->get();
 
-        foreach ($domain_settings as $domain_setting){
-            if (($name == $domain_setting->domain_setting_name) || is_null($name)){
-                switch($domain_setting->domain_setting_name){
+        foreach ($domain_settings as $domain_setting) {
+            if (($name == $domain_setting->domain_setting_name) || is_null($name)) {
+                switch ($domain_setting->domain_setting_name) {
                     case 'array':
                         $answer[] = $domain_setting->domain_setting_value;
                         break 1;
                     case 'boolean':
                         $answer = $domain_setting->domain_setting_value;
-                        if (settype($answer, 'boolean') === false){
+                        if (settype($answer, 'boolean') === false) {
                             $answer = false;
                         }
                         break 2;
@@ -45,19 +59,18 @@ class DomainSettingController extends Controller
                     case 'text':
                     case 'uuid':
                         $answer = $domain_setting->domain_setting_value;
-                        if (settype($answer, 'string') == false){
+                        if (settype($answer, 'string') == false) {
                             $domain_setting->domain_setting_value;
                         }
                         break 2;
                     case 'numeric':
                         $answer = $domain_setting->domain_setting_value;
-                        if (strstr($answer, '.')){
-                            if (settype($answer, 'float') == false){
+                        if (strstr($answer, '.')) {
+                            if (settype($answer, 'float') == false) {
                                 $answer = 0.0;
                             }
-                        }
-                        else{
-                            if (settype($answer, 'integer') == false){
+                        } else {
+                            if (settype($answer, 'integer') == false) {
                                 $answer = 0;
                             }
                         }
@@ -71,11 +84,22 @@ class DomainSettingController extends Controller
         }
 
         return $answer;
-	}
-
-    public function create()
-    {
-        return view('pages.domainsetting.form');
     }
 
+    public function create($domainUuid)
+    {
+        $domain = Domain::findOrFail($domainUuid);
+
+        return view('pages.domainsetting.form', [
+            'domainUuid' => $domainUuid,
+            'domain' => $domain
+        ]);
+    }
+
+    public function edit($domainUuid,string $domainSettingUuid )
+    {
+        $domainSetting = $this->domainSettingRepository->findByUuid($domainSettingUuid);
+        $domainSettingUuid = $domainSetting->domain_setting_uuid;
+        return view('pages.domainsetting.form', compact('domainSettingUuid', 'domainUuid'));
+    }
 }

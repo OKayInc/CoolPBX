@@ -34,6 +34,8 @@ class DomainSettingForm extends Component
     public array $availableTimezones = [];
     public bool $canEditCategory = false;
     public bool $showOrderField = false;
+    public ?string $selectedTemplate = null;
+    public bool $showTemplateSelector = true;
 
     protected DomainSettingRepository $domainSettingRepository;
 
@@ -64,17 +66,165 @@ class DomainSettingForm extends Component
         $this->canEditCategory = auth()->user()->hasPermission('domain_setting_category_edit');
         $this->allowedCategories = $this->domainSettingRepository->getAllowedCategories() ?? [];
 
+
         if (!$this->isEditing && request()->has('domain_setting_category')) {
             $this->domain_setting_category = request('domain_setting_category');
+            $this->showTemplateSelector = false;
         }
 
         $this->loadDropdownData();
 
         if ($this->isEditing) {
+            $this->showTemplateSelector = false;
             $this->loadDomainSetting();
         } else {
             $this->initializeDefaults();
         }
+    }
+
+    public function selectTemplate($templateKey)
+    {
+        if (!isset($this->quickSetupTemplates[$templateKey])) {
+            return;
+        }
+
+        $template = $this->quickSetupTemplates[$templateKey];
+
+        $this->selectedTemplate = $templateKey;
+        $this->showTemplateSelector = false;
+
+        $this->domain_setting_category = $template['category'];
+        $this->domain_setting_subcategory = $template['subcategory'];
+        $this->domain_setting_name = $template['name'];
+
+        $this->updateShowOrderField();
+        $this->updateNextOrder();
+    }
+    public function backToTemplates()
+    {
+        $this->showTemplateSelector = true;
+        $this->selectedTemplate = null;
+
+        $this->domain_setting_category = '';
+        $this->domain_setting_subcategory = '';
+        $this->domain_setting_name = '';
+        $this->domain_setting_value = '';
+        $this->domain_setting_description = '';
+    }
+
+    public function getSelectedTemplateBadge()
+    {
+        if (!$this->selectedTemplate || !isset($this->quickSetupTemplates[$this->selectedTemplate])) {
+            return null;
+        }
+
+        return $this->quickSetupTemplates[$this->selectedTemplate];
+    }
+
+    public function getQuickSetupTemplatesProperty()
+    {
+        $templates = [
+            'menu' => [
+                'label' => 'Change Domain Menu',
+                'icon' => 'bi-menu-button-wide',
+                'description' => 'Select which menu system appears for users when they log in',
+                'category' => 'domain',
+                'subcategory' => 'menu',
+                'name' => 'uuid',
+                'color' => 'primary',
+            ],
+            'timezone' => [
+                'label' => 'Configure Timezone',
+                'icon' => 'bi-clock-history',
+                'description' => 'Set timezone for calls, voicemails, and all time-related features',
+                'category' => 'domain',
+                'subcategory' => 'time_zone',
+                'name' => 'name',
+                'color' => 'info',
+                'warning' => 'This will update dialplan XML files',
+            ],
+            'theme' => [
+                'label' => 'Change Theme Template',
+                'icon' => 'bi-palette-fill',
+                'description' => 'Select the visual theme for this domain\'s interface',
+                'category' => 'domain',
+                'subcategory' => 'template',
+                'name' => 'name',
+                'color' => 'purple',
+            ],
+            'language' => [
+                'label' => 'Set Domain Language',
+                'icon' => 'bi-translate',
+                'description' => 'Configure the default language for this domain',
+                'category' => 'domain',
+                'subcategory' => 'language',
+                'name' => 'code',
+                'color' => 'success',
+            ],
+            'time_format' => [
+                'label' => 'Time Format (12h/24h)',
+                'icon' => 'bi-clock',
+                'description' => 'Choose between 12-hour or 24-hour time display',
+                'category' => 'domain',
+                'subcategory' => 'time_format',
+                'name' => 'text',
+                'color' => 'secondary',
+            ],
+            'theme_color' => [
+                'label' => 'Customize Theme Colors',
+                'icon' => 'bi-paint-bucket',
+                'description' => 'Change header, buttons, and accent colors for branding',
+                'category' => 'theme',
+                'subcategory' => 'header_background_color',
+                'name' => 'text',
+                'color' => 'danger',
+            ],
+            'smtp_host' => [
+                'label' => 'Email SMTP Server',
+                'icon' => 'bi-envelope-at',
+                'description' => 'Configure email server for sending notifications',
+                'category' => 'email',
+                'subcategory' => 'smtp_host',
+                'name' => 'text',
+                'color' => 'warning',
+            ],
+            'voicemail_file' => [
+                'label' => 'Voicemail Delivery',
+                'icon' => 'bi-voicemail',
+                'description' => 'Configure how voicemail files are delivered via email',
+                'category' => 'voicemail',
+                'subcategory' => 'voicemail_file',
+                'name' => 'text',
+                'color' => 'info',
+            ],
+            'codec' => [
+                'label' => 'Audio Codec Preferences',
+                'icon' => 'bi-music-note-beamed',
+                'description' => 'Set preferred audio codecs order (creates array entry)',
+                'category' => 'domain',
+                'subcategory' => 'codec_prefs',
+                'name' => 'array',
+                'color' => 'success',
+            ],
+            'custom' => [
+                'label' => 'Custom Setting',
+                'icon' => 'bi-tools',
+                'description' => 'Create a custom domain setting from scratch',
+                'category' => '',
+                'subcategory' => '',
+                'name' => '',
+                'color' => 'secondary',
+            ],
+        ];
+
+        if (!$this->canEditCategory && !empty($this->allowedCategories)) {
+            return array_filter($templates, function ($template) {
+                return empty($template['category']) ||
+                    in_array($template['category'], $this->allowedCategories);
+            });
+        }
+
+        return $templates;
     }
 
     protected function loadDomainSetting()
@@ -234,7 +384,7 @@ class DomainSettingForm extends Component
             } else {
                 $domainSetting = $this->domainSettingRepository->create($data);
                 session()->flash('success', 'Domain setting created successfully.');
-                return redirect()->route('domain-settings.edit', [
+                return redirect()->route('domains_settings.edit', [
                     'domainSettingUuid' => $domainSetting->domain_setting_uuid,
                     'domainUuid' => $this->domain_uuid
                 ]);
@@ -371,12 +521,10 @@ class DomainSettingForm extends Component
             return 'voicemail_message_position_select';
         }
 
-        // Recordings
         if ($cat === 'recordings' && $sub === 'storage_type' && $name === 'text') {
             return 'storage_type_select';
         }
 
-        // Destinations
         if ($cat === 'destinations' && $sub === 'dialplan_mode' && $name === 'text') {
             return 'dialplan_mode_select';
         }
@@ -385,7 +533,6 @@ class DomainSettingForm extends Component
             return 'select_mode_select';
         }
 
-        // Provision
         if ($cat === 'provision' && $sub === 'aastra_time_format' && $name === 'text') {
             return 'aastra_time_format_select';
         }
@@ -410,92 +557,6 @@ class DomainSettingForm extends Component
         if (empty($string)) return false;
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
-    }
-
-
-    // En DomainSettingForm.php
-    public function getContextualHint()
-    {
-        $cat = $this->domain_setting_category;
-        $sub = $this->domain_setting_subcategory;
-        $name = $this->domain_setting_name;
-
-        // Menu
-        if ($cat === 'domain' && $sub === 'menu' && $name === 'uuid') {
-            return [
-                'title' => 'Domain Menu Configuration',
-                'description' => 'This controls which menu system users see when they log in to this domain.',
-                'example' => 'Select "en-us - Default Menu" for English interface',
-                'impact' => 'Affects all users in this domain immediately after login'
-            ];
-        }
-
-        // Timezone
-        if ($cat === 'domain' && $sub === 'time_zone' && $name === 'name') {
-            return [
-                'title' => 'Domain Timezone',
-                'description' => 'Sets the timezone for all time-sensitive operations in this domain.',
-                'example' => 'America/Argentina/Buenos_Aires for Argentina',
-                'impact' => '⚠️ This will update dialplan XML and may briefly affect active calls',
-                'affected_features' => [
-                    'Call logs timestamps',
-                    'Voicemail notifications',
-                    'Call reports',
-                    'Scheduled tasks'
-                ]
-            ];
-        }
-
-        if ($cat === 'domain' && $sub === 'template' && $name === 'name') {
-            return [
-                'title' => 'Domain Theme',
-                'description' => 'Changes the visual appearance of the interface for this domain.',
-                'example' => 'Select "dark-mode" for a dark interface',
-                'impact' => 'Users will see the new theme on next page load'
-            ];
-        }
-
-        if ($cat === 'theme' && str_contains($sub, '_color')) {
-            return [
-                'title' => 'Theme Color Customization',
-                'description' => 'Customize the color scheme for this domain.',
-                'example' => '#2c3e50 for dark blue header',
-                'impact' => 'Changes apply immediately to all users',
-                'tip' => 'Use your brand colors for a professional look'
-            ];
-        }
-
-        if ($cat === 'voicemail' && $sub === 'voicemail_file' && $name === 'text') {
-            return [
-                'title' => 'Voicemail Email Delivery',
-                'description' => 'How voicemail audio files are delivered via email.',
-                'options' => [
-                    'listen' => 'Email contains link to listen in web interface (saves bandwidth)',
-                    'link' => 'Email contains download link (requires login)',
-                    'attach' => 'Audio file attached to email (convenient but larger emails)'
-                ],
-                'recommendation' => 'Use "attach" for best user experience'
-            ];
-        }
-
-        // Codecs
-        if ($cat === 'domain' && $sub === 'codec_prefs' && $name === 'array') {
-            return [
-                'title' => 'Audio Codec Preferences',
-                'description' => 'Order of audio codecs to negotiate with devices.',
-                'example' => 'PCMU, PCMA, G722 (in order of preference)',
-                'impact' => 'Lower order values are tried first',
-                'note' => 'Create multiple entries with different order values',
-                'common_codecs' => [
-                    'PCMU (G.711u)' => 'Good quality, high bandwidth (87 kbps)',
-                    'PCMA (G.711a)' => 'Good quality, high bandwidth (87 kbps)',
-                    'G722' => 'HD quality, moderate bandwidth (64 kbps)',
-                    'OPUS' => 'Best quality, variable bandwidth'
-                ]
-            ];
-        }
-
-        return null;
     }
 
     public function render()

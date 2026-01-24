@@ -29,6 +29,7 @@ class DomainSetting extends Model
      */
 	protected $fillable = [
 		'app_uuid',
+        'domain_uuid',
 		'domain_setting_category',
 		'domain_setting_subcategory',
         'domain_setting_name',

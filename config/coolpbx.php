@@ -19,4 +19,11 @@ return [
     'ring_group' => [
         'app_uuid' => env('RING_GROUP_APP_UUID', '1d61fb65-1eec-bc73-a6ee-a6203b4fe6f2'),
     ],
+    'domain_settings' => [
+        'app_uuid' => env('DOMAIN_SETTINGS_APP_UUID', 'b31e723a-bf70-670c-a49b-470d2a232f71'),
+    ],
+    'global_variables' => [
+        'app_uuid' => env('GLOBAL_VARIABLES_APP_UUID', '9f356fe7-8cf8-4c14-8fe2-6daf89304458'),
+    ],
+
 ];

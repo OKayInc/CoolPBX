@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Repositories\DefaultSettingRepository;
 use App\Repositories\DomainSettingRepository;
 use App\Repositories\UserSettingRepository;
+use App\Services\DomainSettingService;
 use App\Services\SettingService;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,7 +23,7 @@ class SettingServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(DomainSettingRepository::class, function ($app) {
-            return new DomainSettingRepository();
+            return new DomainSettingRepository(app()->make(DomainSettingService::class));
         });
 
         $this->app->bind(UserSettingRepository::class, function ($app) {

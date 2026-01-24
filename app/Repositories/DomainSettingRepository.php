@@ -4,15 +4,19 @@ namespace App\Repositories;
 
 use App\Models\DomainSetting;
 use App\Models\Domain;
+use App\Services\DomainSettingService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DomainSettingRepository
 {
-    /**
-     * Get all settings for a domain
-     */
+    protected DomainSettingService $domainSettingService;
+
+    public function __construct(DomainSettingService $domainSettingService)
+    {
+        $this->domainSettingService = $domainSettingService;
+    }
     public function getAllByDomain(string $domainUuid, bool $onlyEnabled = false): Collection
     {
         $query = DomainSetting::where('domain_uuid', $domainUuid)
@@ -61,7 +65,7 @@ class DomainSettingRepository
         return $setting?->domain_setting_value;
     }
 
- 
+
     public function getArrayValues(
         string $domainUuid,
         string $category,
@@ -79,56 +83,75 @@ class DomainSettingRepository
 
     public function create(array $data): DomainSetting
     {
-        $data['domain_setting_uuid'] = $data['domain_setting_uuid'] ?? Str::uuid()->toString();
-        $data['domain_setting_enabled'] = $data['domain_setting_enabled'] ?? 'true';
-        $data['domain_setting_order'] = $data['domain_setting_order'] ?? 0;
+        DB::beginTransaction();
+        try {
+            $data['domain_setting_uuid'] = $data['domain_setting_uuid'] ?? Str::uuid()->toString();
+            $data['domain_setting_enabled'] = $data['domain_setting_enabled'] ?? 'true';
+            $data['domain_setting_order'] = $data['domain_setting_order'] ?? 0;
 
-        $data['domain_setting_category'] = strtolower($data['domain_setting_category']);
-        $data['domain_setting_subcategory'] = strtolower($data['domain_setting_subcategory']);
-        $data['domain_setting_name'] = strtolower($data['domain_setting_name']);
+            $data['app_uuid'] = config('coolpbx.domain_settings.app_uuid');
 
-        return DomainSetting::create($data);
+            $data['domain_setting_category'] = strtolower($data['domain_setting_category']);
+            $data['domain_setting_subcategory'] = strtolower($data['domain_setting_subcategory']);
+            $data['domain_setting_name'] = strtolower($data['domain_setting_name']);
+
+            $setting = DomainSetting::create($data);
+
+            $this->domainSettingService->processAfterSave($setting);
+
+            DB::commit();
+            return $setting;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
-    /**
-     * Update a domain setting
-     */
+
     public function update(string $domainSettingUuid, array $data): bool
     {
-        if (isset($data['domain_setting_category'])) {
-            $data['domain_setting_category'] = strtolower($data['domain_setting_category']);
-        }
-        if (isset($data['domain_setting_subcategory'])) {
-            $data['domain_setting_subcategory'] = strtolower($data['domain_setting_subcategory']);
-        }
-        if (isset($data['domain_setting_name'])) {
-            $data['domain_setting_name'] = strtolower($data['domain_setting_name']);
-        }
+        DB::beginTransaction();
+        try {
+            if (isset($data['domain_setting_category'])) {
+                $data['domain_setting_category'] = strtolower($data['domain_setting_category']);
+            }
+            if (isset($data['domain_setting_subcategory'])) {
+                $data['domain_setting_subcategory'] = strtolower($data['domain_setting_subcategory']);
+            }
+            if (isset($data['domain_setting_name'])) {
+                $data['domain_setting_name'] = strtolower($data['domain_setting_name']);
+            }
 
-        $setting = DomainSetting::findOrFail($domainSettingUuid);
-        return $setting->update($data);
+            $setting = DomainSetting::where('domain_setting_uuid', $domainSettingUuid)->firstOrFail();
+            $updated = $setting->update($data);
+
+            if ($updated) {
+                $setting->refresh();
+                
+                $this->domainSettingService->processAfterSave($setting);
+            }
+
+            DB::commit();
+            return $updated;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
-    /**
-     * Delete a domain setting
-     */
+
     public function delete(string $domainSettingUuid): bool
     {
         $setting = DomainSetting::findOrFail($domainSettingUuid);
         return $setting->delete();
     }
 
-    /**
-     * Find by UUID
-     */
+
     public function findByUuid(string $domainSettingUuid): ?DomainSetting
     {
         return DomainSetting::find($domainSettingUuid);
     }
 
-    /**
-     * Check if setting exists
-     */
     public function exists(
         string $domainUuid,
         string $category,
@@ -142,9 +165,6 @@ class DomainSettingRepository
             ->exists();
     }
 
-    /**
-     * Get settings grouped by category
-     */
     public function getGroupedByCategory(string $domainUuid, bool $onlyEnabled = true): Collection
     {
         $query = DomainSetting::where('domain_uuid', $domainUuid)
@@ -242,9 +262,6 @@ class DomainSettingRepository
         return !empty($categories) ? array_unique($categories) : null;
     }
 
-    /**
-     * Validate if user can edit a category
-     */
     public function canEditCategory(string $category): bool
     {
         $allowedCategories = $this->getAllowedCategories();
