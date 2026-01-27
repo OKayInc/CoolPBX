@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\FollowMe;
+use App\Models\CallCenterTier;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = CallCenterTier::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = CallCenterTier::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,19 +50,18 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('follow_me_uuid')->nullable(false)->primary()->first();
+        $table->uuid('call_center_tier_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->string('cid_name_prefix', length: 255)->nullable();
-        $table->string('cid_number_prefix', length: 255)->nullable();
-        $table->longText('dial_string')->nullable();
-        $table->enum('follow_me_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->enum('follow_me_ignore_busy', ['true','false'])->default('false')->nullable(false);
+        $table->uuid('call_center_queue_uuid')->nullable(false);
+        $table->uuid('call_center_agent_uuid')->nullable(false);
+        $talbe->unsignedTinyInteger('tier_level')->default(0)->nullable(false);
+        $talbe->unsignedTinyInteger('tier_position')->default(1)->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX follow me information');
+        $table->comment('CoolPBX call center agent information');
     }
 };

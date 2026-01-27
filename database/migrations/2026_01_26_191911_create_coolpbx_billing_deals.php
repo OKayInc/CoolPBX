@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\FollowMe;
+use App\Models\BillingDeal;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = BillingDeal::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = BillingDeal::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,19 +50,22 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('follow_me_uuid')->nullable(false)->primary()->first();
+        $table->uuid('billing_deal_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->string('cid_name_prefix', length: 255)->nullable();
-        $table->string('cid_number_prefix', length: 255)->nullable();
-        $table->longText('dial_string')->nullable();
-        $table->enum('follow_me_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->enum('follow_me_ignore_busy', ['true','false'])->default('false')->nullable(false);
+        $table->string('label', length: 255)->nullable(false);
+        $table->enum('direction', ['outbound','inbound','local'])->default('outbound')->nullable(false);
+        $table->string('digits', length: 255)->nullable(false);
+        $talbe->unsignedInteger('minutes')->default(0)->nullable(false);
+        $table->decimal('rate', total: 11, places: 5)->default(0.0)->nullable(false);
+        $table->string('currency', length: 3)->nullable(false);
+        $table->longText('billing_deal_notes')->nullable(false);
+        $table->string('label', length: 255)->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX follow me information');
+        $table->comment('CoolPBX billing profile information');
     }
 };

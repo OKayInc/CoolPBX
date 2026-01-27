@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\FollowMe;
+use App\Models\BillingAuthorizedPaymentSource;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = BillingAuthorizedPaymentSource::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = FollowMe::getTableName();
+        $tableName = BillingAuthorizedPaymentSource::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,19 +50,18 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('follow_me_uuid')->nullable(false)->primary()->first();
+        $table->uuid('billing_authorized_payment_source_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->string('cid_name_prefix', length: 255)->nullable();
-        $table->string('cid_number_prefix', length: 255)->nullable();
-        $table->longText('dial_string')->nullable();
-        $table->enum('follow_me_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->enum('follow_me_ignore_busy', ['true','false'])->default('false')->nullable(false);
+        $table->uuid('billing_uuid')->nullable(false);
+        $table->string('billing_authorized_payment_source_plugin_used', length: 255)->nullable(false);
+        $table->longText('billing_authorized_payment_source_token')->nullable(false);
+        $table->enum('verified', ['true','false'])->default('false')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX follow me information');
+        $table->comment('CoolPBX billing profile information');
     }
 };
