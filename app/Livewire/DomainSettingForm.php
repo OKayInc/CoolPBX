@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Requests\DomainSettingRequest;
 use Livewire\Component;
 use App\Repositories\DomainSettingRepository;
 use App\Models\DomainSetting;
@@ -46,15 +47,8 @@ class DomainSettingForm extends Component
 
     public function rules()
     {
-        return [
-            'domain_setting_category' => 'required|max:255',
-            'domain_setting_subcategory' => 'required|max:255',
-            'domain_setting_name' => 'required|max:255',
-            'domain_setting_value' => 'nullable',
-            'domain_setting_order' => 'required|integer',
-            'domain_setting_enabled' => 'required|in:true,false',
-            'domain_setting_description' => 'nullable|max:1024',
-        ];
+        $request = new DomainSettingRequest;
+        return $request->rules();
     }
 
     public function mount($domainSettingUuid = null, $domainUuid = null)

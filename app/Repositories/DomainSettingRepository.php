@@ -266,7 +266,6 @@ class DomainSettingRepository
     {
         $allowedCategories = $this->getAllowedCategories();
 
-        // Si es null, tiene acceso a todas
         if ($allowedCategories === null) {
             return true;
         }
