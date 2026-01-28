@@ -254,9 +254,9 @@ class DeviceProfileRepository
         return $this->deviceProfileSetting->create($data);
     }
 
-    protected function updateProfileSetting(string $deviceProfileSettingUuid, array $settingData): DeviceProfileSetting
+    protected function updateProfileSetting(string $deviceProfileextensionSettingUuid, array $settingData): DeviceProfileSetting
     {
-        $profileSetting = $this->deviceProfileSetting->where('device_profile_setting_uuid', $deviceProfileSettingUuid)->firstOrFail();
+        $profileSetting = $this->deviceProfileSetting->where('device_profile_setting_uuid', $deviceProfileextensionSettingUuid)->firstOrFail();
         $profileSetting->update($settingData);
         return $profileSetting;
     }
@@ -269,11 +269,11 @@ class DeviceProfileRepository
             ->delete() > 0;
     }
 
-    public function deleteSpecificSettings(string $deviceProfileUuid, array $settingUuids): bool
+    public function deleteSpecificSettings(string $deviceProfileUuid, array $extensionSettingUuids): bool
     {
         return $this->deviceProfileSetting
             ->where('device_profile_uuid', $deviceProfileUuid)
-            ->whereIn('device_profile_setting_uuid', $settingUuids)
+            ->whereIn('device_profile_setting_uuid', $extensionSettingUuids)
             ->delete() > 0;
     }
 

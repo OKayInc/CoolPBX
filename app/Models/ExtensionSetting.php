@@ -31,6 +31,7 @@ class ExtensionSetting extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'extension_setting_uuid',
         'domain_uuid',
         'extension_uuid',
         'extension_setting_type',
@@ -54,6 +55,7 @@ class ExtensionSetting extends Model
      * @var array<string, string>
      */
 	protected $casts = [
+		'extension_setting_enabled' => 'boolean',
 	];
 
 	public function domain(): BelongsTo {

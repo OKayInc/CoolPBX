@@ -34,6 +34,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
 use App\Http\Controllers\EmailQueueController;
+use App\Http\Controllers\ExtensionSettingController;
 use App\Http\Controllers\FaxController;
 use App\Http\Controllers\IVRMenuController;
 use App\Http\Controllers\LcrController;
@@ -267,6 +268,15 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('/extensions', ExtensionController::class)->except('show');
     Route::get('extensions/import', [ExtensionController::class, 'import'])->name('extensions.import');
     Route::get('extensions/export', [ExtensionController::class, 'export'])->name('extensions.export');
+
+    //extension settings
+    Route::get('/extensions/{extension}/settings', [ExtensionSettingController::class, 'index'])
+    ->name('extensions.settings');
+    Route::get('/extensions/{extensionUuid}/settings/create', [ExtensionSettingController::class, 'create'])
+    ->name('extensions.settings.create');
+    Route::get('/extensions/{extensionUuid}/settings/{extensionSettingUuid}/edit', [ExtensionSettingController::class, 'edit'])
+    ->name('extensions.settings.edit');
+
 
     Route::resource('/devices', DeviceController::class)->except('show');
     Route::resource('/devices/devices_profiles', DeviceProfileController::class)->except('show');

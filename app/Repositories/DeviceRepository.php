@@ -419,9 +419,9 @@ class DeviceRepository
         return $this->deviceSetting->create($data);
     }
 
-    protected function updateDeviceSetting(string $deviceSettingUuid, array $settingData): DeviceSetting
+    protected function updateDeviceSetting(string $deviceextensionSettingUuid, array $settingData): DeviceSetting
     {
-        $deviceSetting = $this->deviceSetting->where('device_setting_uuid', $deviceSettingUuid)->firstOrFail();
+        $deviceSetting = $this->deviceSetting->where('device_setting_uuid', $deviceextensionSettingUuid)->firstOrFail();
         $deviceSetting->update($settingData);
         return $deviceSetting;
     }
@@ -442,11 +442,11 @@ class DeviceRepository
             ->delete() > 0;
     }
 
-    public function deleteSpecificSettings(string $deviceUuid, array $settingUuids): bool
+    public function deleteSpecificSettings(string $deviceUuid, array $extensionSettingUuids): bool
     {
         return $this->deviceSetting
             ->where('device_uuid', $deviceUuid)
-            ->whereIn('device_setting_uuid', $settingUuids)
+            ->whereIn('device_setting_uuid', $extensionSettingUuids)
             ->delete() > 0;
     }
 

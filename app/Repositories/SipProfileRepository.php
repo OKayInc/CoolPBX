@@ -206,10 +206,10 @@ class SipProfileRepository
     }
 
 
-    private function updateSetting(string $settingUuid, array $settingData): bool
+    private function updateSetting(string $extensionSettingUuid, array $settingData): bool
     {
         return $this->sipProfileSetting
-            ->where('sip_profile_setting_uuid', $settingUuid)
+            ->where('sip_profile_setting_uuid', $extensionSettingUuid)
             ->update([
                 'sip_profile_setting_name' => $settingData['sip_profile_setting_name'],
                 'sip_profile_setting_value' => $settingData['sip_profile_setting_value'],

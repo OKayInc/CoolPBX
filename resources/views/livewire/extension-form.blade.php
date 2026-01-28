@@ -27,9 +27,10 @@
                                 @endcan
 
                                 @can('extension_setting_view')
-                                    <button type="button" class="btn btn-primary btn-sm">
+                                    <a href="{{ route('extensions.settings', $extensions->extension_uuid) }}"
+                                        class="btn btn-primary btn-sm">
                                         <i class="fa fa-cogs" aria-hidden="true"></i> {{ __('Settings') }}
-                                    </button>
+                                    </a>
                                 @endcan
                             @endif
                         </div>
