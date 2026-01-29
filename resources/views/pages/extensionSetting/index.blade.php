@@ -19,7 +19,7 @@
         </div>
 
         <div class="card-body">
-            <livewire:extension-setting-table :extensionUuid = 'extensionUuid ?? null'/>
+            @livewire('extension-setting-table', ['extensionUuid' => $extensionUuid])
         </div>
     </div>
 </div>

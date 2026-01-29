@@ -5,7 +5,6 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Repositories\ExtensionSettingRepository;
 use App\Models\ExtensionSetting;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
@@ -172,7 +171,7 @@ class ExtensionSettingForm extends Component
         }
     }
 
-    public function copy(): RedirectResponse
+    public function copy()
     {
         if (!$this->isEditing) {
             return redirect()->route('extensions.settings', $this->extensionUuid);
@@ -192,7 +191,7 @@ class ExtensionSettingForm extends Component
         return redirect()->route('extensions.settings', $this->extensionUuid);
     }
 
-    public function delete(): RedirectResponse
+    public function delete()
     {
         if (!$this->isEditing) {
             return redirect()->route('extensions.settings', $this->extensionUuid);

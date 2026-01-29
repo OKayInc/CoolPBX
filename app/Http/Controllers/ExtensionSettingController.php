@@ -24,7 +24,6 @@ class ExtensionSettingController extends Controller
     public function create($extensionUuid)
     {
         $extensionUuid = $this->extensionRepository->findByUuid($extensionUuid)->extension_uuid;
-        // dd($extensionUuid);
         return view('pages.extensionSetting.form', compact('extensionUuid'));
     }
 

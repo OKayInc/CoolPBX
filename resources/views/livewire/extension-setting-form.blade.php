@@ -29,7 +29,6 @@
 
                 <div class="card-body">
                     <form wire:submit.prevent="save">
-                        <!-- General Information -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="border-bottom pb-2 mb-3">
@@ -129,7 +128,7 @@
                             </div>
                         </div>
 
-                        <!-- Common Settings Examples -->
+
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="border-bottom pb-2 mb-3">
@@ -153,16 +152,15 @@
                             </div>
                         </div>
 
-                        <!-- Form Actions -->
                         <div class="row">
                             <div class="col-12">
                                 <div class="d-flex justify-content-between">
                                     <a href="{{ route('extensions.settings', $extensionUuid) }}" class="btn btn-secondary">
-                                        <i class="fa fa-arrow-left me-1"></i>Back to Settings
+                                        <i class="fa fa-arrow-left me-1"></i>Back
                                     </a>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fa fa-save me-1"></i>
-                                        {{ $isEditing ? 'Update Setting' : 'Create Setting' }}
+                                        {{ $isEditing ? 'Update' : 'Create' }}
                                     </button>
                                 </div>
                             </div>
