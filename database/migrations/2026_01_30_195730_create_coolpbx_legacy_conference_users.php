@@ -60,6 +60,6 @@ return new class extends Migration
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX conference center session detail information');
+        $table->comment('CoolPBX legacy conference center user detail information');
     }
 };
