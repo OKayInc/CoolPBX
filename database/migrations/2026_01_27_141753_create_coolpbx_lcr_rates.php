@@ -50,19 +50,19 @@ return new class extends Migration
         }
 
         $table->uuid('lcr_uuid')->nullable(false)->primary()->first();
-        $table->uuid('carrier_uuid')->nullable(false);
+        $table->uuid('carrier_uuid')->nullable();
         $table->string('digits', length: 255)->nullable(false);
         $table->string('origination_digits', length: 255)->nullable(false);
         $table->enum('lcr_direction', ['inbound','outbound','local'])->default('outbound')->nullable(false);
         $table->decimal('connect_rate', total: 11, places: 5)->nullable()->comment('first increment rate per minute');
         $table->decimal('rate', total: 11, places: 5)->nullable(false)->comment('other increment rate per minute');
-        $table->tinyInteger('connect_increment')->default(1)->nullable()->comment('first increment lenght in seconds');
-        $table->tinyInteger('talk_increment')->default(1)->nullable(false)->comment('other increment lenght in seconds');
+        $table->unsignedTinyInteger('connect_increment')->default(1)->nullable()->comment('first increment lenght in seconds');
+        $table->unsignedTinyInteger('talk_increment')->default(1)->nullable(false)->comment('other increment lenght in seconds');
         $table->decimal('intrastate_rate', total: 11, places: 5)->nullable()->comment('intra state rate per minute');
         $table->decimal('intralata_rate', total: 11, places: 5)->nullable()->comment('intra lata rate per minute');
         $table->string('currency', length: 3)->nullable(false);
-        $table->tinyInteger('lead_strip')->default(0)->nullable(false);
-        $table->tinyInteger('trail_strip')->default(0)->nullable(false);
+        $table->unsignedTinyInteger('lead_strip')->default(0)->nullable(false);
+        $table->unsignedTinyInteger('trail_strip')->default(0)->nullable(false);
         $table->string('prefix', length: 255)->nullable();
         $table->string('suffix', length: 255)->nullable();
         $table->string('lcr_profile', length: 255)->nullable();

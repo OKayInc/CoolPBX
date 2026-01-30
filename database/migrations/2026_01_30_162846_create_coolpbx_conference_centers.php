@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\DialplanDetail;
+use App\Models\ConferenceCenter;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = DialplanDetail::getTableName();
+        $tableName = ConferenceCenter::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = DialplanDetail::getTableName();
+        $tableName = ConferenceCenter::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,23 +50,21 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('dialplan_detail_uuid')->nullable(false)->primary()->first();
-        $table->uuid('dialplan_uuid')->nullable(false);
+        $table->uuid('conference_center_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->enum('dialplan_detail_tag', ['condition','regex','action','anti-action'])->nullable(false);
-        $table->string('dialplan_detail_type', length: 255)->nullable(false);
-        $table->string('dialplan_detail_data', length: 255)->nullable();
-        $table->enum('dialplan_detail_break', ['on-true','on-false','always','never'])->nullable();
-        $table->enum('dialplan_detail_inline', ['true','false',])->default('false')->nullable();
-        $talbe->unsignedBigInteger('dialplan_detail_group')->defauilt(0)->nullable(false);
-        $talbe->unsignedBigInteger('dialplan_detail_order')->defauilt(0)->nullable(false);
-        $table->enum('dialplan_detail_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->uuid('dialplan_uuid')->nullable(false);
+        $table->string('conference_center_name', length: 255)->nullable(false);
+        $table->string('conference_center_extension', length: 255)->nullable(false);
+        $table->unsignedTinyInteger('conference_center_pin_length')->default(9)->nullable(false);
+        $table->string('conference_center_greeting', length: 255)->nullable(false);
+        $table->longText('conference_center_description')->nullable();
+        $table->enum('conference_center_enabled', ['true','false'])->default('false')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX dialplan detail information');
+        $table->comment('CoolPBX conference center information');
     }
 };

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\DialplanDetail;
+use App\Models\ConferenceControlDetail;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = DialplanDetail::getTableName();
+        $tableName = ConferenceControlDetail::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = DialplanDetail::getTableName();
+        $tableName = ConferenceControlDetail::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,23 +50,18 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('dialplan_detail_uuid')->nullable(false)->primary()->first();
-        $table->uuid('dialplan_uuid')->nullable(false);
-        $table->uuid('domain_uuid')->nullable(false);
-        $table->enum('dialplan_detail_tag', ['condition','regex','action','anti-action'])->nullable(false);
-        $table->string('dialplan_detail_type', length: 255)->nullable(false);
-        $table->string('dialplan_detail_data', length: 255)->nullable();
-        $table->enum('dialplan_detail_break', ['on-true','on-false','always','never'])->nullable();
-        $table->enum('dialplan_detail_inline', ['true','false',])->default('false')->nullable();
-        $talbe->unsignedBigInteger('dialplan_detail_group')->defauilt(0)->nullable(false);
-        $talbe->unsignedBigInteger('dialplan_detail_order')->defauilt(0)->nullable(false);
-        $table->enum('dialplan_detail_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->uuid('conference_control_detail_uuid')->nullable(false)->primary()->first();
+        $table->uuid('conference_control_uuid')->nullable(false);
+        $table->string('control_digits', length: 1)->nullable(false);
+        $table->string('control_action', length: 255)->nullable(false);
+        $table->string('control_data', length: 255)->nullable();
+        $table->enum('control_enabled', ['true','false'])->default('false')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX dialplan detail information');
+        $table->comment('CoolPBX conference center control information');
     }
 };
