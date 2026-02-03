@@ -23,7 +23,7 @@ class ConferenceRequest extends FormRequest
 			"conference_email_address" => "bail|nullable|email|max:255",
 			"conference_account_code" => "bail|nullable|string|max:255",
 			"conference_order" => "bail|nullable|integer|min:1|max:999",
-			"conference_enabled" => "bail|nullable|in:true,false",
+			"conference_enabled" => "bail|nullable|bool",
 			"conference_description" => "bail|nullable|string|max:255",
 		];
 	}
