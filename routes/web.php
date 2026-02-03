@@ -115,6 +115,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/callrecordings/{file}/download', [ViewCallRecordingController::class, 'download'])->name('callrecordings.download', 'callrecordings.download');
 
     // CONFERENCES
+    Route::get('/conferences/active', [ConferenceController::class, 'getActive'])->name('conferences.active', 'conferences.active');
     Route::resource('/conferences', ConferenceController::class)->name('conferences', 'conferences');
 
     // CONFERENCE CENTERS
