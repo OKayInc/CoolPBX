@@ -10,6 +10,11 @@
 
             <div class="card-tools">
                 <div class="d-flex gap-2 " role="group" aria-label="Conference actions">
+                    @can('conference_active_view')
+                    <a href="{{ route('conferences.active') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-comments mr-1"></i> {{__('View Active')}}
+                    </a>
+                    @endcan
                     @can('conference_add')
                     <a href="{{ route('conferences.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> {{__('Add')}}

@@ -5,18 +5,17 @@ use App\Http\Requests\ConferenceRequest;
 use App\Models\ConferenceProfile;
 use App\Models\Conference;
 use App\Repositories\ConferenceRepository;
-use App\Services\ConferenceActiveService;
-use App\Services\ConferenceInteractiveService;
+use App\Services\ConferenceCenterActiveService;
 
 class ConferenceController extends Controller
 {
 	protected $conferenceRepository;
-	protected $conferenceActiveService;
-	protected $conferenceInteractiveService;
+	protected $conferenceCenterActiveService;
 
-	public function __construct(ConferenceRepository $conferenceRepository)
+	public function __construct(ConferenceRepository $conferenceRepository, ConferenceCenterActiveService $conferenceCenterActiveService)
 	{
 		$this->conferenceRepository = $conferenceRepository;
+		$this->conferenceCenterActiveService = $conferenceCenterActiveService;
 	}
 
 	public function index()
@@ -63,4 +62,12 @@ class ConferenceController extends Controller
 
         return redirect()->route('conferences.index');
     }
+
+	public function getActive()
+	{
+		$conferenceRooms = $this->conferenceCenterActiveService->getActiveConferenceCenters();
+
+        return view("pages.conferenceCenters.active", compact("conferenceRooms"));
+	}
+
 }
