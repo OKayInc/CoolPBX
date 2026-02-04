@@ -102,7 +102,7 @@ class ConferenceRoomForm extends Component
             }
         }
 
-        if($conferenceRoom && empty($this->conferenceRoomUsers))
+        if(empty($this->conferenceRoomUsers))
         {
             $this->addConferenceRoomUser();
         }

@@ -101,6 +101,7 @@
 											<tr>
 												<td>
 													<select class="form-select @error('conferenceRoomUsers.' . $index . '.user_uuid') is-invalid @enderror" wire:model="conferenceRoomUsers.{{ $index }}.user_uuid" required>
+														<option value=""></option>
 														@foreach($users as $user)
 														<option value="{{ $user->user_uuid }}">{{ $user->username }}</option>
 														@endforeach
