@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\DashboardWidgetGroup;
+use App\Models\DeviceProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DeviceProfile::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DeviceProfile::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,15 +50,17 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('dashboard_group_uuid')->nullable(false)->primary()->first();
-        $table->uuid('dashboard_uuid')->nullable(false);
-        $table->uuid('group_uuid')->nullable(false);
+        $table->uuid('device_profile_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->string('device_profile_name', length: 255)->nullable(false);
+        $table->longText('device_profile_description')->nullable();
+        $table->enum('device_profile_enabled', ['true','false'])->default('false')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX dashboard widget group detail information');
+        $table->comment('CoolPBX device profile detail information');
     }
 };

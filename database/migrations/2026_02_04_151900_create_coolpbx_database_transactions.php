@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\DashboardWidgetGroup;
+use App\Models\DatabaseTransaction;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DatabaseTransaction::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DatabaseTransaction::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,15 +50,22 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('dashboard_group_uuid')->nullable(false)->primary()->first();
-        $table->uuid('dashboard_uuid')->nullable(false);
-        $table->uuid('group_uuid')->nullable(false);
+        $table->uuid('database_transaction_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('user_uuid')->nullable(false);
+        $table->uuid('app_uuid')->nullable();
+        $table->string('app_name', length: 255)->nullable(false);
+        $table->unsignedTinyInteger('transaction_code')->nullable(false);
+        $table->ipAddress('transaction_address')->default('127.0.0.1')->nullable(false);
+        $table->enum('transaction_type', ['add','delete','update'])->nullable(false);
+        $table->longText('transaction_old')->nullable();
+        $table->longText('transaction_new')->nullable();
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX dashboard widget group detail information');
+        $table->comment('CoolPBX database transaction detail information');
     }
 };

@@ -64,6 +64,6 @@ return new class extends Migration
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX contact user detail information');
+        $table->comment('CoolPBX widget detail information');
     }
 };

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\DashboardWidgetGroup;
+use App\Models\DefaultSetting;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DefaultSetting::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = DashboardWidgetGroup::getTableName();
+        $tableName = DefaultSetting::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,15 +50,21 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('dashboard_group_uuid')->nullable(false)->primary()->first();
-        $table->uuid('dashboard_uuid')->nullable(false);
-        $table->uuid('group_uuid')->nullable(false);
+        $table->uuid('default_setting_uuid')->nullable(false)->primary()->first();
+        $table->uuid('app_uuid')->nullable();
+        $table->string('default_setting_category', length: 255)->nullable(false);
+        $table->string('default_setting_subcategory', length: 255)->nullable(false)->comment('this field usually is the name of the setting');
+        $table->string('default_setting_name', length: 255)->nullable(false)->comment('this field is the type of the setting');
+        $table->string('default_setting_value', length: 255)->nullable(false);
+        $table->unsignedTinyInteger('default_setting_order')->default(0)->nullable(false);
+        $table->longText('default_setting_description')->nullable();
+        $table->enum('default_setting_enabled', ['true','false'])->default('false')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX dashboard widget group detail information');
+        $table->comment('CoolPBX default setting detail information');
     }
 };
