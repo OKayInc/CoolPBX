@@ -73,7 +73,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label class="form-label">Currency</label>
-                            {{ currency_select($lcr->currency ?? '') }}
+                            <x-switch-currencies :selected="$lcr->currency ?? ''" />
                         </div>
                         @error('currency')
                             <div class="invalid-feedback d-block">{{ $message }}</div>

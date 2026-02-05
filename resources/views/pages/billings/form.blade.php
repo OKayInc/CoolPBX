@@ -154,7 +154,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Currency</label>
-                        {{ currency_select($lcr->currency ?? '') }}
+                        <x-switch-currencies :selected="$billing->currency ?? ''" />
                     </div>
                 </div>
 

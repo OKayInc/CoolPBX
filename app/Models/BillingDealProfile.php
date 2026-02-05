@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class BillingProfileDeal extends Pivot
+class BillingDealProfile extends Pivot
 {
 	use HasFactory, HasUniqueIdentifier, GetTableName;
 	protected $table = 'v_billing_profile_deals';

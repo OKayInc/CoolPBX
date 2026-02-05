@@ -108,11 +108,11 @@ class ConferenceForm extends Component
     {
         $this->validate();
 
-        $userRules = ConferenceUserRequest::rules();
+        $conferenceUserRules = ConferenceUserRequest::rules();
 
         foreach($this->conferenceUsers as $index => $conferenceUser)
         {
-            $validator = Validator::make($conferenceUser, $userRules);
+            $validator = Validator::make($conferenceUser, $conferenceUserRules);
 
             try
             {

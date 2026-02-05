@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\BillingProfileDeal;
+use App\Models\BillingDealProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = BillingProfileDeal::getTableName();
+        $tableName = BillingDealProfile::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = BillingProfileDeal::getTableName();
+        $tableName = BillingDealProfile::getTableName();
         Schema::dropIfExists($tableName);
     }
 
