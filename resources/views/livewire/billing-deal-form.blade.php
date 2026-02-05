@@ -129,8 +129,10 @@
 													<select name="billingDealProfiles.{{ $index }}.billing_uuid" class="form-select" wire:model="billingDealProfiles.{{ $index }}.billing_uuid">
 														<option value=""></option>
 														@foreach($billingProfiles as $billingProfile)
-														<option value="{{ $billingProfile->billing_uuid }}">
-															{{ $billingProfile->contact_organization }} {{ $billingProfile->contact_name_family }} {{ $billingProfile->contact_name_given }}
+														<option value="{{ $billingProfile['billing_uuid'] }}">
+															{{ $billingProfile['contact_organization'] }}
+															{{ $billingProfile['contact_name_family'] }}
+															{{ $billingProfile['contact_name_given'] }}
 														</option>
 														@endforeach
 													</select>
@@ -139,7 +141,7 @@
 													@enderror
 												</td>
 												<td class="text-center">
-													@if (count($billingDealProfiles) > 1)
+													@if (count($billingDealProfiles) >= 1)
 													<button type="button" class="btn btn-sm btn-danger" wire:click="removeBillingDealProfile({{ $index }})"><i class="fas fa-times"></i> <i class="bi bi-trash"></i> </button>
 													@endif
 

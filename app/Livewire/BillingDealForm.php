@@ -46,9 +46,16 @@ class BillingDealForm extends Component
         return $request->rules();
     }
 
-    public function mount($billingDeal = null, $billingProfiles = []): void
+    public function mount($billingDeal = null, $billingProfiles): void
     {
-        $this->billingProfiles = $billingProfiles;
+        $this->billingProfiles = $billingProfiles
+            ->map(fn($b) => [
+                'billing_uuid' => $b->billing_uuid,
+                'contact_organization' => $b->contact_organization,
+                'contact_name_family' => $b->contact_name_family,
+                'contact_name_given' => $b->contact_name_given,
+            ])
+            ->toArray();
 
         if($billingDeal)
         {
@@ -67,7 +74,7 @@ class BillingDealForm extends Component
             {
                 $this->billingDealProfiles[] = [
                     'billing_profile_deal_uuid' => $billingDealProfile->pivot->billing_profile_deal_uuid,
-                    'billing_uuid' => $billingDealProfile->billing_uuid,
+                    'billing_uuid' => $billingDealProfile->pivot->billing_uuid,
                 ];
             }
         }
