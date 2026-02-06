@@ -39,7 +39,7 @@
             @foreach ($attachments as $index => $attachment)
                 <div class="row mb-2 border-bottom pb-3">
                     <div class="col-md-6">
-                        @if(isset($attachment['attachment_uploaded_date']) && $attachment['attachment_uploaded_date'])
+                        @if(isset($attachment['insert_date']) && $attachment['insert_date'])
                             <div class="mb-2">
                                 <a href="{{ $attachment['file'] }}" target="_blank">
                                     <img src="{{ $attachment['file'] }}" alt="Attachment" class="img-fluid" style="max-height: 20rem">

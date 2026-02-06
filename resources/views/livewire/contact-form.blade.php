@@ -41,6 +41,10 @@
                     @livewire('contact-setting-form', ['contactUuid' => $contactUuid])
 
                     @livewire('contact-attachment-form', ['contactUuid' => $contactUuid])
+
+                    @livewire('contact-note-form', ['contactUuid' => $contactUuid])
+
+                    @livewire('contact-time-form', ['contactUuid' => $contactUuid])
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('contacts.index') }}" class="btn btn-secondary">Cancel</a>
 

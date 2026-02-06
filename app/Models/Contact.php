@@ -27,6 +27,7 @@ class Contact extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+		'domain_uuid',
 		'contact_parent_uuid',
 		'contact_type',
 		'contact_organization',
@@ -75,7 +76,7 @@ class Contact extends Model
 	}
 
 	public function notes(): HasMany {
-		return $this->hasMany(ContactNote::class, 'contact_note_uuid', 'contact_note_uuid');
+		return $this->hasMany(ContactNote::class, 'contact_uuid', 'contact_uuid');
 	}
 
 	public function phones(): HasMany {
@@ -93,7 +94,7 @@ class Contact extends Model
 
 	// TODO: Check if User::class needs this method as well
 	public function times(): HasMany {
-		return $this->hasMany(ContactTime::class, 'contact_setting_uuid', 'contact_setting_uuid');
+		return $this->hasMany(ContactTime::class, 'contact_uuid', 'contact_uuid');
 	}
 
 	public function urls(): HasMany {

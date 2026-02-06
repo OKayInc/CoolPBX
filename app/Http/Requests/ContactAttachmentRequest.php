@@ -27,8 +27,7 @@ class ContactAttachmentRequest extends FormRequest
             'attachments.*.attachment_description' => 'nullable|string|max:500',
             'attachments.*.attachment_primary' => 'nullable|boolean',
             'attachments.*.contact_attachment_uuid' => 'nullable|string|uuid',
-            'attachments.*.attachment_uploaded_date' => 'nullable|date',
-            'attachments.*.attachment_uploaded_user_uuid' => 'nullable|string|uuid',
+            'attachments.*.insert_date' => 'nullable|date', 
         ];
     }
 

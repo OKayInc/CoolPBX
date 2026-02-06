@@ -89,8 +89,7 @@ class ContactBasicInformationForm extends Component
                 $contact->contact_note = $this->contactNote;
                 $contact->save();
             } else {
-                Contact::create([
-//                    'contact_uuid' => Str::uuid(),
+                $contact = Contact::create([
                     'domain_uuid' => Session::get('domain_uuid'),
                     'contact_type' => $this->contactType,
                     'contact_organization' => $this->contactOrganization,
@@ -106,6 +105,9 @@ class ContactBasicInformationForm extends Component
                     'contact_time_zone' => $this->contactTimeZone,
                     'contact_note' => $this->contactNote,
                 ]);
+
+                Contact::where('contact_uuid', $contact->contact_uuid)
+                    ->update(['contact_uuid' => $this->contactUuid]);
             }
             $this->dispatch('emailsSaved')->to(ContactEmailForm::class);
         } catch (\Throwable $e) {

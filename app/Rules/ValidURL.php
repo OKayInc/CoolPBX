@@ -17,14 +17,14 @@ class ValidURL implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $response = Http::get($value);
-        if(App::hasDebugModeEnabled()){
-            Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] $response: '.print_r($response, true));
-        }
+        try {
+            $response = Http::timeout(5)->get($value);
 
-        if ($response->failed())
-        {
-            $fail('The URL on :attribute does not work.');
+            if ($response->failed()) {
+                $fail('The URL on :attribute does not work.');
+            }
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            $fail('The URL on :attribute is not reachable.');
         }
     }
 }

@@ -48,8 +48,7 @@ class ContactAttachmentForm extends Component
                     'attachment_filename' => $attachment->attachment_filename,
                     'attachment_primary' => (bool)$attachment->attachment_primary,
                     'attachment_description' => $attachment->attachment_description,
-                    'attachment_uploaded_date' => $attachment->attachment_uploaded_date,
-                    'attachment_uploaded_user_uuid' => $attachment->attachment_uploaded_user_uuid,
+                    'insert_date' => $attachment->insert_date, 
                     'file' => '/storage/attachments/' . $attachment->attachment_filename,
                 ];
             })->toArray();
@@ -68,18 +67,18 @@ class ContactAttachmentForm extends Component
             'attachment_filename' => '',
             'attachment_primary' => '',
             'attachment_description' => '',
-            'attachment_uploaded_date' => '',
-            'attachment_uploaded_user_uuid' => '',
+            'insert_date' => null,
             'file' => null,
         ];
     }
+
     public function removeAttachment($index)
     {
         if (!auth()->user()->hasPermission('contact_attachment_delete')) {
             session()->flash('message', 'You do not have permission to remove attachments.');
             return;
         }
-        if ($this->attachments[$index]['attachment_uploaded_date'] !== null) {
+        if ($this->attachments[$index]['insert_date'] !== null) {
             $this->removedAttachments[] = $this->attachments[$index];
         }
         unset($this->attachments[$index]);
@@ -89,6 +88,7 @@ class ContactAttachmentForm extends Component
     public function save()
     {
         $this->validate();
+        
         foreach ($this->removedAttachments as $removedAttachment) {
             $contactAttachment = ContactAttachment::where('contact_attachment_uuid', $removedAttachment['contact_attachment_uuid'])->first();
             if ($contactAttachment) {
@@ -96,6 +96,7 @@ class ContactAttachmentForm extends Component
                 $contactAttachment->delete();
             }
         }
+        
         foreach ($this->attachments as $attachment) {
             $contactAttachment = null;
 
@@ -110,18 +111,20 @@ class ContactAttachmentForm extends Component
             $contactAttachment->attachment_description = $attachment['attachment_description'];
             $contactAttachment->domain_uuid = auth()->user()->domain_uuid;
 
+            if (!isset($attachment['contact_attachment_uuid'])) {
+                $contactAttachment->insert_user = auth()->user()->user_uuid;
+            }
+            $contactAttachment->update_user = auth()->user()->user_uuid;
+
             if (!isset($attachment['contact_attachment_uuid']) && isset($attachment['file']) && is_object($attachment['file'])) {
-                $contactAttachment->attachment_uploaded_date = now();
-                $contactAttachment->attachment_uploaded_user_uuid = auth()->user()->uuid;
                 $contactAttachment->attachment_filename = Str::uuid() . '_' . $attachment['file']->getClientOriginalName();
                 Storage::putFileAs('public\\attachments', $attachment['file'], $contactAttachment->attachment_filename);
             }
-
+            
             $contactAttachment->save();
         }
 
-        session()->flash('message', 'Attachment saved successfully.');
-        redirect()->route('contacts.index');
+        $this->dispatch('notesSaved')->to(ContactNoteForm::class);
     }
 
     public function render()

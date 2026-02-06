@@ -31,8 +31,6 @@ class ContactNote extends Model
         'domain_uuid',
         'contact_uuid',
         'contact_note',
-        'last_mod_date',
-        'last_mod_user',
 	];
 
     /**

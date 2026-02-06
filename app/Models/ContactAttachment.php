@@ -34,8 +34,6 @@ class ContactAttachment extends Model
         'attachment_filename',
         'attachment_content',
         'attachment_description',
-        'attachment_uploaded_date',
-        'attachment_uploaded_user_uuid',
 	];
 
     /**
@@ -58,4 +56,3 @@ class ContactAttachment extends Model
 		return $this->belongsTo(Contact::class, 'contact_uuid', 'contact_uuid');
 	}
 }
-    

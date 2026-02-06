@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -49,8 +47,12 @@ class ContactTime extends Model
      *
      * @var array<string, string>
      */
-	protected $casts = [
-	];
+    protected $casts = [
+        'time_start' => 'datetime',
+        'time_stop' => 'datetime',
+        'insert_date' => 'datetime',
+        'update_date' => 'datetime',
+    ];
 
 	public function contact(): BelongsTo {
 		return $this->belongsTo(Contact::class, 'contact_uuid', 'contact_uuid');
