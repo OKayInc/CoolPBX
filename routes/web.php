@@ -159,8 +159,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/domains/switch/{domain}', [DomainController::class, 'switchByUuid'])->name('domain.switchuuid');
 
     // FAX
-    Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
     Route::get('/faxes/{fax}/send', [FaxController::class, 'send'])->name('faxes.send');
+    Route::get('/faxes/{fax}/inbox', [FaxController::class, 'inbox'])->name('faxes.inbox');
+    Route::get('/faxes/{fax}/sent', [FaxController::class, 'sent'])->name('faxes.sent');
+    Route::get('/faxes/{faxFile}/download', [FaxController::class, 'download'])->name('faxes.download');
+    Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
 
     // GROUP
     Route::resource('/groups', GroupController::class)->name('groups', 'groups');

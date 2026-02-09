@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FaxRequest;
 use App\Models\Contact;
 use App\Models\Fax;
+use App\Models\FaxFile;
 use App\Models\User;
 use App\Repositories\FaxRepository;
+use App\Services\AudioPlayDownloadService;
 use Illuminate\Support\Facades\Session;
 
 class FaxController extends Controller
 {
 	protected $faxRepository;
+	protected $audioPlayDownloadService;
 
-	public function __construct(FaxRepository $faxRepository)
+	public function __construct(FaxRepository $faxRepository, AudioPlayDownloadService $audioPlayDownloadService)
 	{
 		$this->faxRepository = $faxRepository;
+		$this->audioPlayDownloadService = $audioPlayDownloadService;
 	}
 	public function index()
 	{
@@ -141,5 +145,24 @@ class FaxController extends Controller
 		}
 
 		return view("pages.faxes.send", compact("fax", "contacts"));
+	}
+
+	public function inbox(Fax $fax)
+	{
+		$viewType = "inbox";
+
+		return view("pages.faxes.files", compact("fax", "viewType"));
+	}
+
+	public function sent(Fax $fax)
+	{
+		$viewType = "sent";
+
+		return view("pages.faxes.files", compact("fax", "viewType"));
+	}
+
+	public function download(FaxFile $faxFile)
+	{
+		return $this->audioPlayDownloadService->download($faxFile->fax_file_path);
 	}
 }

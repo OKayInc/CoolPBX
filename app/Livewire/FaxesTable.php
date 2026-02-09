@@ -150,12 +150,12 @@ class FaxesTable extends DataTableComponent
 
                     if(auth()->user()->hasPermission('fax_inbox_view'))
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-inbox"></i></a>';
+                        $buttons .= '<a href="' . route("faxes.inbox", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-inbox"></i></a>';
                     }
 
                     if(auth()->user()->hasPermission('fax_sent_view'))
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-envelope-circle-check"></i></a>';
+                        $buttons .= '<a href="' . route("faxes.sent", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-envelope-circle-check"></i></a>';
                     }
 
                     if(auth()->user()->hasPermission('fax_log_view'))
