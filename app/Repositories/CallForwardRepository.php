@@ -321,7 +321,7 @@ class CallForwardRepository
         );
     }
 
-
+  
     private function synchronizeExtensionXml(Extension $extension): void
     {
         $extensionsDir = config('freeswitch.extensions_dir');
