@@ -25,6 +25,7 @@ class FaxRequest extends FormRequest
 			"fax_caller_id_number" => "bail|nullable|alpha_num|min:0",
 			"fax_forward_number" => "bail|nullable|alpha_num|max:20",
 			"fax_toll_allow" => "bail|nullable|integer|min:0",
+			"fax_send_greeting" => "bail|nullable|string",
 			"fax_send_channels" => "bail|nullable|integer|min:0",
 			"fax_description" => "bail|nullable|string|max:255",
 		];

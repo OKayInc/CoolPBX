@@ -246,7 +246,7 @@
 													class="form-control @error('fax_user.' . $index) is-invalid @enderror"
 													wire:model="faxUsers.{{ $index }}.username"
 												>
-												<button type="button" class="btn btn-outline-danger" wire:click="removeFaxUser({{ $index }})" title="Remove email"><i class="fas fa-trash"></i></button>
+												<button type="button" class="btn btn-outline-danger" wire:click="removeFaxUser({{ $index }})" title="Remove user"><i class="fas fa-trash"></i></button>
 											</div>
 										@endforeach
 
@@ -271,6 +271,27 @@
 								</div>
 							</div>
 						@endif
+					@endcan
+
+					@can('fax_send_greeting')
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label class="form-label">Greeting</label>
+
+									<x-switch-music-on-hold name="fax_send_greeting"
+										:selected="$fax->fax_send_greeting ?? ''"
+									    :withRecordings=true
+										:withPhrases="true"
+										:withSounds="true"
+                                        wire:model="fax_send_greeting" />
+
+									<small class="text-muted d-block mt-1">
+										Choose a greeting to play before sending a fax.
+									</small>
+								</div>
+							</div>
+						</div>
 					@endcan
 
 					<div class="row mt-3" >

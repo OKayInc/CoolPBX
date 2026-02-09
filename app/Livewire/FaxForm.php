@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Http\Requests\FaxRequest;
+use App\Http\Requests\FaxUserRequest;
 use App\Repositories\FaxRepository;
 use App\Repositories\FaxUserRepository;
 use Livewire\Component;
@@ -25,6 +26,7 @@ class FaxForm extends Component
     public ?string $fax_caller_id_number = '';
     public ?string $fax_forward_number = '';
     public ?int $fax_toll_allow = 0;
+    public ?string $fax_send_greeting = '';
     public ?int $fax_send_channels = 0;
     public ?string $fax_description = '';
 
@@ -48,6 +50,7 @@ class FaxForm extends Component
     protected $faxUserRepository;
 
     public $faxUsers = [];
+    public $faxUsersToDelete = [];
     public $availableUsers = [];
     public $availableUser = '';
 
@@ -80,6 +83,7 @@ class FaxForm extends Component
             $this->fax_caller_id_number = $fax->fax_caller_id_number;
             $this->fax_forward_number = $fax->fax_forward_number;
             $this->fax_toll_allow = $fax->fax_toll_allow;
+            $this->fax_send_greeting = $fax->fax_send_greeting;
             $this->fax_send_channels = $fax->fax_send_channels;
             $this->fax_description = $fax->fax_description;
 
@@ -108,7 +112,6 @@ class FaxForm extends Component
                     'username' => $fax_user->username,
                 ];
             }
-
         }
 		else
 		{
@@ -144,13 +147,13 @@ class FaxForm extends Component
 	{
         $availableUser = collect($this->availableUsers)->firstWhere('user_uuid', $this->availableUser);
 
-        if(collect($this->faxUsers)->contains('user_uuid', $availableUser->user_uuid))
-        {
-            return;
-        }
-
         if($availableUser)
         {
+            if(collect($this->faxUsers)->contains('user_uuid', $availableUser->user_uuid))
+            {
+                return;
+            }
+
             $this->faxUsers[] = [
                 'user_uuid' => $availableUser->user_uuid,
                 'username' => $availableUser->username,
@@ -169,6 +172,39 @@ class FaxForm extends Component
     {
         $this->validate();
 
+        $faxUserRules = FaxUserRequest::rules();
+
+        foreach($this->faxUsers as $index => $faxUser)
+        {
+            $validator = Validator::make($faxUser, $faxUserRules);
+
+            try
+            {
+                $validator->validate();
+            }
+            catch (ValidationException $e)
+            {
+                $errors = [];
+
+                foreach ($e->errors() as $field => $messages)
+                {
+                    $errors["faxUsers.{$index}.{$field}"] = $messages;
+                }
+
+                throw ValidationException::withMessages($errors);
+            }
+        }
+
+        $oldFaxUsers = collect($this->faxUsers)->filter(function ($faxUser)
+        {
+            return !empty($faxUser['fax_user_uuid']);
+        })->toArray();
+
+        $newFaxUsers = collect($this->faxUsers)->filter(function ($faxUser)
+        {
+            return empty($faxUser['fax_user_uuid']);
+        })->toArray();
+
         $faxData = [
             'fax_name' => $this->fax_name,
             'fax_extension' => $this->fax_extension,
@@ -180,6 +216,7 @@ class FaxForm extends Component
             'fax_caller_id_number' => $this->fax_caller_id_number,
             'fax_forward_number' => $this->fax_forward_number,
             'fax_toll_allow' => $this->fax_toll_allow,
+            'fax_send_greeting' => $this->fax_send_greeting,
             'fax_send_channels' => $this->fax_send_channels,
             'fax_description' => $this->fax_description,
 
@@ -217,7 +254,20 @@ class FaxForm extends Component
 
         $this->faxUserRepository->deleteAll($this->fax);
 
-        $this->faxUserRepository->create($this->fax, $this->faxUsers);
+        if($newFaxUsers)
+        {
+            $this->faxUserRepository->create($this->fax, $newFaxUsers);
+        }
+
+        if($oldFaxUsers)
+        {
+            $this->faxUserRepository->update($this->fax, $oldFaxUsers);
+        }
+
+        if(!empty($this->faxUsersToDelete))
+        {
+            $this->faxUserRepository->delete($this->faxUsersToDelete);
+        }
 
         redirect()->route('faxes.edit', $this->fax->fax_uuid);
     }
