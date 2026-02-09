@@ -397,7 +397,18 @@ class CallFlowRepository
     private function updateSwitch(CallFlow $callFlow): void
     {
         try {
-            FreeSwitch::execute('reloadxml');
+            $responses = FreeSwitch::execute('reloadxml');
+
+            foreach ($responses as $item) {
+                $response = trim($item['response'] ?? '');
+                if (!str_starts_with($response, '+OK')) {
+                    Log::warning('Node failed to reload XML', [
+                        'node' => $item['node']->node_name,
+                        'hostname' => $item['node']->node_hostname,
+                        'response' => $response,
+                    ]);
+                }
+            }
         } catch (\Exception $e) {
             Log::error('Error reloading FreeSWITCH XML: ' . $e->getMessage());
         }

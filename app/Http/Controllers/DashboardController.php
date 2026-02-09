@@ -1279,67 +1279,70 @@ class DashboardController extends Controller
     public function getSwitchStatus()
     {
         $list = [];
+        $registrations = 0;
 
         //switch version
         if(auth()->user()->hasPermission('switch_version'))
         {
-            $result = FreeSwitch::execute("version");
-            preg_match("/FreeSWITCH Version (\d+\.\d+\.\d+(?:\.\d+)?).*\(.*?(\d+\w+)\s*\)/", $result, $matches);
-            $switchVersion = $matches[1] ?? "";
-            $switchBits = $matches[2] ?? "";
+            $responses = FreeSwitch::execute("version");
 
-            $list[] = [
-                "name" => "Switch",
-                "value" => "{$switchVersion} ({$switchBits})",
-            ];
+            foreach ($responses as $item) {
+                $nodeResponse = $item['response'] ?? '';
+                preg_match("/FreeSWITCH Version (\d+\.\d+\.\d+(?:\.\d+)?).*\(.*?(\d+\w+)\s*\)/", $nodeResponse, $matches);
+                $switchVersion = $matches[1] ?? "";
+                $switchBits = $matches[2] ?? "";
+
+                $list[] = [
+                    "name" => "Switch",
+                    "value" => "{$switchVersion} ({$switchBits})",
+                    "node" => $item['node']->node_name,
+                ];
+            }
         }
 
         //switch uptime
         if(auth()->user()->hasPermission('switch_uptime'))
         {
-            $result = FreeSwitch::execute("status");
+            $responses = FreeSwitch::execute("status");
 
-            if(empty($result))
-            {
-                $uptime = "";
+            foreach ($responses as $item) {
+                $nodeResult = $item['response'] ?? '';
+
+                if(empty($nodeResult))
+                {
+                    $uptime = "";
+                }
+                else
+                {
+                    $parts = explode("\n", $nodeResult);
+                    $parts = explode(' ', $parts[0]);
+                    $uptime = (($parts[1]) ? $parts[1].'y ' : null);
+                    $uptime .= (($parts[3]) ? $parts[3].'d ' : null);
+                    $uptime .= (($parts[5]) ? $parts[5].'h ' : null);
+                    $uptime .= (($parts[7]) ? $parts[7].'m ' : null);
+                    $uptime .= (($parts[9]) ? $parts[9].'s' : null);
+                }
+
+                $list[] = [
+                    "name" => "Switch Uptime",
+                    "value" => $uptime,
+                    "node" => $item['node']->node_name,
+                ];
             }
-            else
-            {
-                $result = explode("\n", $result);
-                $result = $result[0];
-                $result = explode(' ', $result);
-                $uptime = (($result[1]) ? $result[1].'y ' : null);
-                $uptime .= (($result[3]) ? $result[3].'d ' : null);
-                $uptime .= (($result[5]) ? $result[5].'h ' : null);
-                $uptime .= (($result[7]) ? $result[7].'m ' : null);
-                $uptime .= (($result[9]) ? $result[9].'s' : null);
-            }
-
-            // todo
-            // if(auth()->user()->hasPermission('system_status_sofia_status') || auth()->user()->hasPermission('system_status_sofia_status_profile') || auth()->user()->hasGroup("superadmin"))
-            // {
-            //     $link = route("sip_status");
-            // }
-
-            $list[] = [
-                "name" => "Switch Uptime",
-                "value" => $uptime,
-            ];
         }
 
         //channel count
         if(auth()->user()->hasPermission('switch_channels'))
         {
-            $result = FreeSwitch::execute("status");
-            $matches = Array();
-            preg_match("/(\d+)\s+session\(s\)\s+\-\speak/", $result, $matches);
-            $channels = $matches[1] ?? 0;
+            $responses = FreeSwitch::execute("status");
+            $channels = 0;
 
-            // todo
-            // if(auth()->user()->hasPermission('call_active_view'))
-            // {
-            //     $link = route("calls_active");
-            // }
+            foreach ($responses as $item) {
+                $nodeResponse = $item['response'] ?? '';
+                $matches = [];
+                preg_match("/(\d+)\s+session\(s\)\s+\-\speak/", $nodeResponse, $matches);
+                $channels += (int)($matches[1] ?? 0);
+            }
 
             $list[] = [
                 "name" => "Channels",
@@ -1350,32 +1353,32 @@ class DashboardController extends Controller
         //registration count
         if(auth()->user()->hasPermission('switch_registrations'))
         {
-            $xml = FreeSwitch::execute("sofia xmlstatus profile 'all' reg");
+            $responses = FreeSwitch::execute("sofia xmlstatus profile 'all' reg");
 
-            $registrations = 0;
+            foreach ($responses as $item) {
+                $xml = $item['response'] ?? '';
 
-            if(strlen($xml) > 100)
-            {
-                $xml = preg_replace('/[\x00-\x1F\x7F]/u', '', $xml);
-                $xml = str_replace(
-                    ['<profile-info>', '</profile-info>'],
-                    ['<profile_info>', '</profile_info>'],
-                    $xml
-                );
-
-                $xmlObj = null;
-
-                try
+                if(strlen($xml) > 100)
                 {
-                    $xmlObj = new \SimpleXMLElement($xml);
+                    $xml = preg_replace('/[\x00-\x1F\x7F]/u', '', $xml);
+                    $xml = str_replace(
+                        ['<profile-info>', '</profile-info>'],
+                        ['<profile_info>', '</profile_info>'],
+                        $xml
+                    );
 
-                    if(isset($xmlObj->registrations->registration))
+                    try
                     {
-                        $registrations = count($xmlObj->registrations->registration);
+                        $xmlObj = new \SimpleXMLElement($xml);
+
+                        if(isset($xmlObj->registrations->registration))
+                        {
+                            $registrations += count($xmlObj->registrations->registration);
+                        }
                     }
-                }
-                catch(\Exception $e)
-                {
+                    catch(\Exception $e)
+                    {
+                    }
                 }
             }
 

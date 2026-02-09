@@ -56,7 +56,18 @@ class CallCenterNotifyService
         }
         $eventString .= "\n"; 
         try {
-            FreeSwitch::execute('sendevent', "{$eventType}\n{$eventString}");
+            $responses = FreeSwitch::execute('sendevent', "{$eventType}\n{$eventString}");
+
+            foreach ($responses as $item) {
+                $response = trim($item['response'] ?? '');
+                if (!str_starts_with($response, '+OK') && !str_starts_with($response, 'OK')) {
+                    Log::warning('Node failed to send event', [
+                        'node' => $item['node']->node_name,
+                        'hostname' => $item['node']->node_hostname,
+                        'response' => $response,
+                    ]);
+                }
+            }
         } catch (Exception $e) {
             throw new Exception("Failed to send event to FreeSWITCH: " . $e->getMessage());
         }
