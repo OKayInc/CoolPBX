@@ -52,20 +52,48 @@ class FreeSwitchCallCenterStatusService
         return $result;
     }
 
+    /**
+     * Parse and consolidate list responses from all nodes
+     */
+    private function consolidateListResponses(array $responses, callable $parser): array
+    {
+        $consolidated = [];
+
+        foreach ($responses as $item) {
+            if (empty($item['response'])) {
+                continue;
+            }
+
+            $parsed = $parser($item['response']);
+
+            if (is_array($parsed)) {
+                foreach ($parsed as $entry) {
+                    $entry['_node_name'] = $item['node']->node_name;
+                    $entry['_node_hostname'] = $item['node']->node_hostname;
+                    $consolidated[] = $entry;
+                }
+            }
+        }
+
+        return $consolidated;
+    }
+
 	public function getAgentsStatus(CallCenterQueue $callCenterQueue)
     {
 		$data = [];
 
 		try
 		{
-			//send the event socket command and get the response
+			//send the event socket command and get the response (consolidated from all nodes)
 			$command = "callcenter_config queue list tiers " . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
-			$event_socket_str = $this->freeSwitchService->execute($command);
-			$result = $this->str_to_named_array($event_socket_str, '|');
+			$tierResponses = $this->freeSwitchService->execute($command);
+			$result = $this->consolidateListResponses($tierResponses, function ($response) {
+				return $this->str_to_named_array($response, '|');
+			});
 
 			if(App::hasDebugModeEnabled())
 			{
-				Log::debug('CallCenterQueueController > list tiers: ', [$event_socket_str]);
+				Log::debug('CallCenterQueueController > list tiers (consolidated from all nodes): ', [$result]);
 			}
 
 			//prepare the result for array_multisort
@@ -96,14 +124,16 @@ class FreeSwitchCallCenterStatusService
 				array_multisort($tier_result, SORT_ASC);
 			}
 
-			//send the event socket command and get the response
+			//send the event socket command and get the response (consolidated from all nodes)
 			$command = 'callcenter_config queue list agents ' . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
-			$event_socket_str = $this->freeSwitchService->execute($command);
-			$agent_result = $this->str_to_named_array($event_socket_str, '|');
+			$agentResponses = $this->freeSwitchService->execute($command);
+			$agent_result = $this->consolidateListResponses($agentResponses, function ($response) {
+				return $this->str_to_named_array($response, '|');
+			});
 
 			if(App::hasDebugModeEnabled())
 			{
-				Log::debug('CallCenterQueueController > list agents: ', [$event_socket_str]);
+				Log::debug('CallCenterQueueController > list agents (consolidated from all nodes): ', [$agent_result]);
 			}
 
 			//get the agents from the database
@@ -214,14 +244,15 @@ class FreeSwitchCallCenterStatusService
 
 		try
 		{
-			//send the event socket command and get the response
 			$command = "callcenter_config queue list members " . $callCenterQueue->queue_extension . "@" . Session::get("domain_name");
-			$event_socket_str = $this->freeSwitchService->execute($command);
-			$result = $this->str_to_named_array($event_socket_str, '|');
+			$memberResponses = $this->freeSwitchService->execute($command);
+			$result = $this->consolidateListResponses($memberResponses, function ($response) {
+				return $this->str_to_named_array($response, '|');
+			});
 
 			if(App::hasDebugModeEnabled())
 			{
-				Log::debug('CallCenterQueueController > list members: ', [$event_socket_str]);
+				Log::debug('CallCenterQueueController > list members (consolidated from all nodes): ', [$result]);
 			}
 
 			$q_waiting = 0;

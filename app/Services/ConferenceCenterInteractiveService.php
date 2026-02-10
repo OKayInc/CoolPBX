@@ -20,6 +20,83 @@ class ConferenceCenterInteractiveService
         $this->freeSwitchService = $freeSwitchService;
     }
 
+    /**
+     * Execute command and find first successful/meaningful response (for targeted operations)
+     */
+    private function executeUntilSuccess(string $command, ?string $param = null): array
+    {
+        $responses = $this->freeSwitchService->execute($command, $param);
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+
+            $isSuccess = str_starts_with($response, '+OK') ||
+                         str_starts_with($response, 'OK');
+
+            if ($isSuccess) {
+                return [
+                    'success' => true,
+                    'response' => $response,
+                    'node' => $item['node']->node_name
+                ];
+            }
+        }
+
+        return [
+            'success' => false,
+            'response' => null,
+            'node' => null
+        ];
+    }
+
+    /**
+     * Execute command on all nodes and return first non-error response
+     * Used for read operations where the data exists on one specific node
+     */
+    private function executeAndFindResponse(string $command, ?string $param = null): ?string
+    {
+        $responses = $this->freeSwitchService->execute($command, $param);
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+
+            if (!empty($response) && !str_ends_with($response, 'not found') && $response !== '-ERR') {
+                return $response;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Execute command on all nodes (for operations that must apply everywhere like lock/unlock)
+     */
+    private function executeOnAllNodes(string $command, ?string $param = null): array
+    {
+        $responses = $this->freeSwitchService->execute($command, $param);
+        $failedNodes = [];
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+            $isSuccess = str_starts_with($response, '+OK') ||
+                         str_starts_with($response, 'OK');
+
+            if (!$isSuccess && !empty($response)) {
+                $failedNodes[] = [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response
+                ];
+            }
+        }
+
+        return [
+            'success' => empty($failedNodes),
+            'responses' => $responses,
+            'failed_nodes' => $failedNodes
+        ];
+    }
+
 	public function getInteractiveConferenceCenters(ConferenceRoom $conferenceRoom)
     {
 		$data = [
@@ -31,9 +108,11 @@ class ConferenceCenterInteractiveService
 		{
 			$conferenceRoomName = $conferenceRoom->conference_room_name . "@" . Session::get("domain_name");
 			$command = "conference {$conferenceRoomName} xml_list";
-			$xml_string = $this->freeSwitchService->execute($command);
 
-			if(substr($xml_string, -9) == "not found")
+			// Execute on all nodes and find the node that has this conference
+			$xml_string = $this->executeAndFindResponse($command);
+
+			if(empty($xml_string) || substr($xml_string, -9) == "not found")
 			{
 				$valid_xml = false;
 			}
@@ -59,6 +138,9 @@ class ConferenceCenterInteractiveService
 						$mute_all = false;
 					}
 
+					// uuid_getvar is targeted - the UUID exists on one specific node
+					$handRaisedResponse = $this->executeAndFindResponse($command);
+
 					$data["body"][] = [
 						"id" => $member["id"],
 						"uuid" => $member["uuid"],
@@ -73,7 +155,7 @@ class ConferenceCenterInteractiveService
 						"is_moderator" => $member["flags"]["is_moderator"],
 						"caller_id_name" => urldecode($member["caller_id_name"]),
 						"caller_id_number" => $member["caller_id_number"],
-						"hand_raised" => ($this->freeSwitchService->execute($command) == "true") ? true : false,
+						"hand_raised" => ($handRaisedResponse == "true") ? true : false,
 						"join_time_formatted" => sprintf('%02d:%02d:%02d', floor($member["join_time"] / 3600), floor(floor($member["join_time"] / 60) % 60), $member["join_time"] % 60),
 						"last_talking_formatted" => sprintf('%02d:%02d:%02d', floor($member["last_talking"] / 3600), floor(floor($member["last_talking"] / 60) % 60), $member["last_talking"] % 60),
 						"mute_all" => ($member["flags"]["is_moderator"] == "false" && $member["flags"]["can_speak"] == "true") ? false : true,
@@ -194,8 +276,9 @@ class ConferenceCenterInteractiveService
 
             if($data == "energy")
             {
-                $switch_result = $this->freeSwitchService->execute($command);
-                $result_array = explode("=", $switch_result);
+                // Targeted: get current energy value from the node that has this participant
+                $switch_result = $this->executeAndFindResponse($command);
+                $result_array = explode("=", $switch_result ?? '=0');
                 $tmp_value = $result_array[1];
 
                 if($direction == "up")
@@ -208,13 +291,15 @@ class ConferenceCenterInteractiveService
                     $tmp_value = $tmp_value - 100;
                 }
 
-                $switch_result = $this->freeSwitchService->execute($command . ' ' . $tmp_value);
+                // Targeted: set new energy value on the node that has this participant
+                $this->executeUntilSuccess($command . ' ' . $tmp_value);
             }
 
             if($data == "volume_in")
             {
-                $switch_result = $this->freeSwitchService->execute($command);
-                $result_array = explode("=", $switch_result);
+                // Targeted: get current volume from the node that has this participant
+                $switch_result = $this->executeAndFindResponse($command);
+                $result_array = explode("=", $switch_result ?? '=0');
                 $tmp_value = $result_array[1];
 
                 if($direction == "up")
@@ -227,13 +312,15 @@ class ConferenceCenterInteractiveService
                     $tmp_value = $tmp_value - 1;
                 }
 
-                $switch_result = $this->freeSwitchService->execute($command . ' ' . $tmp_value);
+                // Targeted: set new volume on the node that has this participant
+                $this->executeUntilSuccess($command . ' ' . $tmp_value);
             }
 
             if($data == "volume_out")
             {
-                $switch_result = $this->freeSwitchService->execute($command);
-                $result_array = explode("=", $switch_result);
+                // Targeted: get current volume from the node that has this participant
+                $switch_result = $this->executeAndFindResponse($command);
+                $result_array = explode("=", $switch_result ?? '=0');
                 $tmp_value = $result_array[1];
 
                 if($direction == "up")
@@ -246,7 +333,8 @@ class ConferenceCenterInteractiveService
                     $tmp_value = $tmp_value - 1;
                 }
 
-                $switch_result = $this->freeSwitchService->execute($command . ' ' . $tmp_value);
+                // Targeted: set new volume on the node that has this participant
+                $this->executeUntilSuccess($command . ' ' . $tmp_value);
             }
 
             if($data == "record")
@@ -259,7 +347,8 @@ class ConferenceCenterInteractiveService
 
                 if(!file_exists($file))
                 {
-                    $switch_result = $this->freeSwitchService->execute($command);
+                    // Targeted: record on the node that has this conference
+                    $this->executeUntilSuccess($command);
                 }
             }
 
@@ -271,12 +360,14 @@ class ConferenceCenterInteractiveService
 
                 $command .= $file;
 
-                $switch_result = $this->freeSwitchService->execute($command);
+                // Targeted: stop recording on the node that has this conference
+                $this->executeUntilSuccess($command);
             }
 
             if($data == "kick")
             {
-                $switch_result = $this->freeSwitchService->execute('uuid_kill ' . $uuid);
+                // Targeted: uuid_kill on the node that has this call
+                $this->executeUntilSuccess('uuid_kill ' . $uuid);
             }
 
             if($data == "kick all")
@@ -286,21 +377,23 @@ class ConferenceCenterInteractiveService
 
             if($data == "mute" || $data == "unmute" || $data == "mute non_moderator" || $data == "unmute non_moderator")
             {
-                $switch_result = $this->freeSwitchService->execute($command);
+                // Targeted: mute/unmute on the node that has this participant
+                $this->executeUntilSuccess($command);
 
-                $command = "uuid_setvar " . $uuid . " hand_raised false";
-
-                $this->freeSwitchService->execute($command);
+                // Targeted: set hand_raised on the node that has this UUID
+                $this->executeUntilSuccess("uuid_setvar " . $uuid . " hand_raised false");
             }
 
             if($data == "deaf" || $data == "undeaf" )
             {
-                $switch_result = $this->freeSwitchService->execute($command);
+                // Targeted: deaf/undeaf on the node that has this participant
+                $this->executeUntilSuccess($command);
             }
 
             if($data == "lock" || $data == "unlock" )
             {
-                $switch_result = $this->freeSwitchService->execute($command);
+                // Lock/unlock should apply on all nodes that have this conference
+                $this->executeOnAllNodes($command);
             }
         }
     }
@@ -310,7 +403,13 @@ class ConferenceCenterInteractiveService
 	{
 		$command = "conference '{$name}' xml_list";
 
-        $xml_str = $this->freeSwitchService->execute($command);
+		// Get conference XML from the node that has it
+        $xml_str = $this->executeAndFindResponse($command);
+
+        if (empty($xml_str)) {
+            Log::warning('Conference not found on any node for endConference', ['name' => $name]);
+            return;
+        }
 
 		try
 		{
@@ -318,7 +417,8 @@ class ConferenceCenterInteractiveService
 		}
 		catch(\Exception $e)
 		{
-			//echo $e->getMessage();
+			Log::error('Failed to parse conference XML in endConference: ' . $e->getMessage());
+			return;
 		}
 
 		$session_uuid = $xml->conference['uuid'];
@@ -331,7 +431,8 @@ class ConferenceCenterInteractiveService
 
 			if(Str::isUuid($uuid))
             {
-                $switch_result = $this->freeSwitchService->execute('uuid_kill ' . $uuid);
+                // Targeted: uuid_kill on the node that has this call
+                $this->executeUntilSuccess('uuid_kill ' . $uuid);
 			}
 
 			if($x < 1)

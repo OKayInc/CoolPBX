@@ -43,14 +43,13 @@ return new class extends Migration
         {
             case 'mariadb':
             case 'mysql':
-                $table->collation('unicode_ci');
                 $table->engine('InnoDB');
                 break;
             case 'pgsql':
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('cluster_node_uuid')->nullable(false)->primary()->first();
+        $table->uuid('cluster_node_uuid')->nullable(false)->primary();
         $table->string('node_name', length: 100)->nullable(false);
         $table->string('node_hostname', length: 255)->nullable(false);
         $table->integer('xml_rpc_port')->default(8080)->nullable(false);

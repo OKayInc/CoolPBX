@@ -686,12 +686,12 @@ class CallCenterQueueForm extends Component
     public function startCalLCenterQueue(): void
     {
         try {
-            $command = 'callcenter_config queue load ' . $this->queue_extension . '@' . Session::get('domain_name');
-            $response = FreeSwitch::execute($command);
-            if (strpos($response, "+OK") !== false) {
-                session()->flash('message', 'Queue loaded successfully.');
+            $result = $this->executeOnAllNodes('callcenter_config', 'queue load ' . $this->queue_extension . '@' . Session::get('domain_name'));
+            if ($result['success']) {
+                session()->flash('message', 'Queue loaded successfully on all nodes.');
             } else {
-                session()->flash('error', 'Error loading queue: ' . $response);
+                $failedNames = array_column($result['failed_nodes'], 'node');
+                session()->flash('error', 'Error loading queue on nodes: ' . implode(', ', $failedNames));
             }
         } catch (\Throwable $th) {
             Log::error('Error loading queue: ' . $th->getMessage());
@@ -702,33 +702,64 @@ class CallCenterQueueForm extends Component
     public function unloadCalLCenterQueue(): void
     {
         try {
-            $command = 'callcenter_config queue unload ' . $this->queue_extension . '@' . Session::get('domain_name');
-            $response = FreeSwitch::execute($command);
-            if (strpos($response, '+OK') !== false) {
-                session()->flash('message', 'Queue unloaded successfully.');
+            $result = $this->executeOnAllNodes('callcenter_config', 'queue unload ' . $this->queue_extension . '@' . Session::get('domain_name'));
+            if ($result['success']) {
+                session()->flash('message', 'Queue unloaded successfully on all nodes.');
             } else {
-                session()->flash('error', 'Error unloading queue: ' . $response);
+                $failedNames = array_column($result['failed_nodes'], 'node');
+                session()->flash('error', 'Error unloading queue on nodes: ' . implode(', ', $failedNames));
             }
         } catch (\Throwable $th) {
-            Log::error('Error unloading queue:' . $th->getMessage());
-            session()->flash('error', 'Error unloading queue' . $th->getMessage());
+            Log::error('Error unloading queue: ' . $th->getMessage());
+            session()->flash('error', 'Error unloading queue: ' . $th->getMessage());
         }
     }
 
     public function reloadCalLCenterQueue(): void
     {
         try {
-            $command = "callcenter_config queue reload " . $this->queue_extension . "@" . Session::get('domain_name');
-            $response = FreeSwitch::execute($command);
-            if (strpos($response, '+OK') !== false) {
-                session()->flash('mesagge', 'Queue reloaded successfully.');
+            $result = $this->executeOnAllNodes('callcenter_config', 'queue reload ' . $this->queue_extension . '@' . Session::get('domain_name'));
+            if ($result['success']) {
+                session()->flash('message', 'Queue reloaded successfully on all nodes.');
             } else {
-                session()->flash('error', 'Error reloading queue: ' . $response);
+                $failedNames = array_column($result['failed_nodes'], 'node');
+                session()->flash('error', 'Error reloading queue on nodes: ' . implode(', ', $failedNames));
             }
         } catch (\Throwable $th) {
-            Log::error('Error loading queue' . $th->getMessage());
-            session()->flash('error', '' . $th->getMessage());
+            Log::error('Error reloading queue: ' . $th->getMessage());
+            session()->flash('error', 'Error reloading queue: ' . $th->getMessage());
         }
+    }
+
+    /**
+     * Execute command on all nodes and verify all succeeded
+     */
+    private function executeOnAllNodes(string $command, ?string $param = null): array
+    {
+        $responses = FreeSwitch::execute($command, $param);
+        $failedNodes = [];
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+
+            $isSuccess = str_starts_with($response, '+OK') ||
+                         str_starts_with($response, 'OK') ||
+                         str_starts_with($response, '1');
+
+            if (!$isSuccess && !empty($response)) {
+                $failedNodes[] = [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response
+                ];
+            }
+        }
+
+        return [
+            'success' => empty($failedNodes),
+            'responses' => $responses,
+            'failed_nodes' => $failedNodes
+        ];
     }
     public function updatedQueueEnabled($value)
     {

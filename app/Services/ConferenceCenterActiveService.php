@@ -26,43 +26,60 @@ class ConferenceCenterActiveService
 		try
 		{
 			$command = "conference xml_list";
-			$xml_string = $this->freeSwitchService->execute($command);
-			$xml = simplexml_load_string($xml_string, "SimpleXMLElement", LIBXML_NOCDATA);
-			$json = json_encode($xml);
-			$conferences = json_decode($json, true);
 
-			foreach($conferences as $conference)
-			{
-				$memberCount = $conference["@attributes"]["member-count"];
+			// Execute on all nodes and consolidate conferences from every node
+			$responses = $this->freeSwitchService->execute($command);
 
-				list($conferenceRoomUuid, $domain) = explode('@', $conference["@attributes"]["name"]);
+			foreach ($responses as $item) {
+				$xml_string = $item['response'] ?? '';
 
-				if($domain == Session::get('domain_name'))
+				if (empty($xml_string) || str_ends_with(trim($xml_string), 'not found')) {
+					continue;
+				}
+
+				$xml = simplexml_load_string($xml_string, "SimpleXMLElement", LIBXML_NOCDATA);
+				if ($xml === false) {
+					continue;
+				}
+
+				$json = json_encode($xml);
+				$conferences = json_decode($json, true);
+
+				foreach($conferences as $conference)
 				{
-					if(Str::isUuid($conferenceRoomUuid))
+					$memberCount = $conference["@attributes"]["member-count"];
+
+					list($conferenceRoomUuid, $domain) = explode('@', $conference["@attributes"]["name"]);
+
+					if($domain == Session::get('domain_name'))
 					{
-						$conferenceRoom = ConferenceRoom::with('conferenceCenter')->where('conference_room_uuid', $conferenceRoomUuid)->first();
+						if(Str::isUuid($conferenceRoomUuid))
+						{
+							$conferenceRoom = ConferenceRoom::with('conferenceCenter')->where('conference_room_uuid', $conferenceRoomUuid)->first();
 
-						$conferenceRoomName = $conferenceRoom->conference_room_name;
-						$conferenceExtension = $conferenceRoom->conferencecenter->conference_center_extension;
-						$participantPIN = $conferenceRoom->participant_pin;
+							$conferenceRoomName = $conferenceRoom->conference_room_name;
+							$conferenceExtension = $conferenceRoom->conferencecenter->conference_center_extension;
+							$participantPIN = $conferenceRoom->participant_pin;
+						}
+						else if(is_numeric($conferenceRoomUuid))
+						{
+							$c = Conference::where('domain_uuid', Session::get('domain_name'))->andWhere('conference_extension', $conferenceRoomUuid)->first();
+
+							$conferenceRoomName = $c->conference_room_name;
+							$conferenceExtension = $c->conference_center_extension;
+							$participantPIN = $c->participant_pin;
+						}
+
+						$data[] = [
+							"conference_room_uuid" => $conferenceRoomUuid,
+							"conference_room_name" => $conferenceRoomName,
+							"conference_center_extension" => $conferenceExtension,
+							"participant_pin" => $participantPIN,
+							"memberCount" => $memberCount,
+							"_node_name" => $item['node']->node_name,
+							"_node_hostname" => $item['node']->node_hostname,
+						];
 					}
-					else if(is_numeric($conferenceRoomUuid))
-					{
-						$c = Conference::where('domain_uuid', Session::get('domain_name'))->andWhere('conference_extension', $conferenceRoomUuid)->first();
-
-						$conferenceRoomName = $c->conference_room_name;
-						$conferenceExtension = $c->conference_center_extension;
-						$participantPIN = $c->participant_pin;
-					}
-
-					$data[] = [
-						"conference_room_uuid" => $conferenceRoomUuid,
-						"conference_room_name" => $conferenceRoomName,
-						"conference_center_extension" => $conferenceExtension,
-						"participant_pin" => $participantPIN,
-						"memberCount" => $memberCount,
-					];
 				}
 			}
         }

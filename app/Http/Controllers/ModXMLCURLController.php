@@ -1555,25 +1555,45 @@ class ModXMLCURLController extends Controller
                 $local_hostname = $this->get_hostname($request);    // TODO: verify this
                 $reg_user = $dialed_extension;
                 if ($dial_string_based_on_userid == 'false'){
-                    $reg_user = FreeSwitch::execute('user_data', $dialed_extension . '@' . $domain_name . ' attr id', $local_hostname);
+                    $userDataResponses = FreeSwitch::execute('user_data', $dialed_extension . '@' . $domain_name . ' attr id');
+                    $reg_user = $this->findFirstNonEmptyResponse($userDataResponses) ?? $dialed_extension;
                 }
                 else{
                     $reg_user = $dialed_extension;
                 }
 
-                $registrations = FreeSwitch::execute('show', 'registrations as xml', $local_hostname);
-                if(App::hasDebugModeEnabled()){
-                    Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] $registrations: '.$registrations);
-                }
-                $xml2 = simplexml_load_string($registrations);
-                $row_count = $xml2->attributes()['row_count'];
+                $registrationResponses = FreeSwitch::execute('show', 'registrations as xml');
                 $database_hostname = null;
-                if ($row_count > 0){
-                    foreach($xml2->row as $r){
-                        if (($r->reg_user == $reg_user) && ($r->realm == $domain_name) && ($r->expires > time())){
-                            $database_hostname = $r->hostname;
-                            break;
+                foreach ($registrationResponses as $item) {
+                    $nodeRegistrations = $item['response'] ?? '';
+
+                    if (empty($nodeRegistrations)) {
+                        continue;
+                    }
+
+                    if(App::hasDebugModeEnabled()){
+                        Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] node ' . $item['node']->node_name . ' $registrations: '.$nodeRegistrations);
+                    }
+
+                    try {
+                        $xml2 = simplexml_load_string($nodeRegistrations);
+                        if ($xml2 === false) {
+                            continue;
                         }
+                        $row_count = (int)($xml2->attributes()['row_count'] ?? 0);
+                        if ($row_count > 0){
+                            foreach($xml2->row as $r){
+                                if (($r->reg_user == $reg_user) && ($r->realm == $domain_name) && ($r->expires > time())){
+                                    $database_hostname = (string)$r->hostname;
+                                    break 2;
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        if(App::hasDebugModeEnabled()){
+                            Log::debug('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] XML parse error: ' . $e->getMessage());
+                        }
+                        continue;
                     }
                 }
 
@@ -1675,8 +1695,9 @@ class ModXMLCURLController extends Controller
                                     Log::notice('['.__FILE__.':'.__LINE__.']['.__CLASS__.']['.__METHOD__.'] local_host and database_host are the same.');
                                 }
                                 else{
-                                    $contact = FreeSwitch::execute('sofia_contact', $destination, $database_hostname);
-                                    $array = explode('/', $contact);
+                                    $contactResponses = FreeSwitch::execute('sofia_contact', $destination);
+                                    $contact = $this->findFirstNonEmptyResponse($contactResponses);
+                                    $array = explode('/', $contact ?? '');
                                     $proxy = $database_hostname;
                                     $exchange_profile = DefaultSetting::get('config', 'xml_handler.exchange_profile', 'text') ?? 'internal';
                                     $profile = DefaultSetting::get('config', 'xml_handler.exchange_profile', 'text') ??
@@ -2422,6 +2443,23 @@ class ModXMLCURLController extends Controller
         $answer = $xml->outputMemory();
 
         return $answer;
+    }
+
+    private function findFirstNonEmptyResponse(array $responses): ?string
+    {
+        foreach ($responses as $item) {
+            $response = $item['response'] ?? null;
+
+            if (!empty($response) &&
+                $response !== '-ERR' &&
+                $response !== 'Invalid Gateway!' &&
+                !str_contains($response, 'not found') &&
+                !str_contains($response, 'error/user_not_registered')) {
+                return $response;
+            }
+        }
+
+        return null;
     }
 
     public function not_found(): string{                    // TODO: this or XMLWriter
