@@ -162,6 +162,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/faxes/{fax}/send', [FaxController::class, 'send'])->name('faxes.send');
     Route::get('/faxes/{fax}/inbox', [FaxController::class, 'inbox'])->name('faxes.inbox');
     Route::get('/faxes/{fax}/sent', [FaxController::class, 'sent'])->name('faxes.sent');
+    Route::get('/faxes/{fax}/logs', [FaxController::class, 'logs'])->name('faxes.logs');
+    Route::get('/faxes/logs/{faxLog}/view', [FaxController::class, 'viewLog'])->name('faxes.logs.view');
     Route::get('/faxes/{faxFile}/download', [FaxController::class, 'download'])->name('faxes.download');
     Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
 

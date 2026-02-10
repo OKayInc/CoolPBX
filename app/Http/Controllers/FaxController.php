@@ -5,6 +5,7 @@ use App\Http\Requests\FaxRequest;
 use App\Models\Contact;
 use App\Models\Fax;
 use App\Models\FaxFile;
+use App\Models\FaxLog;
 use App\Models\User;
 use App\Repositories\FaxRepository;
 use App\Services\AudioPlayDownloadService;
@@ -159,6 +160,16 @@ class FaxController extends Controller
 		$viewType = "sent";
 
 		return view("pages.faxes.files", compact("fax", "viewType"));
+	}
+
+	public function logs(Fax $fax)
+	{
+		return view("pages.faxes.logs", compact("fax"));
+	}
+
+	public function viewLog(FaxLog $faxLog)
+	{
+		return view("pages.faxes.log_view", compact("faxLog"));
 	}
 
 	public function download(FaxFile $faxFile)

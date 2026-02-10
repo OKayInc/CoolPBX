@@ -160,7 +160,7 @@ class FaxesTable extends DataTableComponent
 
                     if(auth()->user()->hasPermission('fax_log_view'))
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-file-lines"></i></a>';
+                        $buttons .= '<a href="' . route("faxes.logs", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-file-lines"></i></a>';
                     }
 
                     if(auth()->user()->hasPermission('fax_active_view'))

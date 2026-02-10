@@ -6,13 +6,9 @@ use App\Facades\Setting;
 use App\Models\Fax;
 use App\Models\FaxFile;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\BooleanColumn;
 
 class FaxesFilesTable extends DataTableComponent
 {
@@ -31,7 +27,6 @@ class FaxesFilesTable extends DataTableComponent
         $this->viewType = $viewType;
 
         $this->dirFax = Setting::getSetting('switch', 'storage', 'dir') . '/fax/' . Session::get('domain_name');
-        $this->dirFax = storage_path('app/freeswitch/storage/fax/' . Session::get('domain_name'));
 
         $this->dirFaxInbox = $this->dirFax . '/' . $this->fax->fax_extension . '/inbox';
         $this->dirFaxSent = $this->dirFax . '/' . $this->fax->fax_extension . '/sent';
@@ -40,13 +35,12 @@ class FaxesFilesTable extends DataTableComponent
 
     public function configure(): void
     {
-        $canEdit = auth()->user()->hasPermission('fax_edit');
-        $this->setPrimaryKey('fax_uuid')
+        $this->setPrimaryKey('fax_file_uuid')
             ->setTableAttributes([
                 'class' => 'table table-striped table-hover table-bordered'
             ])
             ->setSearchEnabled()
-            ->setSearchPlaceholder('Search Faxes')
+            ->setSearchPlaceholder('Search Faxes Files')
             ->setPerPageAccepted([10, 25, 50, 100, 250])
             ->setDefaultPerPage(100)
             ->setPaginationEnabled();
