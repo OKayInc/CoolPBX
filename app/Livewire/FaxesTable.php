@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Facades\Setting;
 use App\Models\Fax;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -141,7 +142,8 @@ class FaxesTable extends DataTableComponent
             Column::make("Tools", "fax_uuid")
                 ->format(function ($value, $row, Column $column) {
                     $buttons = "";
-                    $tools = "";
+
+                    $faxSendMode = Setting::getSetting('fax', 'send_mode', 'text');
 
                     if(auth()->user()->hasPermission('fax_send'))
                     {
@@ -163,9 +165,9 @@ class FaxesTable extends DataTableComponent
                         $buttons .= '<a href="' . route("faxes.logs", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-file-lines"></i></a>';
                     }
 
-                    if(auth()->user()->hasPermission('fax_active_view'))
+                    if(auth()->user()->hasPermission('fax_active_view') && $faxSendMode == 'queue')
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-square-check"></i></a>';
+                        $buttons .= '<a href="' . route("faxes.active", $row->fax_uuid) . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-square-check"></i></a>';
                     }
 
                     if(auth()->user()->hasPermission('fax_queue_view'))

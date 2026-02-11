@@ -165,6 +165,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/faxes/{fax}/logs', [FaxController::class, 'logs'])->name('faxes.logs');
     Route::get('/faxes/logs/{faxLog}/view', [FaxController::class, 'viewLog'])->name('faxes.logs.view');
     Route::get('/faxes/{faxFile}/download', [FaxController::class, 'download'])->name('faxes.download');
+    Route::get('/faxes/{fax}/active', [FaxController::class, 'active'])->name('faxes.active');
     Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
 
     // GROUP

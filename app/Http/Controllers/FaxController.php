@@ -176,4 +176,9 @@ class FaxController extends Controller
 	{
 		return $this->audioPlayDownloadService->download($faxFile->fax_file_path);
 	}
+
+	public function active(Fax $fax)
+	{
+		return view("pages.faxes.active", compact("fax"));
+	}
 }
