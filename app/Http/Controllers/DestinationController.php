@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DestinationRequest;
 use App\Models\Carrier;
 use App\Models\Destination;
-use App\Models\Domain;
 use App\Models\Fax;
 use App\Models\Group;
 use App\Models\User;
@@ -42,9 +41,8 @@ class DestinationController extends Controller
 		$carriers = Carrier::all();
 		$users = User::all();
 		$groups = Group::all();
-		$domains = Domain::all();
 
-		return view("pages.destinations.form", compact("faxes", "carriers", "users", "groups", "domains"));
+		return view("pages.destinations.form", compact("faxes", "carriers", "users", "groups"));
 	}
 
 	public function store(DestinationRequest $request)
@@ -67,9 +65,8 @@ class DestinationController extends Controller
 		$carriers = Carrier::all();
 		$users = User::all();
 		$groups = Group::all();
-		$domains = Domain::all();
 
-		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "users", "groups", "domains"));
+		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "users", "groups"));
 	}
 
 	public function update(DestinationRequest $request, Destination $destination)

@@ -42,19 +42,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="domain_parent_uuid" class="form-label">Domain Parent</label>
-                            <select
-                                class="form-select @error('domain_parent_uuid') is-invalid @enderror"
-                                id="domain_parent_uuid"
-                                name="domain_parent_uuid"
-                            >
-                                <option value="">Select Parent</option>
-                                @foreach($domains as $d)
-                                    <option value="{{ $d->domain_uuid }}"
-                                        {{ old('domain_parent_uuid', $domain->domain_parent_uuid ?? '') == $d->domain_uuid ? 'selected' : '' }}>
-                                        {{ $d->domain_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-drop-down-domains name="domain_parent_uuid" :selected="$domain->domain_parent_uuid ?? ''" />
                             @error('domain_parent_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StreamRequest;
-use App\Models\Domain;
 use App\Models\Stream;
 use App\Repositories\StreamRepository;
 use Illuminate\Http\Request;
@@ -25,9 +24,7 @@ class StreamController extends Controller
 
 	public function create()
 	{
-		$domains = Domain::all();
-
-		return view("pages.streams.form", compact("domains"));
+		return view("pages.streams.form");
 	}
 
 	public function store(StreamRequest $request)
@@ -44,9 +41,7 @@ class StreamController extends Controller
 
 	public function edit(Stream $stream)
 	{
-		$domains = Domain::all();
-
-		return view("pages.streams.form", compact("stream", "domains"));
+		return view("pages.streams.form", compact("stream"));
 	}
 
 	public function update(StreamRequest $request, Stream $stream)

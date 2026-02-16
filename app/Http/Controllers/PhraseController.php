@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PhraseRequest;
 use App\Models\Phrase;
-use App\Models\Domain;
 use App\Repositories\PhraseRepository;
 
 class PhraseController extends Controller
@@ -21,11 +20,9 @@ class PhraseController extends Controller
 
 	public function create()
 	{
-		$domains = Domain::all();
-
 		$sounds = getSounds();
 
-		return view("pages.phrases.form", compact("domains", "sounds"));
+		return view("pages.phrases.form", compact("sounds"));
 	}
 
 	public function store(PhraseRequest $request)
@@ -42,11 +39,9 @@ class PhraseController extends Controller
 
 	public function edit(Phrase $phrase)
 	{
-		$domains = Domain::all();
-
 		$sounds = getSounds();
 
-		return view("pages.phrases.form", compact("phrase", "domains", "sounds"));
+		return view("pages.phrases.form", compact("phrase", "sounds"));
 	}
 
 	public function update(PhraseRequest $request, Phrase $phrase)

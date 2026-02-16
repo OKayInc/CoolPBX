@@ -473,19 +473,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="domain_uuid" class="form-label">Domain</label>
-                            <select
-                                class="form-select @error('domain_uuid') is-invalid @enderror"
-                                id="domain_uuid"
-                                name="domain_uuid"
-                            >
-                                <option value="">Global</option>
-                                @foreach($domains as $domain)
-                                    <option value="{{ $domain->domain_uuid }}"
-                                        @selected(old('domain_uuid', $destination->domain_uuid ?? '') == $domain->domain_uuid)>
-                                        {{ $domain->domain_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-drop-down-domains name="domain_uuid" :selected="$destination->domain_uuid ?? ''" />
                             @error('domain_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

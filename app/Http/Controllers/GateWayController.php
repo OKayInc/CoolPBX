@@ -31,10 +31,9 @@ class GateWayController extends Controller
      */
     public function create() : View
     {
-        $domains = $this->gatewayRepository->getAllDomains();
         $profiles = $this->gatewayRepository->getAllSipProfiles();
 
-        return view('pages.gateway.form', compact('domains', 'profiles'));
+        return view('pages.gateway.form', compact('profiles'));
     }
 
     /**
@@ -43,7 +42,7 @@ class GateWayController extends Controller
     public function store(GatewayRequest $request) : RedirectResponse
     {
         $this->gatewayRepository->create($request->validated());
-        
+
         return redirect()->route('gateways.index');
     }
 
@@ -60,10 +59,9 @@ class GateWayController extends Controller
      */
     public function edit(Gateway $gateway) : View
     {
-        $domains = $this->gatewayRepository->getAllDomains();
         $profiles = $this->gatewayRepository->getAllSipProfiles();
 
-        return view('pages.gateway.form', compact('gateway', 'domains', 'profiles'));
+        return view('pages.gateway.form', compact('gateway', 'profiles'));
     }
 
     /**

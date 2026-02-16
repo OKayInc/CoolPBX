@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Destination;
 use App\Models\Dialplan;
-use App\Models\Domain;
 use App\Http\Requests\DialplanRequest;
 use App\Http\Requests\InboundDialplanRequest;
 use App\Http\Requests\OutboundDialplanRequest;
@@ -37,14 +36,13 @@ class DialplanController extends Controller
 
 	public function create()
 	{
-        $domains = $this->dialplanRepository->getAllDomains();
         $types = $this->dialplanRepository->getTypesList();
         $dialplan_default_context = $this->dialplanRepository->getDefaultContext(
             request()->input('app_uuid'),
             Session::get('domain_name')
         );
 
-		return view("pages.dialplans.form", compact("domains", "types", "dialplan_default_context"));
+		return view("pages.dialplans.form", compact("types", "dialplan_default_context"));
 	}
 
 	public function store(DialplanRequest $request)
@@ -59,12 +57,11 @@ class DialplanController extends Controller
 
 	public function edit(Dialplan $dialplan)
 	{
-		$domains = Domain::all();
 		$dialplan->load("dialplanDetails");
 		$types = $this->dialplanRepository->getTypesList();
 		$dialplan_default_context = (request()->input('app_uuid') == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : Session::get('domain_name');
 
-		return view("pages.dialplans.form", compact("dialplan", "domains", "types", "dialplan_default_context"));
+		return view("pages.dialplans.form", compact("dialplan", "types", "dialplan_default_context"));
 	}
 
 	public function update(DialplanRequest $request, Dialplan $dialplan)

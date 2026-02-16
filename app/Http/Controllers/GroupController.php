@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
-use App\Models\Domain;
 use App\Http\Requests\GroupRequest;
 use App\Repositories\GroupRepository;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
-    protected $groupRepository;    
+    protected $groupRepository;
 
     public function __construct(GroupRepository $groupRepository)
     {
@@ -25,9 +24,7 @@ class GroupController extends Controller
 
     public function create()
     {
-        $domains = Domain::all();
-
-        return view('pages.groups.form', compact('domains'));
+        return view('pages.groups.form');
     }
 
     public function store(GroupRequest $request)
@@ -44,9 +41,7 @@ class GroupController extends Controller
 
     public function edit(Group $group)
     {
-        $domains = Domain::all();
-
-        return view('pages.groups.form', compact('group', 'domains'));
+        return view('pages.groups.form', compact('group'));
     }
 
     public function update(GroupRequest $request, Group $group)

@@ -552,11 +552,7 @@
 							<div class="col-md-6">
 								<div class="form-group">
 									<label for="domain_uuid" class="form-label">Domain</label>
-									<select name="domain_uuid" class="form-select @error('domain_uuid') is-invalid @enderror" wire:model="domain_uuid">
-										@foreach($domains as $domain)
-										<option value="{{ $domain->domain_uuid }}" @selected($domain->domain_uuid == $ivrMenu?->domain_uuid ?? '')>{{ $domain->domain_name }}</option>
-										@endforeach
-									</select>
+									<x-drop-down-domains name="domain_uuid" wire:model="domain_uuid" />
 									@error('domain_uuid')
 										<div class="invalid-feedback d-block">{{ $message }}</div>
 									@enderror

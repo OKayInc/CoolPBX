@@ -26,8 +26,7 @@ class DomainController extends Controller
 
 	public function create()
 	{
-		$domains = $this->domainRepository->all();
-		return view("pages.domains.form", compact("domains"));
+		return view("pages.domains.form");
 	}
 
 	public function store(DomainRequest $request)
@@ -44,9 +43,7 @@ class DomainController extends Controller
 
 	public function edit(Domain $domain)
 	{
-		$domains = $this->domainRepository->all();
-
-		return view("pages.domains.form", compact("domain", "domains"));
+		return view("pages.domains.form", compact("domain"));
 	}
 
 	public function update(DomainRequest $request, Domain $domain)
