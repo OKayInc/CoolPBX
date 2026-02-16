@@ -35,6 +35,7 @@ use App\Http\Controllers\DeviceProfileController;
 use App\Http\Controllers\DeviceVendorController;
 use App\Http\Controllers\EmailQueueController;
 use App\Http\Controllers\FaxController;
+use App\Http\Controllers\FaxQueueController;
 use App\Http\Controllers\IVRMenuController;
 use App\Http\Controllers\LcrController;
 use App\Http\Controllers\UserGroupController;
@@ -167,6 +168,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/faxes/{faxFile}/download', [FaxController::class, 'download'])->name('faxes.download');
     Route::get('/faxes/{fax}/active', [FaxController::class, 'active'])->name('faxes.active');
     Route::resource('/faxes', FaxController::class)->name('faxes', 'faxes');
+    Route::resource('/fax_queue', FaxQueueController::class);
 
     // GROUP
     Route::resource('/groups', GroupController::class)->name('groups', 'groups');

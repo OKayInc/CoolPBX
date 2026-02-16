@@ -172,7 +172,7 @@ class FaxesTable extends DataTableComponent
 
                     if(auth()->user()->hasPermission('fax_queue_view'))
                     {
-                        $buttons .= '<a href="#" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-business-time"></i></a>';
+                        $buttons .= '<a href="' . route("fax_queue.index") . '" class="btn btn-primary btn-sm m-1"><i class="fa-solid fa-business-time"></i></a>';
                     }
 
                     return $buttons;
