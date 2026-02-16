@@ -32,9 +32,7 @@ class ConferenceRoomController extends Controller
 
 		$conferenceProfiles = ConferenceProfile::where("profile_enabled", "true")->where("profile_name", "<>", "sla")->get();
 
-		$users = User::all();
-
-		return view("pages.conferenceRooms.form", compact("conferenceCenters", "conferenceProfiles", "users"));
+		return view("pages.conferenceRooms.form", compact("conferenceCenters", "conferenceProfiles"));
 	}
 
 	public function store(ConferenceRoomRequest $request)
@@ -55,9 +53,7 @@ class ConferenceRoomController extends Controller
 
 		$conferenceProfiles = ConferenceProfile::where("profile_enabled", "true")->where("profile_name", "<>", "sla")->get();
 
-		$users = User::all();
-
-		return view("pages.conferenceRooms.form", compact("conferenceRoom", "conferenceCenters", "conferenceProfiles", "users"));
+		return view("pages.conferenceRooms.form", compact("conferenceRoom", "conferenceCenters", "conferenceProfiles"));
 	}
 
 	public function update(ConferenceRoomRequest $request, ConferenceRoom $conferenceRoom)

@@ -305,19 +305,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="user_uuid" class="form-label">User</label>
-                            <select
-                                class="form-select @error('user_uuid') is-invalid @enderror"
-                                id="user_uuid"
-                                name="user_uuid"
-                            >
-                                <option value=""></option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->user_uuid }}"
-                                        @selected(old('user_uuid', $destination->user_uuid ?? '') == $user->user_uuid)>
-                                        {{ $user->username }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-switch-users name="user_uuid" :selected="$destination->user_uuid ?? ''" />
                             @error('user_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

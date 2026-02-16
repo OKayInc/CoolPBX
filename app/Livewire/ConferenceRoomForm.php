@@ -45,8 +45,6 @@ class ConferenceRoomForm extends Component
 
     public array $conferenceRoomUsersToDelete = [];
 
-    public $users = [];
-
     protected $conferenceRoomRepository;
     protected $conferenceRoomUserRepository;
 
@@ -63,11 +61,10 @@ class ConferenceRoomForm extends Component
         return $request->rules($this->conference_room_uuid);
     }
 
-    public function mount($conferenceRoom = null, $conferenceCenters = [], $conferenceProfiles = [], $users = []): void
+    public function mount($conferenceRoom = null, $conferenceCenters = [], $conferenceProfiles = []): void
     {
         $this->conferenceCenters = $conferenceCenters;
         $this->conferenceProfiles = $conferenceProfiles;
-        $this->users = $users;
 
         if($conferenceRoom)
         {
