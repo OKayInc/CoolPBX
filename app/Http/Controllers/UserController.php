@@ -51,10 +51,9 @@ class UserController extends Controller
         $currentDomain = Domain::find(Session::get('domain_uuid'));
         $groups = $currentDomain->groups;
         $languages = Language::all();
-        $timezones = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
         $canSelectDomain = auth()->user()->hasPermission('domain_select');
 
-        return view("pages.users.form", compact("contacts", "groups", "languages", "timezones", "api_key", 'currentDomain', 'canSelectDomain'));
+        return view("pages.users.form", compact("contacts", "groups", "languages", "api_key", 'currentDomain', 'canSelectDomain'));
     }
 
     public function store(UserRequest $request)
@@ -97,13 +96,12 @@ class UserController extends Controller
         $currentDomain = Domain::find(Session::get('domain_uuid'));
         $groups = $currentDomain->groups;
         $languages = Language::all();
-        $timezones = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
         $canSelectDomain = auth()->user()->hasPermission('domain_select');
 
         $selectedLanguage = $user->userSettings->where('user_setting_subcategory', 'language')->first()->user_setting_value ?? null;
         $selectedTimezone = $user->userSettings->where('user_setting_subcategory', 'time_zone')->first()->user_setting_value ?? null;
 
-        return view("pages.users.form", compact("user", "contacts", "groups", "languages", "timezones", "selectedLanguage", "selectedTimezone", 'currentDomain', 'canSelectDomain'));
+        return view("pages.users.form", compact("user", "contacts", "groups", "languages", "selectedLanguage", "selectedTimezone", 'currentDomain', 'canSelectDomain'));
     }
 
     public function update(UserRequest $request, User $user)

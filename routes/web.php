@@ -338,6 +338,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     Route::resource('/call_flows', CallFlowController::class)->name('call_flows', 'call_flows');
 
+
 });
 
 Route::post('/switch/xml_handler/{binding}', function (Request $request, string $binding) {

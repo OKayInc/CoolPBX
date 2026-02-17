@@ -131,13 +131,13 @@
                 <!-- Time Zone -->
                 <div class="col-md-6 mb-3">
                     <label for="contactTimeZone" class="form-label">Time Zone</label>
-                    <select id="contactTimeZone" wire:model="contactTimeZone"
-                        class="form-select @error('contactTimeZone') is-invalid @enderror">
-                        <option value="">Select a time zone...</option>
-                        @foreach ($timeZones as $tz)
-                            <option value="{{ $tz }}">{{ $tz }}</option>
-                        @endforeach
-                    </select>
+                    <x-drop-down-timezones
+                        name="contactTimeZone"
+                        :selected="$contactTimeZone"
+                        wire:model="contactTimeZone"
+                        id="contactTimeZone"
+                        class="form-select @error('contactTimeZone') is-invalid @enderror"
+                    />
                     @error('contactTimeZone')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

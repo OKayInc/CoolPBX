@@ -139,19 +139,12 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="timezone" class="form-label">Timezone</label>
-                            <select
-                                class="form-select @error('timezone') is-invalid @enderror"
-                                id="timezone"
+                            <x-drop-down-timezones
                                 name="timezone"
-                            >
-                                <option value="">Select timezone</option>
-                                @foreach($timezones as $timezone)
-                                    <option value="{{ $timezone }}"
-									    {{ old('user_timezone', $selectedTimezone ?? '') == $timezone ? 'selected' : '' }}>
-                                        {{ $timezone }}
-                                    </option>
-                                @endforeach
-                            </select>
+                                :selected="old('timezone', $selectedTimezone ?? '')"
+                                id="timezone"
+                                class="form-select @error('timezone') is-invalid @enderror"
+                            />
                             @error('timezone')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

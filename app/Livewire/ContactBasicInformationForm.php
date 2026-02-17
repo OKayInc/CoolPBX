@@ -25,7 +25,6 @@ class ContactBasicInformationForm extends Component
     public $contactNote;
 
     public $contactTypes = ['customer', 'contractor','friend', 'lead', 'member', 'family', 'subscriber', 'supplier', 'provider', 'user', 'volunteer'];
-    public $timeZones = [];
 
     public function rules()
     {
@@ -40,7 +39,6 @@ class ContactBasicInformationForm extends Component
     public function mount($contactUuid)
     {
         $this->contactUuid = $contactUuid;
-        $this->loadTimeZones();
 
         $contact = Contact::where('contact_uuid', $this->contactUuid)->first();
 
@@ -59,11 +57,6 @@ class ContactBasicInformationForm extends Component
             $this->contactTimeZone = $contact->contact_time_zone;
             $this->contactNote = $contact->contact_note;
         }
-    }
-
-    public function loadTimeZones()
-    {
-        $this->timeZones = \DateTimeZone::listIdentifiers();
     }
 
     public function save()
