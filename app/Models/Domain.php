@@ -74,7 +74,10 @@ class Domain extends Model
 	}
 
 	public function groups(): HasMany {
-		return $this->hasMany(Group::class, 'domain_uuid', 'domain_uuid')->orWhereNull('domain_uuid'); //->select('*',DB::raw("CONCAT(".Group::getTableName().".group_name,'@', IFNULL(v_domains.domain_name,'Global')) AS group_name_group"));
+		return $this->hasMany(Group::class, 'domain_uuid', 'domain_uuid')
+		->orWhereNull('domain_uuid')
+		->orderBy('group_name', 'asc');
+		 //->select('*',DB::raw("CONCAT(".Group::getTableName().".group_name,'@', IFNULL(v_domains.domain_name,'Global')) AS group_name_group"));
 	}
 
 	public function userGroups(): HasMany {

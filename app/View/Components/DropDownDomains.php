@@ -3,10 +3,8 @@
 namespace App\View\Components;
 
 use App\Models\Domain;
-use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Session;
 use Illuminate\View\Component;
 
 class DropDownDomains extends Component

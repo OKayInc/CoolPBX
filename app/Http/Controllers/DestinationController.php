@@ -5,13 +5,10 @@ use App\Http\Requests\DestinationRequest;
 use App\Models\Carrier;
 use App\Models\Destination;
 use App\Models\Fax;
-use App\Models\Group;
 use App\Repositories\DestinationRepository;
 use App\Repositories\DialplanRepository;
 use App\Services\DialplanService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Session;
 
 class DestinationController extends Controller
 {
@@ -38,9 +35,8 @@ class DestinationController extends Controller
 	{
 		$faxes = Fax::all();
 		$carriers = Carrier::all();
-		$groups = Group::all();
 
-		return view("pages.destinations.form", compact("faxes", "carriers", "groups"));
+		return view("pages.destinations.form", compact("faxes", "carriers"));
 	}
 
 	public function store(DestinationRequest $request)
@@ -61,9 +57,8 @@ class DestinationController extends Controller
 	{
 		$faxes = Fax::all();
 		$carriers = Carrier::all();
-		$groups = Group::all();
 
-		return view("pages.destinations.form", compact("destination", "faxes", "carriers", "groups"));
+		return view("pages.destinations.form", compact("destination", "faxes", "carriers"));
 	}
 
 	public function update(DestinationRequest $request, Destination $destination)

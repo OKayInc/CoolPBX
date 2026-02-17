@@ -48,15 +48,7 @@
 						</div>
 						<div class="form-group">
 							<label>Groups</label>
-							@foreach($groups as $group)
-							@php
-								$checked = isset($menuitem) && $menuitem->groups->contains('group_uuid', $group->group_uuid);
-							@endphp
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" name="groups[]" value="{{ $group->group_uuid }}" @if($checked) checked @endif>
-								<label class="form-check-label">{{ $group->full_group_name }}</label>
-							</div>
-							@endforeach
+							<x-list-groups name="groups" :selected="$menuitem->groups ?? []" />
 						</div>
 						<div class="form-group">
 							<label for="menu_item_protected">Protected</label>

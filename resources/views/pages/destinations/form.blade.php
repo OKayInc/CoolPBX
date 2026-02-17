@@ -319,19 +319,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="group_uuid" class="form-label">Group</label>
-                            <select
-                                class="form-select @error('group_uuid') is-invalid @enderror"
-                                id="group_uuid"
-                                name="group_uuid"
-                            >
-                                <option value=""></option>
-                                @foreach($groups as $group)
-                                    <option value="{{ $group->group_uuid }}"
-                                        @selected(old('group_uuid', $destination->group_uuid ?? '') == $group->group_uuid)>
-                                        {{ $group->group_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-list-groups name="group_uuid" :selected="$destination->group_uuid ?? ''" :multiple="false" />
                             @error('group_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

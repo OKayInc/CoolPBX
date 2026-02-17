@@ -2,25 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\DefaultSetting;
-use App\Http\Controllers\DomainSettingController;
-use App\Http\Controllers\UserSettingController;
 use App\Http\Requests\UserRequest;
 use App\Models\Contact;
 use App\Models\Domain;
-use App\Models\Group;
 use App\Models\Language;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\SettingService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-
 
 class UserController extends Controller
 {
@@ -49,12 +41,11 @@ class UserController extends Controller
 
         $contacts = Contact::all();
         $currentDomain = Domain::find(Session::get('domain_uuid'));
-        $groups = $currentDomain->groups;
         $languages = Language::all();
         $timezones = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
         $canSelectDomain = auth()->user()->hasPermission('domain_select');
 
-        return view("pages.users.form", compact("contacts", "groups", "languages", "timezones", "api_key", 'currentDomain', 'canSelectDomain'));
+        return view("pages.users.form", compact("contacts", "languages", "timezones", "api_key", 'currentDomain', 'canSelectDomain'));
     }
 
     public function store(UserRequest $request)
@@ -95,7 +86,6 @@ class UserController extends Controller
     {
         $contacts = Contact::all();
         $currentDomain = Domain::find(Session::get('domain_uuid'));
-        $groups = $currentDomain->groups;
         $languages = Language::all();
         $timezones = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
         $canSelectDomain = auth()->user()->hasPermission('domain_select');
@@ -103,7 +93,7 @@ class UserController extends Controller
         $selectedLanguage = $user->userSettings->where('user_setting_subcategory', 'language')->first()->user_setting_value ?? null;
         $selectedTimezone = $user->userSettings->where('user_setting_subcategory', 'time_zone')->first()->user_setting_value ?? null;
 
-        return view("pages.users.form", compact("user", "contacts", "groups", "languages", "timezones", "selectedLanguage", "selectedTimezone", 'currentDomain', 'canSelectDomain'));
+        return view("pages.users.form", compact("user", "contacts", "languages", "timezones", "selectedLanguage", "selectedTimezone", 'currentDomain', 'canSelectDomain'));
     }
 
     public function update(UserRequest $request, User $user)
