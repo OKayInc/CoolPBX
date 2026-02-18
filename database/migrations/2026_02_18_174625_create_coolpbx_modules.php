@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Domain;
+use App\Models\Module;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = Module::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = Module::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,17 +50,20 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_parent_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('domain_description')->nullable(false)->comment('Dommain description');
+        $table->uuid('module_uuid')->nullable(false)->primary()->first();
+        $table->string('module_label', length: 255)->nullable(false);
+        $table->string('module_name', length: 255)->nullable();
+        $table->string('module_category', length: 255)->nullable();
+        $table->unsignedTinyInteger('module_order')->default(0)->nullable(false);
+        $table->enum('module_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->enum('module_default_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->longText('module_description')->nullable();
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
+        $table->comment('CoolPBX module information');
     }
 };

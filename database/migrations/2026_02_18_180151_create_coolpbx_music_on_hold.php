@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Domain;
+use App\Models\MusicOnHold;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = MusicOnHold::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = MusicOnHold::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,17 +50,24 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_parent_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('domain_description')->nullable(false)->comment('Dommain description');
+        $table->uuid('music_on_hold_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable();
+        $table->string('music_on_hold_name', length: 255)->nullable(false);
+        $table->string('music_on_hold_path', length: 255)->nullable();
+        $table->enum('music_on_hold_rate', [8000, 16000, 32000, 48000])->nullable(false);
+        $table->enum('music_on_hold_shuffle', ['true','false'])->default('false')->nullable(false);
+        $table->unsignedTinyInteger('music_on_hold_channels')->nullable(false);
+        $table->unsignedTinyInteger('music_on_hold_interval')->nullable();
+        $table->string('music_on_hold_timer_name', length: 255)->nullable();
+        $table->string('music_on_hold_chime_list', length: 1024)->nullable();
+        $table->enum('music_on_hold_chime_freq', [8000, 16000, 32000, 48000])->nullable();
+        $table->unsignedTinyInteger('music_on_hold_chime_max')->nullable();
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
+        $table->comment('CoolPBX music on hold information');
     }
 };

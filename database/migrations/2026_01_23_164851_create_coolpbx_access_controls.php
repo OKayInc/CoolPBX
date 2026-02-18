@@ -52,7 +52,6 @@ return new class extends Migration
 
         $table->uuid('access_control_uuid')->nullable(false)->primary()->first();
         $table->string('access_control_name', length: 255)->nullable(false);
-        $table->string('password', length: 60)->nullable(false);
         $table->enum('access_control_default', ['deny','allow'])->default('deny')->nullable(false);
         $table->longText('access_control_description')->nullable();
 

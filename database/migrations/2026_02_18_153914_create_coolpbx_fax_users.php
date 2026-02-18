@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Domain;
+use App\Models\FaxUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = FaxUser::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = FaxUser::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,17 +50,16 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_parent_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('domain_description')->nullable(false)->comment('Dommain description');
+        $table->uuid('fax_user_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('fax_uuid')->nullable(false);
+        $table->uuid('user_uuid')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
+        $table->comment('CoolPBX fax user detail information');
     }
 };
