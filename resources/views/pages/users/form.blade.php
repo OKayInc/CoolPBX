@@ -163,19 +163,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="contact_uuid" class="form-label">Contact</label>
-                            <select
-                                class="form-select @error('contact_uuid') is-invalid @enderror"
-                                id="contact_uuid"
-                                name="contact_uuid"
-                            >
-                                <option value="">Select contact</option>
-                                @foreach($contacts as $contact)
-                                    <option value="{{ $contact->contact_uuid }}"
-										{{ old('contact_uuid', $user->contact_uuid ?? '') == $contact->contact_uuid ? 'selected' : '' }}>
-                                        {{ $contact->contact_nickname }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-switch-contacts name="contact_uuid" selected="{{ old('contact_uuid', $user->contact_uuid ?? null) }}" class="@error('contact_uuid') is-invalid @enderror" />
                             @error('contact_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
