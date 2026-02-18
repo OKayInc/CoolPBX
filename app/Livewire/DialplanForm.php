@@ -37,7 +37,6 @@ class DialplanForm extends Component
     public bool $canDeleteDialplanDetail = false;
 
     public $dialplan_default_context = '';
-    public $domains = [];
     public $types = [];
 
     protected $dialplanRepository;
@@ -55,9 +54,8 @@ class DialplanForm extends Component
         return $request->rules();
     }
 
-    public function mount($dialplan = null, $domains = [], $types = [], $dialplan_default_context = ''): void
+    public function mount($dialplan = null, $types = [], $dialplan_default_context = ''): void
     {
-        $this->domains = $domains;
         $this->types = $types;
         $this->dialplan_default_context = $dialplan_default_context;
 
