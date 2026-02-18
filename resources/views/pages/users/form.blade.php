@@ -115,19 +115,12 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="language" class="form-label">Language</label>
-                            <select
-                                class="form-select @error('language') is-invalid @enderror"
-                                id="language"
+                            <x-drop-down-language
                                 name="language"
-                            >
-                                <option value="">Select language</option>
-                                @foreach($languages as $language)
-                                    <option value="{{ $language->code }}"
-										{{ old('language', $selectedLanguage ?? '') == $language->code ? 'selected' : '' }}>
-                                        {{ $language->language }} [{{ $language->code }}]
-                                    </option>
-                                @endforeach
-                            </select>
+                                :selected="old('language', $selectedLanguage ?? '')"
+                                id="language"
+                                class="@error('language') is-invalid @enderror"
+                            />
                             @error('language')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
