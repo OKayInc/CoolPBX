@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\View\Component;
 use Closure;
 
-class SwitchDestinations extends Component
+class DropDownDestinations extends Component
 {
     public $name;
     public $selected;
@@ -428,6 +428,6 @@ class SwitchDestinations extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.switch-destinations');
+        return view('components.drop-down-destinations');
     }
 }

@@ -346,7 +346,7 @@
                                                     </td>
                                                     <td>
 
-                                                        <x-switch-destinations
+                                                        <x-drop-down-destinations
                                                             name="voicemailOptions.{{ $index }}.voicemail_option_param"
                                                             :selected="$voicemailOption['voicemail_option_param'] ?? ''" extension-type="ivr"
                                                             ring-group-type="ivr" voice-mail-type="ivr"

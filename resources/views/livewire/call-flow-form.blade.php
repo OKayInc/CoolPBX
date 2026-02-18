@@ -169,7 +169,7 @@
                             <div class="col-12 mb-3">
                                 <label for="call_flow_destination" class="form-label">Destination <span
                                         class="text-danger">*</span></label>
-                                <x-switch-destinations name="call_flow_destination" :selected="$call_flow_destination ?? ''"
+                                <x-drop-down-destinations name="call_flow_destination" :selected="$call_flow_destination ?? ''"
                                     extension-type="dialplan" ring-group-type="dialplan" voice-mail-type="dialplan"
                                     call-center-type="dialplan" call-flow-type="dialplan"
                                     conference-center-type="dialplan" ivr-menu-type="dialplan"
@@ -237,7 +237,7 @@
                             <div class="col-12 mb-3">
                                 <label for="call_flow_alternate_destination" class="form-label">Alternate
                                     Destination</label>
-                                <x-switch-destinations name="call_flow_alternate_destination" :selected="$call_flow_alternate_destination ?? ''"
+                                <x-drop-down-destinations name="call_flow_alternate_destination" :selected="$call_flow_alternate_destination ?? ''"
                                     extension-type="dialplan" ring-group-type="dialplan" voice-mail-type="dialplan"
                                     call-center-type="dialplan" call-flow-type="dialplan"
                                     conference-center-type="dialplan" ivr-menu-type="dialplan"

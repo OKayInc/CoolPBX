@@ -255,7 +255,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="queue_timeout_action" class="form-label">Timeout
                                                 Action</label>
-                                            <x-switch-destinations name="queue_timeout_action" :selected="$queue_timeout_action ?? ''"
+                                            <x-drop-down-destinations name="queue_timeout_action" :selected="$queue_timeout_action ?? ''"
                                                 extension-type="dialplan" ring-group-type="dialplan"
                                                 voice-mail-type="dialplan" call-center-type="dialplan"
                                                 conference-center-type="dialplan" ivr-menu-type="dialplan"

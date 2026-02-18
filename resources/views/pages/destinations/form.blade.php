@@ -240,7 +240,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_actions" class="form-label">Action</label>
-                            <x-switch-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" required/>
+                            <x-drop-down-destinations name="destination_actions" selected="{{ $destination->destination_actions ?? '' }}" bridgeType="dialplan" callCenterType="dialplan" conferenceCenterType="dialplan" extensionType="dialplan" ivrMenuType="dialplan" switchType="dialplan" timeConditionType="dialplan" toneType="dialplan" voiceMailType="dialplan" required/>
                             @error('destination_actions')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

@@ -148,7 +148,7 @@
 													@enderror
 												</td>
 												<td>
-													<x-switch-destinations name="ivr_menu_option_param" data-x="$ivrMenuOptions.{{$index}}.ivr_menu_option_param ?? ''"
+													<x-drop-down-destinations name="ivr_menu_option_param" data-x="$ivrMenuOptions.{{$index}}.ivr_menu_option_param ?? ''"
 														:selected="$ivrMenuOptions[$index]['ivr_menu_option_param'] ?? ''"
 														extension-type="ivr"
 														ring-group-type="ivr"
@@ -229,7 +229,7 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label class="form-label d-block">Exit action</label>
-								<x-switch-destinations name="ivr_menu_exit_action"
+								<x-drop-down-destinations name="ivr_menu_exit_action"
 									:selected="$ivrMenu->ivr_menu_exit_action ?? ''"
 									extension-type="dialplan"
 									ring-group-type="dialplan"

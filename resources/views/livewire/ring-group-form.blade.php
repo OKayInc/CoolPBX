@@ -471,7 +471,7 @@
                                     <div class="form-group mb-3">
                                         <label for="ring_group_timeout_action" class="form-label">Timeout Destination</label>
 
-                                        <x-switch-destinations name="ring_group_timeout_action" :selected="$ring_group_timeout_action ?? ''"
+                                        <x-drop-down-destinations name="ring_group_timeout_action" :selected="$ring_group_timeout_action ?? ''"
                                             extension-type="dialplan" ring-group-type="dialplan"
                                             voice-mail-type="dialplan" call-center-type="dialplan"
                                             conference-center-type="dialplan" ivr-menu-type="dialplan"

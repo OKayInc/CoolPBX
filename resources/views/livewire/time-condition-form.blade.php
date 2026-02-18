@@ -201,7 +201,7 @@
                                             <div class="card mt-2 border-warning">
                                                 <div class="card-body">
                                                     <label class="form-label">Default Preset Action</label>
-                                                    <x-switch-destinations name="default_preset_action"
+                                                    <x-drop-down-destinations name="default_preset_action"
                                                         :selected="$default_preset_action ?? ''" bridge-type="dialplan"
                                                         call-center-type="dialplan" conference-center-type="dialplan"
                                                         extension-type="dialplan" ivr-menu-type="dialplan"
@@ -463,7 +463,7 @@
                                                             <div class="card-body p-3">
                                                                 <div class="col-12 mt-3">
                                                                     <label class="form-label">Then route to:</label>
-                                                                    <x-switch-destinations
+                                                                    <x-drop-down-destinations
                                                                         name="customConditions[{{ $groupIndex }}][action]"
                                                                         :selected="$group['action'] ?? ''" bridge-type="dialplan"
                                                                         call-center-type="dialplan"
@@ -521,7 +521,7 @@
                                 <div class="card border-warning">
                                     <div class="card-body">
                                         <label class="form-label fw-bold">Default Route To:</label>
-                                        <x-switch-destinations name="dialplan_anti_action" :selected="$dialplan_anti_action ?? ''"
+                                        <x-drop-down-destinations name="dialplan_anti_action" :selected="$dialplan_anti_action ?? ''"
                                             bridge-type="dialplan" call-center-type="dialplan"
                                             conference-center-type="dialplan" extension-type="dialplan"
                                             ivr-menu-type="dialplan" time-condition-type="dialplan"
