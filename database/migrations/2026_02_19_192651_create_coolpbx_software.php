@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\App;
+use App\Models\Software;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = App::getTableName();
+        $tableName = Software::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = App::getTableName();
+        $tableName = Software::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,16 +50,16 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('app_uuid')->nullable(false)->primary()->first();
-        $table->string('app_name', length: 255)->nullable();
-        $table->string('app_controller', length: 255)->nullable();
-        $table->longText('app_description')->nullable();
+        $table->uuid('software_uuid')->nullable(false)->primary()->first();
+        $table->string('software_name', length: 255)->nullable(false);
+        $table->string('software_url', length: 1024)->nullable();
+        $table->string('software_version', length: 255)->nullable();
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX application information');
+        $table->comment('CoolPBX setting information');
     }
 };

@@ -267,12 +267,19 @@ class Domain extends Model
 			});
 	}
 
-	public function phrases(?bool $phrase_enabled = null): HasMany {
+	public function phrases(?bool $pin_enabled = null): HasMany {
 		return $this->hasMany(Phrase::class, 'domain_uuid', 'domain_uuid')
-			->when(is_bool($phrase_enabled), function ($query) use ($phrase_enabled) {
-				return $query->where('phrase_enabled', $phrase_enabled ? 'true' : 'false');
+			->when(is_bool($pin_enabled), function ($query) use ($pin_enabled) {
+				return $query->where('enabled', $pin_enabled ? 'true' : 'false');
 			});
 	}
+
+	public function pinNumbers(?bool $phrase_enabled = null): HasMany {
+        return $this->hasMany(PinNumber::class, 'domain_uuid', 'domain_uuid')
+        ->when(is_bool($phrase_enabled), function ($query) use ($phrase_enabled) {
+            return $query->where('phrase_enabled', $phrase_enabled ? 'true' : 'false');
+        });
+    }
 
 	public function ringGroupForward(?bool $ring_group_forward_enabled = null): HasMany {
 		return $this->hasMany(RingGroup::class, 'domain_uuid', 'domain_uuid')

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\App;
+use App\Models\Setting;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = App::getTableName();
+        $tableName = Setting::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = App::getTableName();
+        $tableName = Setting::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,16 +50,25 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('app_uuid')->nullable(false)->primary()->first();
-        $table->string('app_name', length: 255)->nullable();
-        $table->string('app_controller', length: 255)->nullable();
-        $table->longText('app_description')->nullable();
+        $table->uuid('setting_uuid')->nullable(false)->primary()->first();
+        $table->string('numbering_plan', length: 255)->nullable(false);
+        $table->ipAddress('event_socket_ip_address')->default('127.0.0.1')->nullable(false);
+        $table->unsignedTinyInteger('event_socket_port')->default(8021)->nullable(false);
+        $table->string('event_socket_password', length: 255)->default('ClueCon')->nullable();
+        $table->string('event_socket_acl', length: 255)->nullable();
+        $table->unsignedTinyInteger('xml_rpc_http_port')->default(8080)->nullable(false);
+        $table->string('xml_rpc_auth_realm', length: 255)->nullable(false);
+        $table->string('xml_rpc_auth_user', length: 255)->nullable(false);
+        $table->string('xml_rpc_auth_pass', length: 255)->nullable(false);
+        $table->unsignedTinyInteger('admin_pin')->nullable();
+        $table->enum('mod_shout_decoder', ['i486','i586','i686','amd64','generic'])->nullable();
+        $table->decimal('mod_shout_volume', total: 3, places: 1)->default(0.3)->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX application information');
+        $table->comment('CoolPBX setting information');
     }
 };

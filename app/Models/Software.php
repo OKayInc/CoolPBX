@@ -14,11 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Setting extends Model
+class Software extends Model
 {
 	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
-	protected $table = 'v_settings';
-	protected $primaryKey = 'setting_uuid';
+	protected $table = 'v_software';
+	protected $primaryKey = 'software_uuid';
 	public $incrementing = false;
 	protected $keyType = 'string';	// TODO, check if UUID is valid
 	const CREATED_AT = 'insert_date';
@@ -30,18 +30,9 @@ class Setting extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
-        'numbering_plan',
-        'event_socket_ip_address',
-        'event_socket_port',
-        'event_socket_password',
-        'event_socket_acl',
-        'xml_rpc_http_port',
-        'xml_rpc_auth_realm',
-        'xml_rpc_auth_user',
-        'xml_rpc_auth_pass',
-        'admin_pin',
-        'mod_shout_decoder',
-        'mod_shout_volume',
+        'software_name',
+        'software_url',
+        'software_version',
 	];
 
     /**
@@ -59,5 +50,4 @@ class Setting extends Model
      */
 	protected $casts = [
 	];
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\App;
+use App\Models\RingGroupUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = App::getTableName();
+        $tableName = RingGroupUser::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = App::getTableName();
+        $tableName = RingGroupUser::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,16 +50,16 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('app_uuid')->nullable(false)->primary()->first();
-        $table->string('app_name', length: 255)->nullable();
-        $table->string('app_controller', length: 255)->nullable();
-        $table->longText('app_description')->nullable();
+        $table->uuid('ring_group_user_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('ring_group_uuid')->nullable(false);
+        $table->uuid('user_uuid')->nullable(false);
 
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX application information');
+        $table->comment('CoolPBX ring group user detail information');
     }
 };
