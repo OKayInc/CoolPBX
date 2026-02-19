@@ -90,7 +90,7 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label for="ivr_menu_greet_long" class="form-label">Greet long</label>
-								<x-switch-music-on-hold name="ivr_menu_greet_long" class="form-select"
+								<x-drop-down-sounds name="ivr_menu_greet_long" class="form-select"
 									:selected="$ivrMenu?->ivr_menu_greet_long"
 									:withRecordings="true"
 									:withPhrases="true"
@@ -108,7 +108,7 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label for="ivr_menu_greet_short" class="form-label">Greet short</label>
-								<x-switch-music-on-hold name="ivr_menu_greet_short" class="form-select"
+								<x-drop-down-sounds name="ivr_menu_greet_short" class="form-select"
 									:selected="$ivrMenu?->ivr_menu_greet_short"
 									:withRecordings="true"
 									:withPhrases="true"
@@ -266,7 +266,7 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label class="form-label d-block">Ring back</label>
-								<x-switch-music-on-hold name="ivr_menu_ringback" class="form-select"
+								<x-drop-down-sounds name="ivr_menu_ringback" class="form-select"
 									:selected="$ivrMenu?->ivr_menu_ringback"
 									:withMusicOnHold="true"
 									:withRecordings="true"
@@ -315,7 +315,7 @@
 							<div class="col-md-6">
 								<div class="form-group">
 									<label for="ivr_menu_invalid_sound" class="form-label">Invalid sound</label>
-									<x-switch-music-on-hold name="ivr_menu_invalid_sound" class="form-select"
+									<x-drop-down-sounds name="ivr_menu_invalid_sound" class="form-select"
 										:selected="$ivrMenu?->ivr_menu_invalid_sound"
 										:withRecordings="true"
 										:withPhrases="true"
@@ -333,7 +333,7 @@
 							<div class="col-md-6">
 								<div class="form-group">
 									<label for="ivr_menu_exit_sound" class="form-label">Exit sound</label>
-									<x-switch-music-on-hold name="ivr_menu_exit_sound" class="form-select"
+									<x-drop-down-sounds name="ivr_menu_exit_sound" class="form-select"
 										:selected="$ivrMenu?->ivr_menu_exit_sound"
 										:withRecordings="true"
 										:withPhrases="true"

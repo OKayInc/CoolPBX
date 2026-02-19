@@ -371,7 +371,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="destination_hold_music" class="form-label">Hold music</label>
-                            <x-switch-music-on-hold name="destination_hold_music" selected="{{ $destination->destination_hold_music ?? null }}" withMusicOnHold=true withStreams=true />
+                            <x-drop-down-sounds name="destination_hold_music" selected="{{ $destination->destination_hold_music ?? null }}" withMusicOnHold=true withStreams=true />
                         </div>
                     </div>
                 </div>

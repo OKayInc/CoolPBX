@@ -12,7 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\Component;
 
-class SwitchMusicOnHold extends Component
+class DropDownSounds extends Component
 {
     public $name;
     public $selected;
@@ -218,6 +218,6 @@ class SwitchMusicOnHold extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.switch-music-on-hold');
+        return view('components.drop-down-sounds');
     }
 }

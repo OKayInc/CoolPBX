@@ -61,7 +61,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="conference_center_greeting" class="form-label">Greeting</label>
-                            <x-switch-music-on-hold name="conference_center_greeting" selected="{{ $conferenceCenter->conference_center_greeting ?? null }}" withRecordings=true withPhrases=true withStreams=true withSounds=true withOthers=false />
+                            <x-drop-down-sounds name="conference_center_greeting" selected="{{ $conferenceCenter->conference_center_greeting ?? null }}" withRecordings=true withPhrases=true withStreams=true withSounds=true withOthers=false />
                             @error('conference_center_greeting')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

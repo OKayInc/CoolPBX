@@ -279,7 +279,7 @@
 								<div class="form-group">
 									<label class="form-label">Greeting</label>
 
-									<x-switch-music-on-hold name="fax_send_greeting"
+									<x-drop-down-sounds name="fax_send_greeting"
 										:selected="$fax->fax_send_greeting ?? ''"
 									    :withRecordings=true
 										:withPhrases="true"

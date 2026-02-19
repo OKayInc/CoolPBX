@@ -85,7 +85,7 @@
                                         <div class="form-group mb-3">
                                             <label for="queue_moh_sound" class="form-label">Music on Hold</label>
 
-                                            <x-switch-music-on-hold name="queue_moh_sound" :selected="$queue_moh_sound"
+                                            <x-drop-down-sounds name="queue_moh_sound" :selected="$queue_moh_sound"
                                                 :withMusicOnHold="true" :withRingsTones="true" :withStreams="true"
                                                 wire:model="queue_moh_sound" class="form-select" />
 
@@ -98,7 +98,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="queue_announce_sound" class="form-label">Caller Announce
                                             Sound</label>
-                                        <x-switch-music-on-hold name="queue_announce_sound" :selected="$queue_announce_sound"
+                                        <x-drop-down-sounds name="queue_announce_sound" :selected="$queue_announce_sound"
                                             :withMusicOnHold="false" :withRecordings="true" :withRingsTones="false" :withStreams="false"
                                             wire:model="queue_announce_sound" class="form-select " />
                                         @error('queue_announce_sound')
