@@ -25,7 +25,6 @@ class BillingDealForm extends Component
 	public string $currency = '';
 	public string $billing_deal_notes = '';
 
-    public $billingProfiles = [];
     public ?array $billingDealProfiles = [];
 
     public array $billingDealProfilesToDelete = [];
@@ -46,17 +45,8 @@ class BillingDealForm extends Component
         return $request->rules();
     }
 
-    public function mount($billingDeal = null, $billingProfiles): void
+    public function mount($billingDeal = null): void
     {
-        $this->billingProfiles = $billingProfiles
-            ->map(fn($b) => [
-                'billing_uuid' => $b->billing_uuid,
-                'contact_organization' => $b->contact_organization,
-                'contact_name_family' => $b->contact_name_family,
-                'contact_name_given' => $b->contact_name_given,
-            ])
-            ->toArray();
-
         if($billingDeal)
         {
             $this->billingDeal = $billingDeal;

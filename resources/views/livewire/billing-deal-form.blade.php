@@ -126,16 +126,7 @@
 											@foreach($billingDealProfiles as $index => $billingDealProfile)
 											<tr>
 												<td>
-													<select name="billingDealProfiles.{{ $index }}.billing_uuid" class="form-select" wire:model="billingDealProfiles.{{ $index }}.billing_uuid">
-														<option value=""></option>
-														@foreach($billingProfiles as $billingProfile)
-														<option value="{{ $billingProfile['billing_uuid'] }}">
-															{{ $billingProfile['contact_organization'] }}
-															{{ $billingProfile['contact_name_family'] }}
-															{{ $billingProfile['contact_name_given'] }}
-														</option>
-														@endforeach
-													</select>
+													<x-drop-down-billing-profiles name="billingDealProfiles.{{ $index }}.billing_uuid" wire:model="billingDealProfiles.{{ $index }}.billing_uuid" />
 													@error('billingDealProfiles.' . $index . '.billing_uuid')
 														<div class="invalid-feedback d-block">{{ $message }}</div>
 													@enderror
