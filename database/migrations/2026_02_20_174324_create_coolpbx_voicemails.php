@@ -50,24 +50,28 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('user_uuid')->nullable(false)->primary()->first();
+        $table->uuid('voicemail_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->uuid('contact_uuid')->nullable();
-        $table->string('username', length: 255)->nullable(false);
-        $table->string('password', length: 60)->nullable(false);
-        $table->string('salt', length: 255)->nullable();
-        $table->string('user_email', length: 255)->nullable(false);
-        $table->string('user_status', length: 255)->nullable();
-        $table->string('api_key', length: 36)->nullable();
-        $table->string('user_totp_secret', length: 255)->nullable(false);
-        $table->enum('user_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('token')->nullable();
-        $table->text('remember_token')->nullable();
+        $table->string('voicemail_id', length: 255)->nullable(false);
+        $table->string('voicemail_password', length: 60)->nullable(false);
+        $table->unsignedTinyInteger('greeting_id')->default(0)->nullable(false);
+        $table->unsignedTinyInteger('voicemail_alternate_greet_id')->nullable();
+        $table->string('voicemail_mail_to', length: 255)->nullable();
+        $table->string('voicemail_sms_to', length: 255)->nullable();
+        $table->enum('voicemail_transcription_enabled', ['true','false'])->default('false')->nullable(false);
+        $table->string('voicemail_attach_file', length: 255)->nullable();
+        $table->enum('voicemail_file', ['link','attach'])->nullable();
+        $table->enum('voicemail_local_after_email', ['true','false'])->default('false')->nullable(false);
+        $table->longText('voicemail_name_base64')->nullable();
+        $table->enum('voicemail_tutorial', ['true','false'])->default('false')->nullable(false);
+        $table->longText('voicemail_description')->nullable();
+        $table->enum('voicemail_enabled', ['true','false'])->default('false')->nullable(false);
+
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX user information');
+        $table->comment('CoolPBX voicemail information');
     }
 };

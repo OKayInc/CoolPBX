@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\SipProfileSetting;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = SipProfileSetting::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = SipProfileSetting::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -50,24 +50,18 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('user_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable(false);
-        $table->uuid('contact_uuid')->nullable();
-        $table->string('username', length: 255)->nullable(false);
-        $table->string('password', length: 60)->nullable(false);
-        $table->string('salt', length: 255)->nullable();
-        $table->string('user_email', length: 255)->nullable(false);
-        $table->string('user_status', length: 255)->nullable();
-        $table->string('api_key', length: 36)->nullable();
-        $table->string('user_totp_secret', length: 255)->nullable(false);
-        $table->enum('user_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->text('token')->nullable();
-        $table->text('remember_token')->nullable();
+        $table->uuid('sip_profile_setting_uuid')->nullable(false)->primary()->first();
+        $table->uuid('sip_profile_uuid')->nullable(false);
+        $table->string('sip_profile_setting_name', length: 255)->nullable(false);
+        $table->string('sip_profile_setting_value', length: 255)->nullable(false);
+        $table->longText('sip_profile_setting_description')->nullable();
+        $table->enum('sip_profile_setting_enabled', ['true','false'])->default('false')->nullable(false);
+
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
-        $table->comment('CoolPBX user information');
+        $table->comment('CoolPBX sip profile setting detail information');
     }
 };
