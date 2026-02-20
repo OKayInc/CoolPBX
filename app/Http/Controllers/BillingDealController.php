@@ -2,10 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BillingDealRequest;
-use App\Models\Billing;
 use App\Models\BillingDeal;
 use App\Repositories\BillingDealRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class BillingDealController extends Controller
@@ -24,9 +22,7 @@ class BillingDealController extends Controller
 
 	public function create()
 	{
-		$billingProfiles = Billing::parentProfiles();
-
-		return view("pages.billings.deals.form", compact("billingProfiles"));
+		return view("pages.billings.deals.form");
 	}
 
 	public function store(BillingDealRequest $request)
@@ -47,9 +43,7 @@ class BillingDealController extends Controller
 
 	public function edit(BillingDeal $billingDeal)
 	{
-		$billingProfiles = Billing::parentProfiles();
-
-		return view("pages.billings.deals.form", compact("billingDeal", "billingProfiles"));
+		return view("pages.billings.deals.form", compact("billingDeal"));
 	}
 
 	public function update(BillingDealRequest $request, BillingDeal $billingDeal)

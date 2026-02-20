@@ -21,18 +21,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="parent_billing_uuid" class="form-label">Parent profile</label>
-                            <select
-                                class="form-select @error('parent_billing_uuid') is-invalid @enderror"
-                                id="parent_billing_uuid"
-                                name="parent_billing_uuid"
-                            >
-                                <option value="">(none)</option>
-                                @foreach($billings as $b)
-                                    <option value="{{ $b->billing_uuid }}" @selected(old('parent_billing_uuid', $billing->parent_billing_uuid ?? null) == $b->billing_uuid )>
-                                        {{ $b->contact_organization }} {{ $b->contact_name_family }} {{ $b->contact_name_given }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-drop-down-billing-profiles name="parent_billing_uuid" :selected="$billing->parent_billing_uuid ?? null" :exclude="$billing->billing_uuid ?? null" />
                             @error('parent_billing_uuid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

@@ -35,10 +35,9 @@ class BillingController extends Controller
 
 	public function create()
 	{
-		$billings = Billing::parentProfiles();
 		$domains = Domain::all();
 
-		return view("pages.billings.form", compact("billings", "domains"));
+		return view("pages.billings.form", compact("domains"));
 	}
 
 	public function store(BillingRequest $request)
@@ -59,10 +58,9 @@ class BillingController extends Controller
 
 	public function edit(Billing $billing)
 	{
-		$billings = Billing::parentProfiles($billing->billing_uuid);
 		$domains = Domain::all();
 
-		return view("pages.billings.form", compact("billing", "billings", "domains"));
+		return view("pages.billings.form", compact("billing", "domains"));
 	}
 
 	public function update(BillingRequest $request, Billing $billing)
