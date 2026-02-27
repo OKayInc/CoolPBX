@@ -48,6 +48,7 @@ use App\Http\Controllers\MusicOnHoldController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\RingGroupController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\VoicemailController;
 use App\Http\Controllers\XmlCDRController;
 use App\Http\Controllers\SipProfileController;
@@ -90,6 +91,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/inbound-contacts', [DashboardController::class, 'ajaxInboundContacts'])->name('dashboard.inbound_contacts');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+    Route::get('/search', SearchController::class)->name('search.global');
 
     // BILLING
     Route::get('/billing/{billing}/{paymentGateway}/success', [BillingController::class, 'paymentSuccess'])->name('billing.success', 'billing.success');

@@ -119,6 +119,31 @@
 {{--                </a>--}}
 {{--            </li>--}}
 
+            <li class="nav-item d-flex">
+                <form class="d-flex position-relative" id="global-search-form">
+                    <input
+                        id="global-search-input"
+                        class="form-control form-control-sm"
+                        type="search"
+                        placeholder="Search Extension, User, IVR..."
+                        autocomplete="off"
+                    >
+
+                    <div id="global-search-results"
+                        class="dropdown-menu w-100"
+                        style="
+                            display:none;
+                            position:absolute;
+                            top:100%;
+                            left:0;
+                            z-index:1055;
+                            max-height:400px;
+                            overflow:auto;
+                        ">
+                    </div>
+                </form>
+            </li>
+
             <form action="{{ route('domain.switch') }}" method="POST">
                 @csrf
                 <li class="nav-item dropdown">

@@ -168,3 +168,107 @@ document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.updated', ({ el }) => initTags(el));
 });
 
+
+//search
+const input = document.getElementById('global-search-input');
+const resultsBox = document.getElementById('global-search-results');
+
+let timer;
+
+function hideResults()
+{
+    resultsBox.style.display = 'none';
+    resultsBox.innerHTML = '';
+}
+
+input.addEventListener('keyup', function()
+{
+    clearTimeout(timer);
+
+    timer = setTimeout(function()
+    {
+        const q = input.value;
+
+        if(q.trim().length < 2)
+        {
+            hideResults();
+
+            return;
+        }
+
+        fetch(`/search?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+
+                resultsBox.innerHTML = '';
+
+                if(!data.length)
+                {
+                    resultsBox.innerHTML = '<span class="dropdown-item text-muted">Sin resultados</span>';
+                }
+
+                data.forEach(function(item)
+                {
+                    resultsBox.innerHTML += `
+                        <a href="${item.url}" class="dropdown-item">
+                            <i class="bi ${item.icon} me-2"></i>
+                            <strong>${item.label}</strong>
+                            <small class="text-muted">
+                                (${item.type})
+                            </small>
+                            <br>
+                            <small>${item.description ?? ''}</small>
+                        </a>
+                    `;
+                });
+
+                resultsBox.style.display = 'block';
+            });
+
+    }, 300);
+});
+
+document.addEventListener('click', function(e)
+{
+    if(!document.getElementById('global-search-form').contains(e.target))
+    {
+        hideResults();
+    }
+});
+
+input.addEventListener('focus', function()
+{
+    if(input.value.trim().length < 2)
+    {
+        hideResults();
+        return;
+    }
+
+    if(resultsBox.innerHTML !== '')
+    {
+        resultsBox.style.display = 'block';
+    }
+});
+
+input.addEventListener('input', function()
+{
+    if(input.value.trim().length < 2)
+    {
+        hideResults();
+    }
+});
+
+input.addEventListener('keydown', function(e)
+{
+    if(e.key === 'Escape')
+    {
+        hideResults();
+
+        input.blur();
+    }
+});
+
+resultsBox.addEventListener('click', function(e)
+{
+    e.stopPropagation();
+});
