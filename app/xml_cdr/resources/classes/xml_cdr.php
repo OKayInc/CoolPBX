@@ -490,7 +490,7 @@ if (!class_exists('xml_cdr')) {
 						//$this->array[$key]['digits_dialed'] = urldecode($xml->variables->digits_dialed);
 						$this->array[$key]['sip_hangup_disposition'] = urldecode($xml->variables->sip_hangup_disposition);
 						$this->array[$key]['pin_number'] = urldecode($xml->variables->pin_number);
-						$this->array[$key]['record_type'] = isset($xml->variables->record_type)?urldecode($xml->variables->record_type):($_REQUEST['record_type']?'call');
+						$this->array[$key]['record_type'] = isset($xml->variables->record_type)?urldecode($xml->variables->record_type):($_REQUEST['record_type']?'call':null);
 
 					//time
 						$start_epoch = urldecode($xml->variables->start_epoch);
