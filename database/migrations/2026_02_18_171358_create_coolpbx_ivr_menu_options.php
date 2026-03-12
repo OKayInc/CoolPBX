@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\IVRMenuOption;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -66,5 +67,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX IVR menu option information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

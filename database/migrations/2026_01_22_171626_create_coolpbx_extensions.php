@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\Extension;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -110,5 +111,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX SIP extension loging information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

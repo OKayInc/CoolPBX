@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Domain;
+use App\Models\Group;
 use App\Models\GroupPermission;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -64,5 +66,8 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX group and permission relationship information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('group_uuid')->on(Group::getTableName())->references('group_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

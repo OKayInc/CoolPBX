@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ContactUrl;
+use App\Models\Domain;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -65,5 +66,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX contact URL detail information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

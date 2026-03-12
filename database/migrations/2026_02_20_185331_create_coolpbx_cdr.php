@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\User;
+use App\Models\Domain;
+use App\Models\XmlCDR;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = User::getTableName();
+        $tableName = XmlCDR::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -33,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = User::getTableName();
+        $tableName = XmlCDR::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -93,14 +94,14 @@ return new class extends Migration
         $table->enum('voicemail_message', ['true','false'])->default('false')->nullable(false);
         $table->enum('missed_call', ['true','false'])->default('false')->nullable(false);
         $table->unsignedBigInteger('waitsec')->nullable();
-        $table->enum('hangup_cause', ['ALLOTTED_TIMEOUT','ATTENDED_TRANSFER','BLIND_TRANSFER','CALL_REJECTED','CHAN_NOT_IMPLEMENTED','DESTINATION_OUT_OF_ORDER','EXCHANGE_ROUTING_ERROR','INCOMPATIBLE_DESTINATION','INVALID_NUMBER_FORMAT','LOSE_RACE','MANAGER_REQUEST','MANDATORY_IE_MISSING','MEDIA_TIMEOUT','NETWORK_OUT_OF_ORDER','NONE','NORMAL_CLEARING','NORMAL_TEMPORARY_FAILURE','NORMAL_UNSPECIFIED','NO_ANSWER','NO_ROUTE_DESTINATION','NO_USER_RESPONSE','ORIGINATOR_CANCEL','PICKED_OFF','RECOVERY_ON_TIMER_EXPIRE','REQUESTED_CHAN_UNAVAIL','SUBSCRIBER_ABSENT','SYSTEM_SHUTDOWN','UNALLOCATED_NUMBER','USER_BUSY','USER_NOT_REGISTERED'])->->nullable(false);
+        $table->enum('hangup_cause', ['ALLOTTED_TIMEOUT','ATTENDED_TRANSFER','BLIND_TRANSFER','CALL_REJECTED','CHAN_NOT_IMPLEMENTED','DESTINATION_OUT_OF_ORDER','EXCHANGE_ROUTING_ERROR','INCOMPATIBLE_DESTINATION','INVALID_NUMBER_FORMAT','LOSE_RACE','MANAGER_REQUEST','MANDATORY_IE_MISSING','MEDIA_TIMEOUT','NETWORK_OUT_OF_ORDER','NONE','NORMAL_CLEARING','NORMAL_TEMPORARY_FAILURE','NORMAL_UNSPECIFIED','NO_ANSWER','NO_ROUTE_DESTINATION','NO_USER_RESPONSE','ORIGINATOR_CANCEL','PICKED_OFF','RECOVERY_ON_TIMER_EXPIRE','REQUESTED_CHAN_UNAVAIL','SUBSCRIBER_ABSENT','SYSTEM_SHUTDOWN','UNALLOCATED_NUMBER','USER_BUSY','USER_NOT_REGISTERED'])->nullable(false);
         $table->unsignedTinyInteger('hangup_cause_q850')->nullable();
         $table->enum('sip_hangup_disposition', ['recv_bye','recv_cancel','recv_refuse','send_bye','send_cancel','send_refuse'])->nullable(false);
         $table->string('tags', length: 1024)->nullable();
 
         # Callcenter
         $table->uuid('call_center_queue_uuid')->nullable();
-        $table->enum('cc_side', ['agent','member'])->->nullable();
+        $table->enum('cc_side', ['agent','member'])->nullable();
         $table->uuid('cc_member_uuid')->nullable();
         $table->unsignedBigInteger('cc_queue_joined_epoch')->nullable();
         $table->unsignedBigInteger('cc_queue_answered_epoch')->nullable();
@@ -110,7 +111,7 @@ return new class extends Migration
         $table->uuid('cc_member_session_uuid')->nullable();
         $table->uuid('cc_agent_uuid')->nullable();
         $table->uuid('cc_agent')->nullable()->comment('It is an uuid because CoolPBX only gives UUIDs to agents.');
-        $table->enum('cc_agent_type', ['callback','uuid-standby'])->->nullable();
+        $table->enum('cc_agent_type', ['callback','uuid-standby'])->nullable();
         $table->enum('cc_agent_bridged', ['true','false'])->nullable();
         $table->enum('cc_cancel_reason', ['NONE','TIMEOUT','NO_AGENT_TIMEOUT','BREAK_OUT','EXIT_WITH_KEY'])->nullable();
         $table->enum('cc_cause', ['answered','cancel'])->nullable();
@@ -142,5 +143,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX CDR information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
     }
 };

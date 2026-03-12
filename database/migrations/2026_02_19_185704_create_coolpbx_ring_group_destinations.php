@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\RingGroupDestination;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -51,7 +52,7 @@ return new class extends Migration
         }
 
         $table->uuid('ring_group_destination_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable();
+        $table->uuid('domain_uuid')->nullable(false);
         $table->uuid('ring_group_uuid')->nullable();
         $table->string('destination_number', length: 255)->nullable(false);
         $table->unsignedTinyInteger('destination_delay')->default(0)->nullable(false);
@@ -65,5 +66,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX ring group destination information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

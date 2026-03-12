@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Menu;
+use App\Models\MenuItem;
 use App\Models\MenuLanguage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -62,5 +64,8 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX menu language information');
+
+        $table->foreign('menu_uuid')->on(Menu::getTableName())->references('menu_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('menu_item_uuid')->on(MenuItem::getTableName())->references('menu_item_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

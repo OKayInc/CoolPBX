@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Dialplan;
+use App\Models\Domain;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -50,8 +51,8 @@ return new class extends Migration
                 $table->collation('en_US.utf8');
         }
 
-            $table->uuid('dialplan_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('dialplan_uuid')->nullable(false)->primary()->first();
+        $table->uuid('domain_uuid')->nullable();
         $table->uuid('app_uuid')->nullable(false);
         $table->string('hostname', length: 255)->nullable();
         $table->string('dialplan_context', length: 255)->nullable(false);
@@ -69,5 +70,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX dialplan information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
     }
 };

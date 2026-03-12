@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ContactNote;
+use App\Models\Domain;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -53,7 +54,7 @@ return new class extends Migration
         $table->uuid('contact_phone_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
         $table->uuid('contact_uuid')->nullable(false);
-        $table->enum('email_label', ['work','home','mobile','main','billing','fax','voicemail','text','other'])->nullable();
+        $table->enum('phone_label', ['work','home','mobile','main','billing','fax','voicemail','text','other','pref'])->nullable();
         $table->unsignedTinyInteger('phone_type_voice')->default(0)->nullable(false);
         $table->unsignedTinyInteger('phone_type_fax')->default(0)->nullable(false);
         $table->unsignedTinyInteger('phone_type_video')->default(0)->nullable(false);
@@ -71,5 +72,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX contact phone detail information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

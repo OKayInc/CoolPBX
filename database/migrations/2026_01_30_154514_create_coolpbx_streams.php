@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\Stream;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -51,7 +52,7 @@ return new class extends Migration
         }
 
         $table->uuid('stream_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_uuid')->nullable(false);
+        $table->uuid('domain_uuid')->nullable();
         $table->string('stream_name', length: 255)->nullable(false);
         $table->string('stream_location', length: 255)->nullable(false);
         $table->enum('stream_enabled', ['true','false'])->default('false')->nullable(false);
@@ -63,5 +64,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX call flow information');
+
+        $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
     }
 };

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -63,6 +64,7 @@ return new class extends Migration
         $table->enum('user_enabled', ['true','false'])->default('false')->nullable(false);
         $table->text('token')->nullable();
         $table->text('remember_token')->nullable();
+
         // timestamps
         $table->date('insert_date')->nullable();
         $table->uuid('insert_user')->nullable();
