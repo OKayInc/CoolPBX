@@ -19,7 +19,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, HandlesStringBooleans, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_users';
 	protected $primaryKey = 'user_uuid';
 	public $incrementing = false;

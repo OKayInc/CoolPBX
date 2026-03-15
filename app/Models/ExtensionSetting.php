@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Extension;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class ExtensionSetting extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_extension_settings';
 	protected $primaryKey = 'extension_setting_uuid';
 	public $incrementing = false;

@@ -19,7 +19,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Domain extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName, HandlesStringBooleans;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_domains';
 	protected $primaryKey = 'domain_uuid';
 	public $incrementing = false;

@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\MenuItemGroup;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class MenuItem extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_menu_items';
 	protected $primaryKey = 'menu_item_uuid';
 	public $incrementing = false;

@@ -17,7 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class ConferenceCenter extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_conference_centers';
 	protected $primaryKey = 'conference_center_uuid';
 	public $incrementing = false;

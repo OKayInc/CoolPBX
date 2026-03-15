@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,7 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class XmlCDR extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_xml_cdr';
 	protected $primaryKey = 'xml_cdr_uuid';
 	public $incrementing = false;

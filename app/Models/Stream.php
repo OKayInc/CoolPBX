@@ -15,7 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Stream extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, HandlesStringBooleans, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_streams';
 	protected $primaryKey = 'stream_uuid';
 	public $incrementing = false;

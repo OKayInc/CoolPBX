@@ -17,7 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Variable extends Model        // Original name VAR,
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_vars';
 	protected $primaryKey = 'var_uuid';
 	public $incrementing = false;

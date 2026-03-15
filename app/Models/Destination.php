@@ -17,7 +17,8 @@ use DB;
 
 class Destination extends Model
 {
-	use HasFactory, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_destinations';
 	protected $primaryKey = 'destination_uuid';
 	public $incrementing = false;

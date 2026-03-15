@@ -15,7 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Lcr extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_lcr';
 	protected $primaryKey = 'lcr_uuid';
 	public $incrementing = false;

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\MenuItem;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class MenuItemGroup extends Pivot
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_menu_item_groups';
 	protected $primaryKey = 'menu_item_group_uuid';
 	public $incrementing = false;

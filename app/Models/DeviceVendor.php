@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DeviceVendor extends Model
 {
-	use HasFactory, HasUniqueIdentifier, GetTableName;
-	protected $table = 'v_device_vendors';
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $primaryKey = 'device_vendor_uuid';
 	public $incrementing = false;
 	protected $keyType = 'string';	// TODO, check if UUID is valid

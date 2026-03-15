@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FollowMe extends Model
 {
-	use HasFactory, HasUniqueIdentifier, GetTableName;
+    use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_follow_me';
 	protected $primaryKey = 'follow_me_uuid';
 	public $incrementing = false;

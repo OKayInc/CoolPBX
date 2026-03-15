@@ -18,7 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Phrase extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_phrases';
 	protected $primaryKey = 'phrase_uuid';
 	public $incrementing = false;

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -14,7 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class VoicemailGreeting extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+    use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
     protected $table = 'v_voicemail_greetings';
     protected $primaryKey = 'voicemail_greeting_uuid';
     public $incrementing = false;

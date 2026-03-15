@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailTemplate extends Model
 {
-    use HasFactory, HasUniqueIdentifier, GetTableName, HandlesStringBooleans;
+    use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
 
     protected $table = "v_email_templates";
     protected $primaryKey = "email_template_uuid";

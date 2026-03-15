@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DeviceSetting extends Model
 {
-	use HasFactory, HasUniqueIdentifier, GetTableName, HandlesStringBooleans;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_device_settings';
 	protected $primaryKey = 'device_setting_uuid';
 	public $incrementing = false;

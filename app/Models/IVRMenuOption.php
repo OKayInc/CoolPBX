@@ -17,7 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class IVRMenuOption extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_ivr_menu_options';
 	protected $primaryKey = 'ivr_menu_option_uuid';
 	public $incrementing = false;

@@ -17,7 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Dialplan extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_dialplans';
 	protected $primaryKey = 'dialplan_uuid';
 	public $incrementing = false;

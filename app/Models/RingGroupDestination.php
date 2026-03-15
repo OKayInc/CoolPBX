@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RingGroupDestination extends Model
 {
-	use HasFactory, HasUniqueIdentifier, GetTableName, HandlesStringBooleans;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
 	protected $table = 'v_ring_group_destinations';
 	protected $primaryKey = 'ring_group_destination_uuid';
 	public $incrementing = false;

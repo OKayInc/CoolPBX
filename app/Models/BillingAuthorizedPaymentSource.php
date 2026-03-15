@@ -15,7 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class BillingAuthorizedPaymentSource extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_billing_authorized_payment_sources';
 	protected $primaryKey = 'billing_authorized_payment_source_uuid';
 	public $incrementing = false;

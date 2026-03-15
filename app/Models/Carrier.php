@@ -14,7 +14,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Carrier extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_carriers';
 	protected $primaryKey = 'carrier_uuid';
 	public $incrementing = false;

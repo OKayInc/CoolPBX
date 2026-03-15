@@ -6,6 +6,7 @@ use App\Models\XmlCDR;
 use App\Models\ExtensionSetting;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
+use App\Traits\HandlesStringBooleans;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +20,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Extension extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HasUniqueIdentifier, GetTableName;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $table = 'v_extensions';
 	protected $primaryKey = 'extension_uuid';
 	public $incrementing = false;

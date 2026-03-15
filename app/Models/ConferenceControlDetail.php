@@ -17,8 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class ConferenceControlDetail extends Model
 {
-	use HasApiTokens, HasFactory, Notifiable, HandlesStringBooleans, HasUniqueIdentifier, GetTableName;
-	protected $table = 'v_conference_control_details';
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+
 	protected $primaryKey = 'conference_control_detail_uuid';
 	public $incrementing = false;
 	protected $keyType = 'string';	// TODO, check if UUID is valid
