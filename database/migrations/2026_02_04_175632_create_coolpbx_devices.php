@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Device;
+use App\Models\DeviceProfile;
 use App\Models\Domain;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -81,5 +83,8 @@ return new class extends Migration
         $table->comment('CoolPBX device detail information');
 
         $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('device_profile_uuid')->on(DeviceProfile::getTableName())->references('device_profile_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
+        $table->foreign('device_user_uuid')->on(User::getTableName())->references('user_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
+        $table->foreign('device_uuid_alternate')->on(Device::getTableName())->references('device_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
     }
 };

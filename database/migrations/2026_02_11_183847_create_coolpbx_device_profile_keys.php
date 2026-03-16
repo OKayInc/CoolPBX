@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DeviceProfile;
 use App\Models\DeviceProfileKey;
 use App\Models\Domain;
 use Illuminate\Database\Migrations\Migration;
@@ -53,7 +54,7 @@ return new class extends Migration
 
         $table->uuid('device_profile_key_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
-        $table->uuid('device_uuid')->nullable(false);
+        $table->uuid('device_profile_uuid')->nullable(false);
         $table->unsignedTinyInteger('profile_key_id')->nullable(false);
         $table->enum('profile_key_category', ['line','memory','programmable','expansion'])->nullable(false);
         $table->string('profile_key_vendor', length: 255)->nullable();
@@ -74,5 +75,6 @@ return new class extends Migration
         $table->comment('CoolPBX device profile key detail information');
 
         $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('device_profile_uuid')->on(DeviceProfile::getTableName())->references('device_profile_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

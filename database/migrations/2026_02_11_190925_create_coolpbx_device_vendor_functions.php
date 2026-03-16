@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DeviceVendor;
 use App\Models\DeviceVendorFunction;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -64,5 +65,7 @@ return new class extends Migration
         $table->date('update_date')->nullable();
         $table->uuid('update_user')->nullable();
         $table->comment('CoolPBX device vendor function detail information');
+
+        $table->foreign('device_vendor_uuid')->on(DeviceVendor::getTableName())->references('device_vendor_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };

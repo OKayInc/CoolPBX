@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Device;
+use App\Models\DeviceProfile;
 use App\Models\DeviceSetting;
 use App\Models\Domain;
 use Illuminate\Database\Migrations\Migration;
@@ -54,6 +56,7 @@ return new class extends Migration
         $table->uuid('device_setting_uuid')->nullable(false)->primary()->first();
         $table->uuid('domain_uuid')->nullable(false);
         $table->uuid('device_uuid')->nullable(false);
+        $table->uuid('device_profile_uuid')->nullable();
         $table->string('device_setting_category', length: 255)->nullable(false);
         $table->string('device_setting_subcategory', length: 255)->nullable(false);
         $table->string('profile_setting_name', length: 255)->nullable(false);
@@ -69,5 +72,7 @@ return new class extends Migration
         $table->comment('CoolPBX device setting detail information');
 
         $table->foreign('domain_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('device_uuid')->on(Device::getTableName())->references('device_uuid')->cascadeOnDelete()->cascadeOnUpdate();
+        $table->foreign('device_profile_uuid')->on(DeviceProfile::getTableName())->references('device_profile_uuid')->cascadeOnDelete()->cascadeOnUpdate();
     }
 };
