@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Traits\CreatedUpdatedBy;
 use App\Traits\GetTableName;
 use App\Traits\HandlesStringBooleans;
-use App\Traits\HasUniqueIdentifier;
+//use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DeviceVendor extends Model
 {
-	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, HasUniqueIdentifier, Notifiable;
+	use CreatedUpdatedBy, GetTableName, HandlesStringBooleans, HasApiTokens, HasFactory, Notifiable;
+    // HasUniqueIdentifier,
 
 	protected $primaryKey = 'device_vendor_uuid';
 	public $incrementing = false;
@@ -28,6 +29,7 @@ class DeviceVendor extends Model
      * @var array<int, string>
      */
 	protected $fillable = [
+        'device_vendor_uuid',
         'name',
         'enabled',
         'description',

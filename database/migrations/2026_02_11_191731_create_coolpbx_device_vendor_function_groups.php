@@ -54,7 +54,7 @@ return new class extends Migration
         $table->uuid('device_vendor_function_uuid')->nullable(false);
         $table->uuid('device_vendor_uuid')->nullable(false);
         $table->uuid('group_uuid')->nullable(false);
-        $table->string('group_name', length: 255)->nullable(false);
+        $table->string('group_name', length: 255)->nullable(false)->comment('deprecated.'); // TODO: make sure it is not used anywhere before taking it off
 
         // timestamps
         $table->date('insert_date')->nullable();

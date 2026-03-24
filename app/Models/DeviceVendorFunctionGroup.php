@@ -32,7 +32,7 @@ class DeviceVendorFunctionGroup extends Pivot
 	protected $fillable = [
         'device_vendor_function_uuid',
         'device_vendor_uuid',
-        'group_name',
+        'group_name',       // TODO: make sure group_name is not used
         'group_uuid',       // FIXME: Fusion does not use the uuid, instead it uses the name
     ];
 
