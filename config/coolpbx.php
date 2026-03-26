@@ -1930,4 +1930,6 @@ return [
         'cache_location' => env('INSTALL_CACHE_LOCATION', dirname($_SERVER['DOCUMENT_ROOT']).DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'coolpbx'),
         'old_cache_location' => env('OLD_INSTALL_CACHE_LOCATION', dirname($_SERVER['DOCUMENT_ROOT']).DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'fusionpbx'),
     ],
+
+    'role' => env('COOLPBX_ROLE', 'standalone'),
 ];

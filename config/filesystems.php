@@ -60,7 +60,7 @@ return [
             'driver' => 'github',
             'token' => env('COOLPBX_TEMPLATE_REPOSITORY_TOKEN', ''),
             'username' => env('COOLPBX_TEMPLATE_REPOSITORY_USERNAME', ''),
-            'repository' => env('COOLPBX_TEMPLATE_REPOSITORY', 'CoolPBX/templates'),
+            'repository' => env('COOLPBX_TEMPLATE_REPOSITORY', 'CoolPBX/Templates'),
             'branch' => env('COOLPBX_TEMPLATE_REPOSITORY_BRANCH', 'main'),
             'prefix' => env("COOLPBX_TEMPLATE_REPOSITORY_PREFIX", ''),
         ],

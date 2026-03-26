@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Dialplan;
 use App\Models\Domain;
+use App\Repositories\DialplanDetailRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -346,9 +347,19 @@ class DialplanRepository
         ]);
     }
 
-
     public function getDefaultContext(?string $appUuid = null, ?string $domainName = null): string
     {
         return ($appUuid == 'c03b422e-13a8-bd1b-e42b-b6b9b4d27ce4') ? 'public' : $domainName;
+    }
+
+    public function import(string $xml): boolean
+    {
+        $result = false;
+        if (strlen($xml) > 0)
+        {
+
+        }
+
+        return $result;
     }
 }
