@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Dialplan;
 use App\Models\Domain;
+use App\Repositories\DialplanDetailRepository;
+use App\Repositories\DialplanRepository;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
