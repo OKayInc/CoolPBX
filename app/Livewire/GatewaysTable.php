@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Facades\FreeSwitch;
+use Illuminate\Support\Facades\Log;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,40 +25,56 @@ class GatewaysTable extends DataTableComponent
         //$this->getGatewayStatuses();
     }
 
-    public function getGatewayStatuses() 
+    public function getGatewayStatuses()
     {
         $gateways = Gateway::all();
 
         foreach ($gateways as $gateway) {
 
-            $response = FreeSwitch::execute('sofia', 'xmlstatus gateway ' . $gateway->gateway_uuid);
+            $responses = FreeSwitch::execute('sofia', 'xmlstatus gateway ' . $gateway->gateway_uuid);
 
-            if ($response == "Invalid Gateway!") {
-                $this->gatewayStatuses[$gateway->gateway_uuid] = [
-                    'status' => 'stopped',
-                    'state' => null
-                ];
-            } else {
+            $gatewayStatus = 'stopped';
+            $gatewayState = null;
+
+            foreach ($responses as $item) {
+                $nodeResponse = $item['response'] ?? '';
+
+                if (empty($nodeResponse) || $nodeResponse == "Invalid Gateway!") {
+                    continue;
+                }
+
                 try {
-                    $xml = new \SimpleXMLElement($response);
+                    $xml = new \SimpleXMLElement($nodeResponse);
                     $state = (string)$xml->state;
-                    $this->gatewayStatuses[$gateway->gateway_uuid] = [
-                        'status' => 'running',
-                        'state' => $state
-                    ];
+                    $gatewayStatus = 'running';
+                    $gatewayState = $state;
+                    break;
                 } catch (\Exception $e) {
-                    $this->gatewayStatuses[$gateway->gateway_uuid] = [
-                        'status' => 'error',
-                        'state' => null
-                    ];
+                    continue;
                 }
             }
+
+            $this->gatewayStatuses[$gateway->gateway_uuid] = [
+                'status' => $gatewayStatus,
+                'state' => $gatewayState,
+            ];
         }
     }
 
     public function startGateway($gatewayUuid)
     {
-        $response = FreeSwitch::execute('sofia', 'profile external rescan');
+        $responses = FreeSwitch::execute('sofia', 'profile external rescan');
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+            if (!str_starts_with($response, '+OK') && !str_starts_with($response, 'OK')) {
+                Log::warning('Node failed to rescan sofia profile', [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response,
+                ]);
+            }
+        }
 
         $this->getGatewayStatuses();
 
@@ -66,8 +83,19 @@ class GatewaysTable extends DataTableComponent
 
     public function stopGateway($gatewayUuid)
     {
-       
-        $response = FreeSwitch::execute('sofia', 'profile external killgw ' . $gatewayUuid);
+        $responses = FreeSwitch::execute('sofia', 'profile external killgw ' . $gatewayUuid);
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+            if (!str_starts_with($response, '+OK') && !str_starts_with($response, 'OK')) {
+                Log::warning('Node failed to kill gateway', [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response,
+                    'gateway_uuid' => $gatewayUuid,
+                ]);
+            }
+        }
 
         $this->getGatewayStatuses();
 

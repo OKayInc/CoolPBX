@@ -26,79 +26,89 @@ class FreeSwitchRegistrationService
 
         foreach ($sipProfileUserNames as $profileName) {
             if ($this->useMockResponses) {
-                $xml_response = $this->getMockRegistrationXml($profileName);
+                $nodeResponses = [
+                    ['response' => $this->getMockRegistrationXml($profileName), 'node_name' => 'mock', 'node_hostname' => 'mock']
+                ];
             } else {
-                $xml_response = FreeSwitch::execute(
-                    "sofia xmlstatus profile",
-                    "'$profileName' reg"
-                );
-                
+                $nodeResponses = array_map(function ($item) {
+                    return [
+                        'response' => $item['response'] ?? '',
+                        'node_name' => $item['node']->node_name,
+                        'node_hostname' => $item['node']->node_hostname,
+                    ];
+                }, FreeSwitch::execute("sofia xmlstatus profile", "'$profileName' reg"));
             }
 
-            if (empty($xml_response) || str_contains($xml_response, 'Invalid')) {
-                continue;
-            }
+            foreach ($nodeResponses as $nodeItem) {
+                $xml_response = $nodeItem['response'];
 
-            $xml_response = $this->normalizeXmlResponse($xml_response);
-            if (App::hasDebugModeEnabled()) {
-                Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] Normalized XML: ' . $xml_response);
-            }
+                if (empty($xml_response) || str_contains($xml_response, 'Invalid')) {
+                    continue;
+                }
 
-            if (App::hasDebugModeEnabled()) {
-                Log::debug('[' . __CLASS__ . '][' . __METHOD__ . '] XML Response: ' . $xml_response);
-            }
+                $xml_response = $this->normalizeXmlResponse($xml_response);
+                if (App::hasDebugModeEnabled()) {
+                    Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] Normalized XML: ' . $xml_response);
+                }
 
-            try {
-                libxml_use_internal_errors(true);
-                $xml = new SimpleXMLElement($xml_response);
-                if ($xml === false) {
-                    $errors = libxml_get_errors();
-                    if (!empty($errors)) {
-                        if (App::hasDebugModeEnabled()) {
-                            Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] XML Errors: ' . print_r($errors, true));
+                if (App::hasDebugModeEnabled()) {
+                    Log::debug('[' . __CLASS__ . '][' . __METHOD__ . '] XML Response: ' . $xml_response);
+                }
+
+                try {
+                    libxml_use_internal_errors(true);
+                    $xml = new SimpleXMLElement($xml_response);
+                    if ($xml === false) {
+                        $errors = libxml_get_errors();
+                        if (!empty($errors)) {
+                            if (App::hasDebugModeEnabled()) {
+                                Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] XML Errors: ' . print_r($errors, true));
+                            }
                         }
                     }
-                }
-                $array = json_decode(json_encode($xml), true);
+                    $array = json_decode(json_encode($xml), true);
 
-                if (!empty($array) && isset($array['registrations']['registration'])) {
-                    if (!isset($array['registrations']['registration'][0])) {
-                        $row = $array['registrations']['registration'];
-                        unset($array['registrations']['registration']);
-                        $array['registrations']['registration'][0] = $row;
+                    if (!empty($array) && isset($array['registrations']['registration'])) {
+                        if (!isset($array['registrations']['registration'][0])) {
+                            $row = $array['registrations']['registration'];
+                            unset($array['registrations']['registration']);
+                            $array['registrations']['registration'][0] = $row;
+                        }
+
+                        foreach ($array['registrations']['registration'] as $row) {
+                            $user_array = explode('@', $row['user'] ?? '');
+
+                            $registrations[$id] = [
+                                'user' => $row['user'] ?? '',
+                                'call-id' => $row['call-id'] ?? '',
+                                'contact' => $row['contact'] ?? '',
+                                'sip-auth-user' => $row['sip-auth-user'] ?? '',
+                                'agent' => $row['agent'] ?? '',
+                                'host' => $row['host'] ?? '',
+                                'network-ip' => $row['network-ip'] ?? '',
+                                'network-port' => $row['network-port'] ?? '',
+                                'sip-auth-realm' => $row['sip-auth-realm'] ?? '',
+                                'mwi-account' => $row['mwi-account'] ?? '',
+                                'status' => $row['status'] ?? '',
+                                'ping-time' => $row['ping-time'] ?? '',
+                                'ping-status' => $row['ping-status'] ?? '',
+                                'sip_profile_name' => $profileName,
+                                'node_name' => $nodeItem['node_name'],
+                                'node_hostname' => $nodeItem['node_hostname'],
+                            ];
+
+                            $registrations[$id]['lan-ip'] = $this->extractLanIp($row);
+
+                            $id++;
+                        }
                     }
-
-                    foreach ($array['registrations']['registration'] as $row) {
-                        $user_array = explode('@', $row['user'] ?? '');
-
-                        $registrations[$id] = [
-                            'user' => $row['user'] ?? '',
-                            'call-id' => $row['call-id'] ?? '',
-                            'contact' => $row['contact'] ?? '',
-                            'sip-auth-user' => $row['sip-auth-user'] ?? '',
-                            'agent' => $row['agent'] ?? '',
-                            'host' => $row['host'] ?? '',
-                            'network-ip' => $row['network-ip'] ?? '',
-                            'network-port' => $row['network-port'] ?? '',
-                            'sip-auth-realm' => $row['sip-auth-realm'] ?? '',
-                            'mwi-account' => $row['mwi-account'] ?? '',
-                            'status' => $row['status'] ?? '',
-                            'ping-time' => $row['ping-time'] ?? '',
-                            'ping-status' => $row['ping-status'] ?? '',
-                            'sip_profile_name' => $profileName
-                        ];
-
-                        $registrations[$id]['lan-ip'] = $this->extractLanIp($row);
-
-                        $id++;
+                } catch (\Exception $e) {
+                    throw $e;
+                    if (App::hasDebugModeEnabled()) {
+                        Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] Error parsing XML: ' . $e->getMessage());
                     }
+                    continue;
                 }
-            } catch (\Exception $e) {
-                throw $e;
-                if (App::hasDebugModeEnabled()) {
-                    Log::error('[' . __CLASS__ . '][' . __METHOD__ . '] Error parsing XML: ' . $e->getMessage());
-                }
-                continue;
             }
         }
         return $registrations;
@@ -111,29 +121,41 @@ class FreeSwitchRegistrationService
 
         foreach ($activeProfiles as $profileName) {
             if ($this->useMockResponses) {
-                $xml_response = $this->getMockRegistrationXml($profileName);
+                $nodeResponses = [
+                    ['response' => $this->getMockRegistrationXml($profileName)]
+                ];
             } else {
-                $xml_response = FreeSwitch::execute(
-                    "sofia xmlstatus profile",
-                    "'$profileName' reg"
-                );
+                $nodeResponses = array_map(function ($item) {
+                    return ['response' => $item['response'] ?? ''];
+                }, FreeSwitch::execute("sofia xmlstatus profile", "'$profileName' reg"));
             }
 
-            if (empty($xml_response) || $xml_response == "Invalid Profile!") {
-                continue;
-            }
+            $found = false;
 
-            $xml_response = $this->normalizeXmlResponse($xml_response);
+            foreach ($nodeResponses as $nodeItem) {
+                $xml_response = $nodeItem['response'];
 
-            try {
-                $xml = new SimpleXMLElement($xml_response);
-                $array = json_decode(json_encode($xml), true);
-
-                if (!empty($array) && isset($array['registrations']['registration'])) {
-                    $profilesWithRegistrations[] = $profileName;
+                if (empty($xml_response) || $xml_response == "Invalid Profile!") {
+                    continue;
                 }
-            } catch (\Exception $e) {
-                continue;
+
+                $xml_response = $this->normalizeXmlResponse($xml_response);
+
+                try {
+                    $xml = new SimpleXMLElement($xml_response);
+                    $array = json_decode(json_encode($xml), true);
+
+                    if (!empty($array) && isset($array['registrations']['registration'])) {
+                        $found = true;
+                        break;
+                    }
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+
+            if ($found) {
+                $profilesWithRegistrations[] = $profileName;
             }
         }
 
@@ -151,21 +173,27 @@ class FreeSwitchRegistrationService
             return $this->getMockActiveProfiles();
         }
 
-        $response = FreeSwitch::execute('show', 'registrations as xml');
-
-        if (empty($response)) {
-            return [];
-        }
+        $responses = FreeSwitch::execute('show', 'registrations as xml');
 
         $profiles = [];
-        $lines = explode("\n", $response);
 
-        foreach ($lines as $line) {
-            if (preg_match('/^\s*(\w+)\s+(\w+)\s+running/', $line, $matches)) {
-                $profiles[] = $matches[1];
+        foreach ($responses as $item) {
+            $nodeResponse = $item['response'] ?? '';
+
+            if (empty($nodeResponse)) {
+                continue;
+            }
+
+            $lines = explode("\n", $nodeResponse);
+
+            foreach ($lines as $line) {
+                if (preg_match('/^\s*(\w+)\s+(\w+)\s+running/', $line, $matches)) {
+                    if (!in_array($matches[1], $profiles)) {
+                        $profiles[] = $matches[1];
+                    }
+                }
             }
         }
-
 
         return $profiles;
     }
@@ -258,16 +286,31 @@ class FreeSwitchRegistrationService
 
             $command = "sofia profile {$registration['profile']} flush_inbound_reg {$registration['user']} reboot";
 
-            $response = $this->useMockResponses
-                ? $this->getMockActionResponse('unregister', $registration['user'])
-                : FreeSwitch::execute('api', $command);
+            if ($this->useMockResponses) {
+                $mockResponse = $this->getMockActionResponse('unregister', $registration['user']);
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'response' => $mockResponse,
+                    'success' => $mockResponse !== '-ERR no reply' && !empty($mockResponse),
+                ];
+            } else {
+                $nodeResponses = FreeSwitch::execute('api', $command);
+                $anySuccess = false;
 
+                foreach ($nodeResponses as $item) {
+                    $nodeResponse = trim($item['response'] ?? '');
+                    if ($nodeResponse !== '-ERR no reply' && !empty($nodeResponse) && !str_starts_with($nodeResponse, '-ERR')) {
+                        $anySuccess = true;
+                        break;
+                    }
+                }
 
-            $responses[$registration['user']] = [
-                'command' => $command,
-                'response' => $response,
-                'success' => $response !== '-ERR no reply' && !empty($response)
-            ];
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'node_responses' => $nodeResponses,
+                    'success' => $anySuccess,
+                ];
+            }
         }
 
         return [
@@ -285,15 +328,31 @@ class FreeSwitchRegistrationService
 
             $command = "lua app.lua event_notify {$registration['sip_profile_name']} check_sync {$registration['user']} {$registration['agent']} {$registration['host']}";
 
-            $response = $this->useMockResponses
-                ? $this->getMockActionResponse('provision', $registration['user'])
-                : $this->freeSwitchService->execute('api', $command);
+            if ($this->useMockResponses) {
+                $mockResponse = $this->getMockActionResponse('provision', $registration['user']);
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'response' => $mockResponse,
+                    'success' => $mockResponse !== '-ERR no reply' && !empty($mockResponse),
+                ];
+            } else {
+                $nodeResponses = $this->freeSwitchService->execute('api', $command);
+                $anySuccess = false;
 
-            $responses[$registration['user']] = [
-                'command' => $command,
-                'response' => $response,
-                'success' => $response !== '-ERR no reply' && !empty($response)
-            ];
+                foreach ($nodeResponses as $item) {
+                    $nodeResponse = trim($item['response'] ?? '');
+                    if ($nodeResponse !== '-ERR no reply' && !empty($nodeResponse) && !str_starts_with($nodeResponse, '-ERR')) {
+                        $anySuccess = true;
+                        break;
+                    }
+                }
+
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'node_responses' => $nodeResponses,
+                    'success' => $anySuccess,
+                ];
+            }
         }
 
         return [
@@ -310,15 +369,31 @@ class FreeSwitchRegistrationService
 
             $command = "lua app.lua event_notify {$registration['sip_profile_name']} reboot {$registration['user']} {$registration['agent']} {$registration['host']}";
 
-            $response = $this->useMockResponses
-                ? $this->getMockActionResponse('reboot', $registration['user'])
-                : FreeSwitch::execute('api', $command);
+            if ($this->useMockResponses) {
+                $mockResponse = $this->getMockActionResponse('reboot', $registration['user']);
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'response' => $mockResponse,
+                    'success' => $mockResponse !== '-ERR no reply' && !empty($mockResponse),
+                ];
+            } else {
+                $nodeResponses = FreeSwitch::execute('api', $command);
+                $anySuccess = false;
 
-            $responses[$registration['user']] = [
-                'command' => $command,
-                'response' => $response,
-                'success' => $response !== '-ERR no reply' && !empty($response)
-            ];
+                foreach ($nodeResponses as $item) {
+                    $nodeResponse = trim($item['response'] ?? '');
+                    if ($nodeResponse !== '-ERR no reply' && !empty($nodeResponse) && !str_starts_with($nodeResponse, '-ERR')) {
+                        $anySuccess = true;
+                        break;
+                    }
+                }
+
+                $responses[$registration['user']] = [
+                    'command' => $command,
+                    'node_responses' => $nodeResponses,
+                    'success' => $anySuccess,
+                ];
+            }
         }
 
         return [

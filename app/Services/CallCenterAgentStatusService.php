@@ -23,6 +23,63 @@ class CallCenterAgentStatusService
         $this->notifyService = $notifyService;
     }
 
+    /**
+     * Execute command on all nodes and verify all succeeded
+     */
+    private function executeOnAllNodes(string $command, ?string $param = null): array
+    {
+        $responses = FreeSwitch::execute($command, $param);
+        $failedNodes = [];
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+
+            $isSuccess = str_starts_with($response, '+OK') ||
+                         str_starts_with($response, 'OK') ||
+                         str_starts_with($response, '1');
+
+            if (!$isSuccess && !empty($response)) {
+                $failedNodes[] = [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response
+                ];
+            }
+        }
+
+        return [
+            'success' => empty($failedNodes),
+            'responses' => $responses,
+            'failed_nodes' => $failedNodes
+        ];
+    }
+
+    /**
+     * Parse and consolidate list responses from all nodes
+     */
+    private function consolidateListResponses(array $responses, callable $parser): array
+    {
+        $consolidated = [];
+
+        foreach ($responses as $item) {
+            if (empty($item['response'])) {
+                continue;
+            }
+
+            $parsed = $parser($item['response']);
+
+            if (is_array($parsed)) {
+                foreach ($parsed as $entry) {
+                    $entry['_node_name'] = $item['node']->node_name;
+                    $entry['_node_hostname'] = $item['node']->node_hostname;
+                    $consolidated[] = $entry;
+                }
+            }
+        }
+
+        return $consolidated;
+    }
+
     public function updateAgentStatus(array $params): array
     {
         try {
@@ -80,18 +137,24 @@ class CallCenterAgentStatusService
             $this->updateUserStatus($params['user_uuid'], $agentStatus, $params['domain_uuid']);
         }
 
-        if ($agentStatus === 'Do Not Disturb') {
-            $command = "callcenter_config agent set status {$agentUuid} 'Logged Out'";
-        } else {
-            $command = "callcenter_config agent set status {$agentUuid} '{$agentStatus}'";
+        $effectiveStatus = ($agentStatus === 'Do Not Disturb') ? 'Logged Out' : $agentStatus;
+
+        $result = $this->executeOnAllNodes('callcenter_config', "agent set status {$agentUuid} '{$effectiveStatus}'");
+
+        if (!$result['success']) {
+            Log::warning('Failed to set agent status on some nodes', [
+                'agent_uuid' => $agentUuid,
+                'status' => $effectiveStatus,
+                'failed_nodes' => $result['failed_nodes']
+            ]);
         }
 
-        $response = FreeSwitch::execute('callcenter_config', "agent set status {$agentUuid} '{$agentStatus}'");
+        $atLeastOneSuccess = count($result['failed_nodes']) < count($result['responses']);
 
         return [
-            'success' => true,
-            'message' => 'Agent status updated successfully',
-            'response' => $response
+            'success' => $result['success'] || $atLeastOneSuccess,
+            'message' => $result['success'] ? 'Agent status updated successfully' : 'Agent status updated on some nodes',
+            'response' => $result
         ];
     }
 
@@ -111,17 +174,26 @@ class CallCenterAgentStatusService
         $queueId = $queue->queue_extension . '@' . $queue->domain->domain_name;
 
         if ($agentStatus === 'Available') {
-            $response = FreeSwitch::execute('callcenter_config', "tier add {$queueId} {$agentUuid} 1 1");
+            $result = $this->executeOnAllNodes('callcenter_config', "tier add {$queueId} {$agentUuid} 1 1");
         } else {
-            $response = FreeSwitch::execute('callcenter_config', "tier del {$queueId} {$agentUuid}");
+            $result = $this->executeOnAllNodes('callcenter_config', "tier del {$queueId} {$agentUuid}");
+        }
+
+        if (!$result['success']) {
+            Log::warning('Failed to update queue tier on some nodes', [
+                'queue_id' => $queueId,
+                'agent_uuid' => $agentUuid,
+                'action' => $agentStatus === 'Available' ? 'tier add' : 'tier del',
+                'failed_nodes' => $result['failed_nodes']
+            ]);
         }
 
         usleep(200000);
 
         return [
-            'success' => true,
-            'message' => 'Queue status updated successfully',
-            'response' => $response
+            'success' => $result['success'] || count($result['failed_nodes']) < count($result['responses']),
+            'message' => $result['success'] ? 'Queue status updated successfully' : 'Queue status updated on some nodes',
+            'response' => $result
         ];
     }
 
@@ -178,14 +250,16 @@ class CallCenterAgentStatusService
     public function getFreeSwitchAgentList(): array
     {
         try {
-            $response = FreeSwitch::execute('callcenter_config', 'agent list');
+            $responses = FreeSwitch::execute('callcenter_config', 'agent list');
 
-            if (empty($response)) {
+            if (empty($responses)) {
                 Log::warning('FreeSWITCH returned empty response for agent list');
                 return [];
             }
 
-            return $this->csvToNamedArray($response, '|');
+            return $this->consolidateListResponses($responses, function ($response) {
+                return $this->csvToNamedArray($response, '|');
+            });
         } catch (Exception $e) {
             Log::error('Error getting FreeSWITCH agent list: ' . $e->getMessage());
             return [];
@@ -202,10 +276,12 @@ class CallCenterAgentStatusService
             $queueId = $queue->queue_extension . '@' . $queue->domain->domain_name;
 
             try {
-                $response = FreeSwitch::execute('callcenter_config', "queue list agents {$queueId}");
+                $responses = FreeSwitch::execute('callcenter_config', "queue list agents {$queueId}");
 
-                if (!empty($response)) {
-                    $queueData[$queue->call_center_queue_uuid] = $this->csvToNamedArray($response, '|');
+                if (!empty($responses)) {
+                    $queueData[$queue->call_center_queue_uuid] = $this->consolidateListResponses($responses, function ($response) {
+                        return $this->csvToNamedArray($response, '|');
+                    });
                 } else {
                     Log::warning("FreeSWITCH returned empty response for queue {$queueId}");
                     $queueData[$queue->call_center_queue_uuid] = [];

@@ -43,17 +43,29 @@ class CallFlowPresenceService
                 Log::debug('[' . __CLASS__ . '][' . __METHOD__ . '] Sending call flow presence event: ' . $event);
             }
 
-            $response = FreeSwitch::execute('sendevent', $event);
+            $responses = FreeSwitch::execute('sendevent', $event);
 
-            $success = !empty($response) && $response !== '-ERR';
+            $success = true;
+            foreach ($responses as $item) {
+                $nodeResponse = trim($item['response'] ?? '');
 
-            if (App::hasDebugModeEnabled()) {
-                Log::debug('[' . __CLASS__ . '][' . __METHOD__ . '] Response: ' . $response);
+                if (App::hasDebugModeEnabled()) {
+                    Log::debug('[' . __CLASS__ . '][' . __METHOD__ . '] Node ' . $item['node']->node_name . ' response: ' . $nodeResponse);
+                }
+
+                if (!str_starts_with($nodeResponse, '+OK') && !str_starts_with($nodeResponse, 'OK')) {
+                    $success = false;
+                    Log::warning('Node failed to send event', [
+                        'node' => $item['node']->node_name,
+                        'hostname' => $item['node']->node_hostname,
+                        'response' => $nodeResponse,
+                    ]);
+                }
             }
 
             return [
                 'success' => $success,
-                'response' => $response
+                'responses' => $responses,
             ];
         } catch (\Exception $e) {
             if (App::hasDebugModeEnabled()) {

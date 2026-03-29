@@ -321,7 +321,7 @@ class CallForwardRepository
         );
     }
 
-
+  
     private function synchronizeExtensionXml(Extension $extension): void
     {
         $extensionsDir = config('freeswitch.extensions_dir');
@@ -333,7 +333,18 @@ class CallForwardRepository
             );
 
             if (config('freeswitch.auto_reload_xml', true)) {
-                FreeSwitch::execute('reloadxml');
+                $responses = FreeSwitch::execute('reloadxml');
+
+                foreach ($responses as $item) {
+                    $response = trim($item['response'] ?? '');
+                    if (!str_starts_with($response, '+OK')) {
+                        Log::warning('Node failed to reload XML', [
+                            'node' => $item['node']->node_name,
+                            'hostname' => $item['node']->node_hostname,
+                            'response' => $response,
+                        ]);
+                    }
+                }
             }
         }
     }

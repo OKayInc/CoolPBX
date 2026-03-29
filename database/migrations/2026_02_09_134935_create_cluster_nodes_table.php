@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Domain;
-use App\Models\User;
+use App\Models\ClusterNode;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = Domain::getTableName();
+        $tableName = ClusterNode::getTableName();
         if (!Schema::hasTable($tableName))
         {
             Schema::create($tableName, function (Blueprint $table)
@@ -34,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = Domain::getTableName();
+        $tableName = ClusterNode::getTableName();
         Schema::dropIfExists($tableName);
     }
 
@@ -44,27 +43,27 @@ return new class extends Migration
         {
             case 'mariadb':
             case 'mysql':
-                $table->collation('unicode_ci');
                 $table->engine('InnoDB');
                 break;
             case 'pgsql':
                 $table->collation('en_US.utf8');
         }
 
-        $table->uuid('domain_uuid')->nullable(false)->primary()->first();
-        $table->uuid('domain_parent_uuid')->nullable();
-        $table->string('domain_name', length: 255)->nullable(false);
-        $table->enum('domain_enabled', ['true','false'])->default('false')->nullable(false);
-        $table->longText('domain_description')->nullable(false)->comment('Dommain description');
-
-        // timestamps
-        $table->date('insert_date')->nullable();
-        $table->uuid('insert_user')->nullable();
-        $table->date('update_date')->nullable();
-        $table->uuid('update_user')->nullable();
-        $table->comment('Domain information');
-
-        $table->unique('domain_name');
-        $table->foreign('domain_parent_uuid')->on(Domain::getTableName())->references('domain_uuid')->cascadeOnDelete()->cascadeOnUpdate()->nullable();
+        $table->uuid('cluster_node_uuid')->nullable(false)->primary();
+        $table->string('node_name', length: 100)->nullable(false);
+        $table->string('node_hostname', length: 255)->nullable(false);
+        $table->integer('xml_rpc_port')->default(8080)->nullable(false);
+        $table->enum('node_role', ['pbx', 'database', 'both'])->default('pbx')->nullable(false);
+        $table->enum('node_enabled', ['true', 'false'])->default('true')->nullable(false);
+        $table->integer('node_priority')->default(1)->nullable(false);
+        $table->text('node_description')->nullable();
+        
+        $table->timestamp('insert_date')->nullable();
+        $table->timestamp('update_date')->nullable();
+        
+        $table->comment('CoolPBX cluster nodes configuration');
+        
+        $table->index('node_enabled');
+        $table->index(['node_role', 'node_enabled']);
     }
 };

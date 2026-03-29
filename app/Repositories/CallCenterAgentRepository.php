@@ -321,10 +321,41 @@ class CallCenterAgentRepository
         }
     }
 
-    private function updateSwitch(callCenterAgent $callCenterAgent)
+    /**
+     * Execute command on all nodes and verify all succeeded
+     */
+    private function executeOnAllNodes(string $command, ?string $param = null): array
+    {
+        $responses = FreeSwitch::execute($command, $param);
+        $failedNodes = [];
+
+        foreach ($responses as $item) {
+            $response = trim($item['response'] ?? '');
+
+            $isSuccess = str_starts_with($response, '+OK') ||
+                         str_starts_with($response, 'OK') ||
+                         str_starts_with($response, '1');
+
+            if (!$isSuccess && !empty($response)) {
+                $failedNodes[] = [
+                    'node' => $item['node']->node_name,
+                    'hostname' => $item['node']->node_hostname,
+                    'response' => $response
+                ];
+            }
+        }
+
+        return [
+            'success' => empty($failedNodes),
+            'responses' => $responses,
+            'failed_nodes' => $failedNodes
+        ];
+    }
+
+    private function updateSwitch(CallCenterAgent $callCenterAgent)
     {
         $cmd[] = "agent add ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_type;
-        $cmd[] = "agent set contact ".$callCenterAgent->ccall_center_agent_uuid." ".$callCenterAgent->agent_contact;
+        $cmd[] = "agent set contact ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_contact;
         $cmd[] = "agent set status ".$callCenterAgent->call_center_agent_uuid." '".$callCenterAgent->agent_status."'";
         $cmd[] = "agent set reject_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_reject_delay_time;
         $cmd[] = "agent set busy_delay_time ".$callCenterAgent->call_center_agent_uuid." ".$callCenterAgent->agent_busy_delay_time;
@@ -335,14 +366,29 @@ class CallCenterAgentRepository
 
         foreach ($cmd as $arg)
         {
-            $answer = FreeSwitch::execute('callcenter_config', $arg);
+            $result = $this->executeOnAllNodes('callcenter_config', $arg);
+
+            if (!$result['success']) {
+                Log::warning('Failed to execute agent command on some nodes', [
+                    'command' => $arg,
+                    'failed_nodes' => $result['failed_nodes']
+                ]);
+            }
+
             usleep(200);
         }
     }
 
-    private function deleteSwitch(callCenterAgent $callCenterAgent)
+    private function deleteSwitch(CallCenterAgent $callCenterAgent)
     {
-        $cmd = "agent del ".$callCenterAgent->uuid;
-        $answer = FreeSwitch::execute('callcenter_config', $arg);
+        $cmd = "agent del ".$callCenterAgent->call_center_agent_uuid;
+        $result = $this->executeOnAllNodes('callcenter_config', $cmd);
+
+        if (!$result['success']) {
+            Log::warning('Failed to delete agent from some nodes', [
+                'agent_uuid' => $callCenterAgent->call_center_agent_uuid,
+                'failed_nodes' => $result['failed_nodes']
+            ]);
+        }
     }
 }
