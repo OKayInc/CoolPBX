@@ -38,30 +38,21 @@
 	api = freeswitch.API();
 
 -- show all channel variables
-	serialized = env:serialize()
-	freeswitch.consoleLog("INFO","[security]\n" .. serialized .. "\n")
+	--serialized = env:serialize()
+	--freeswitch.consoleLog("INFO","[security]\n" .. serialized .. "\n")
 
 -- set channel variables to lua variables
-	originate_disposition = env:getHeader("originate_disposition");
-	originate_causes = env:getHeader("originate_causes");
-	uuid = env:getHeader("uuid");
-	domain_uuid = env:getHeader("domain_uuid");
-	domain_name = env:getHeader("domain_name");
-	sip_to_user = env:getHeader("sip_to_user");
-	dialed_user = env:getHeader("dialed_user");
-	missed_call_app = env:getHeader("missed_call_app");
-	missed_call_data = env:getHeader("missed_call_data");
-	call_direction = env:getHeader("call_direction");
+--handle originate_disposition
+    if (session ~= nil and session:ready()) then
+        uuid = session:getVariable("uuid");
+        domain_uuid = session:getVariable("domain_uuid");
+        domain_name = session:getVariable("domain_name");
+        context = session:getVariable("context");
+        sip_network_ip = session:getVariable("sip_network_ip");
+        sip_received_ip = session:getVariable("sip_received_ip");
 
--- get the Caller ID
-	caller_id_name = env:getHeader("caller_id_name");
-	caller_id_number = env:getHeader("caller_id_number");
-	if (caller_id_name == nil) then
-		caller_id_name = env:getHeader("Caller-Caller-ID-Name");
-	end
-	if (caller_id_number == nil) then
-		caller_id_number = env:getHeader("Caller-Caller-ID-Number");
-	end
-	if (call_direction == "local") then
-		caller_id_name = env:getHeader("effective_caller_id_name");
-	end
+        sip_ip = sip_received_ip or sip_network_ip;
+        if (sip_ip ~= nil) then
+            freeswitch.consoleLog("INFO","[security] ip:" .. ip .. "\n");
+        end
+    end
