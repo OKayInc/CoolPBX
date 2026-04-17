@@ -631,7 +631,7 @@
 	$sql = "select recording_name, recording_filename from v_recordings ";
 	$sql .= "where domain_uuid = :domain_uuid ";
 	$sql .= "order by recording_name asc ";
-	$parameters['domain_uuid'] = $domain_uuid; // $_SESSION['domain_uuid'];
+	$parameters['domain_uuid'] = $_SESSION['domain_uuid'];
 	$database = new database;
 	$recordings = $database->select($sql, $parameters, 'all');
 	unset($sql, $parameters);

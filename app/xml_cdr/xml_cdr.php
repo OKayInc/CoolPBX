@@ -545,6 +545,7 @@
 		echo "<th class='shrink'>&nbsp;</th>\n";
 		$col_count++;
 	}
+	echo "<th class='shrink'></th>\n";
 	if (permission_exists('xml_cdr_extension')) {
 		echo "<th class='shrink'>".$text['label-ext']."</th>\n";
 		$col_count++;
