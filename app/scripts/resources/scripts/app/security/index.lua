@@ -37,10 +37,6 @@
 --create the api object
 	api = freeswitch.API();
 
--- show all channel variables
-	--serialized = env:serialize()
-	--freeswitch.consoleLog("INFO","[security]\n" .. serialized .. "\n")
-
 -- set channel variables to lua variables
 --handle originate_disposition
 	if (session ~= nil and session:ready()) then
@@ -59,22 +55,22 @@
 			-- if call is not authenticated we do not verify
 			freeswitch.consoleLog("INFO","[security] sip_auth_username:" .. sip_auth_username .. "\n");
 			freeswitch.consoleLog("INFO","[security] sip_auth_realm:" .. sip_auth_realm .. "\n");
-				sip_ip = sip_received_ip or sip_network_ip;
-				if (sip_ip ~= nil) then
-					freeswitch.consoleLog("INFO","[security] sip_ip:" .. sip_ip .. "\n");
-					contact = api:executeString("sofia_contact " .. sip_auth);
-					if contact == "error/user_not_registered" then
+			sip_ip = sip_received_ip or sip_network_ip;
+			if (sip_ip ~= nil) then
+				freeswitch.consoleLog("INFO","[security] sip_ip:" .. sip_ip .. "\n");
+				contact = api:executeString("sofia_contact " .. sip_auth);
+				if contact == "error/user_not_registered" then
+					session:setVariable("proto_specific_hangup_cause", "sip:603");
+					session:hangup();
+				else
+					if string.find(contact, sip_ip) then
+						freeswitch.consoleLog("info", "[security] IP MATCH: User " .. sip_auth .. " is registered from " .. sip_ip .. "\n");
+					else
+						freeswitch.consoleLog("info", "[security] IP MATCH: User " .. sip_auth .. " is NOT registered from " .. sip_ip .. ". Hanging up!\n");
 						session:setVariable("proto_specific_hangup_cause", "sip:603");
 						session:hangup();
-					else
-						if string.find(contact, sip_ip) then
-							freeswitch.consoleLog("info", "[security] IP MATCH: User " .. sip_auth .. " is registered from " .. sip_ip .. "\n");
-						else
-							freeswitch.consoleLog("info", "[security] IP MATCH: User " .. sip_auth .. " is NOT registered from " .. sip_ip .. ". Hanging up!\n");
-							session:setVariable("proto_specific_hangup_cause", "sip:603");
-							session:hangup();
-						end
 					end
 				end
+			end
 		end
 	end
