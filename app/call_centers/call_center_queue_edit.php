@@ -385,7 +385,7 @@
 				$dialplan_xml .= "		<action application=\"set\" data=\"cc_exit_keys=".xml::sanitize($queue_cc_exit_keys)."\"/>\n";
 			}
 			//$dialplan_xml .= "		<action application=\"callcenter\" data=\"".xml::sanitize($queue_extension)."@".$_SESSION["domain_name"]."\"/>\n";
-			$dialplan_xml .= "		<action application=\"lua\" data=\"callcenter ".xml::sanitize($queue_extension)."@".$_SESSION["domain_name"]."\"/>\n";
+			$dialplan_xml .= "		<action application=\"lua\" data=\"app.lua callcenter ".xml::sanitize($queue_extension)."@".$_SESSION["domain_name"]."\"/>\n";
 			if ($destination->valid($queue_timeout_app.':'.$queue_timeout_data)) {
 				$dialplan_xml .= "		<action application=\"".xml::sanitize($queue_timeout_app)."\" data=\"".xml::sanitize($queue_timeout_data)."\"/>\n";
 			}

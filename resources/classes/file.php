@@ -69,6 +69,7 @@ class file {
 		if (!empty($_SESSION['switch']['sounds']['dir']) && file_exists($_SESSION['switch']['sounds']['dir'])) {
 			$dir = $_SESSION['switch']['sounds']['dir'].'/'.$language.'/'.$dialect.'/'.$voice;
 			$rate = '8000';
+			syslog(LOG_NOTICE, '$dir: '.$dir);
 			$files = $this->glob($dir.'/*/'.$rate, true);
 		}
 
