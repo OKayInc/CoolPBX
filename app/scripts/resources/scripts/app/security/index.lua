@@ -14,25 +14,13 @@
 --
 --	The Original Code is FusionPBX
 --
---	The Initial Developer of the Original Code is
---	Mark J Crane <markjcrane@fusionpbx.com>
---	Copyright (C) 2015 - 2018
---	the Initial Developer. All Rights Reserved.
+--	This Module author
+--	Luis Daniel Lucio Quiroz <dlucio@okay.com.mx>
 
 --set the debug options
 	debug["params"] = false;
 	debug["info"] = false;
 	debug["sql"] = false;
-
---general functions
-	require "resources.functions.config";
-	require "resources.functions.explode";
-	require "resources.functions.trim";
-	require "resources.functions.base64";
-	require "resources.functions.file_exists";
-
---load libraries
-	require 'resources.functions.send_mail'
 
 --create the api object
 	api = freeswitch.API();
