@@ -187,6 +187,7 @@
 			default_dialect = session:getVariable("default_dialect");
 			--recording = session:getVariable("recording");
 			domain_name = session:getVariable("domain_name");
+			context = session:getVariable("context") or 'public';
 
 		--set the end epoch
 			end_epoch = os.time();
@@ -434,8 +435,8 @@
 			local_hostname = trim(api:execute("switchname", ""));
 			freeswitch.consoleLog("notice", "[conference center] local_hostname is " .. local_hostname .. "\n");
 			sql = "SELECT hostname FROM channels WHERE application = 'conference' "
-				.. "AND dest = :destination_number AND cid_num <> :caller_id_number LIMIT 1";
-			params = {destination_number = destination_number, caller_id_number = caller_id_number};
+				.. "AND dest = :destination_number AND cid_num <> :caller_id_number AND context = :context LIMIT 1";
+			params = {destination_number = destination_number, caller_id_number = caller_id_number, context = context};
 			if (debug["sql"]) then
 				freeswitch.consoleLog("notice", "[conference center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
 			end
