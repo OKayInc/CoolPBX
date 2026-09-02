@@ -88,6 +88,7 @@
 			domain_name = session:getVariable("domain_name");
 			pin_number = session:getVariable("pin_number");
 			domain_uuid = session:getVariable("domain_uuid");
+			context = session:getVariable("context") or 'public';
 			destination_number = session:getVariable("destination_number");
 			caller_id_number = session:getVariable("caller_id_number");
 			--freeswitch.consoleLog("notice", "[call center] destination_number: " .. destination_number .. "\n");
@@ -125,8 +126,8 @@
 			local_hostname = trim(api:execute("switchname", ""));
 			freeswitch.consoleLog("notice", "[call center] local_hostname is " .. local_hostname .. "\n");
 			sql = "SELECT hostname FROM channels WHERE application = 'callcenter' "
-				.. "AND dest = :destination_number AND cid_num <> :caller_id_number LIMIT 1";
-			params = {destination_number = destination_number, caller_id_number = caller_id_number};
+				.. "AND dest = :destination_number AND cid_num <> :caller_id_number AND context = :contextLIMIT 1";
+			params = {destination_number = destination_number, caller_id_number = caller_id_number, context = context};
 			if (debug["sql"]) then
 				freeswitch.consoleLog("notice", "[call center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
 			end
