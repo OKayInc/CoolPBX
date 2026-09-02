@@ -1,4 +1,4 @@
---	conference_center/index.lua
+--	callcentercenter/index.lua
 --	Part of FusionPBX
 --	Copyright (C) 2013 - 2021 Mark J Crane <markjcrane@fusionpbx.com>
 --	All rights reserved.
@@ -90,8 +90,8 @@
 			domain_uuid = session:getVariable("domain_uuid");
 			destination_number = session:getVariable("destination_number");
 			caller_id_number = session:getVariable("caller_id_number");
-			--freeswitch.consoleLog("notice", "[conference center] destination_number: " .. destination_number .. "\n");
-			--freeswitch.consoleLog("notice", "[conference center] caller_id_number: " .. caller_id_number .. "\n");
+			--freeswitch.consoleLog("notice", "[call center] destination_number: " .. destination_number .. "\n");
+			--freeswitch.consoleLog("notice", "[call center] caller_id_number: " .. caller_id_number .. "\n");
 
 		--add the domain name to the recordings directory
 			recordings_dir = recordings_dir .. "/"..domain_name;
@@ -110,7 +110,7 @@
 				sql = sql .. "WHERE domain_name = :domain_name ";
 				local params = {domain_name = domain_name};
 				if (debug["sql"]) then
-					freeswitch.consoleLog("notice", "[conference center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
+					freeswitch.consoleLog("notice", "[call center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
 				end
 				dbh:query(sql, params, function(rows)
 					domain_uuid = string.lower(rows["domain_uuid"]);
@@ -121,34 +121,34 @@
 		--connect to the switch database
 			local dbh_switch = Database.new('switch')
 
-		--check if someone has already joined the conference
+		--check if someone has already joined the callcenter
 			local_hostname = trim(api:execute("switchname", ""));
-			freeswitch.consoleLog("notice", "[conference center] local_hostname is " .. local_hostname .. "\n");
+			freeswitch.consoleLog("notice", "[call center] local_hostname is " .. local_hostname .. "\n");
 			sql = "SELECT hostname FROM channels WHERE application = 'callcenter' "
 				.. "AND dest = :destination_number AND cid_num <> :caller_id_number LIMIT 1";
 			params = {destination_number = destination_number, caller_id_number = caller_id_number};
 			if (debug["sql"]) then
-				freeswitch.consoleLog("notice", "[conference center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
+				freeswitch.consoleLog("notice", "[call center] SQL: " .. sql .. "; params:" .. json.encode(params) .. "\n");
 			end
 			dbh_switch:query(sql, params, function(rows)
-				conference_hostname = rows["hostname"];
+				callcenter_hostname = rows["hostname"];
 			end);
 
 		--close the database connection
 			dbh_switch:release();
 
-		--if conference hosntame exist, then we bridge there
-			if (conference_hostname ~= nil) then
-				freeswitch.consoleLog("notice", "[conference center] conference_hostname is " .. conference_hostname .. "\n");
-				if (conference_hostname ~= local_hostname) then
-					session:execute("bridge","sofia/internal/" .. destination_number .. "@" .. domain_name .. ";fs_path=sip:" .. conference_hostname);
+		--if callcenter hosntame exist, then we bridge there
+			if (callcenter_hostname ~= nil) then
+				freeswitch.consoleLog("notice", "[call center] callcenter_hostname is " .. callcenter_hostname .. "\n");
+				if (callcenter_hostname ~= local_hostname) then
+					session:execute("bridge","sofia/internal/" .. destination_number .. "@" .. domain_name .. ";fs_path=sip:" .. callcenter_hostname);
 				end
 			end
 
 		--call not bridged, so we answer
 			session:answer();
 
-		--send the call to the conference
-			freeswitch.consoleLog("INFO","[conference center] callcenter " .. callcenter_queue .. "\n");
-			session:execute("conference", cmd);
+		--send the call to the callcenter
+			freeswitch.consoleLog("INFO","[call center] callcenter " .. callcenter_queue .. "\n");
+			session:execute("callcenter", callcenter_queue);
 	end
